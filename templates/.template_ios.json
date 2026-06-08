@@ -6,7 +6,7 @@
       "signal_type": "Digital",
       "direction": "Output",
       "io_type": ""
-    },
+    }, 
     {
       "name": "CD-F_MOD#",
       "description": "Condenser Fan Modulation",
@@ -165,6 +165,68 @@
       "signal_type": "Digital",
       "direction": "Input",
       "io_type": "testtt"
+    }
+  ],
+  "Humidifier": [
+    {
+      "name": "HUM_EN",
+      "description": "Humidifier Enable",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "HUM_MOD-A",
+      "description": "Humidifier Modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": ""
+    }
+  ],
+  "VFD-CD": [
+    {
+      "name": "CD-F_EN#",
+      "description": "Condenser Fan # Enable",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "CD-F_MOD#",
+      "description": "Condenser Fan # Modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "CD_F-STS#",
+      "description": "Conder Fan # Status",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
+    }
+  ],
+  "VFD-L": [
+    {
+      "name": "CP_EN#-A",
+      "description": "Compressor #-A Enable",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "CP_MOD#-A",
+      "description": "Compressor #-A Modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "CP_STS#-A",
+      "description": "Compressor #-A Status",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
     }
   ]
 }
