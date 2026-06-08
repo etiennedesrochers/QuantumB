@@ -1489,7 +1489,7 @@ class MainWindow(QMainWindow):
             return
 
         # Switch to the Template tab automatically
-        self._tabs.setCurrentIndex(2)
+        self._tabs.setCurrentIndex(1)
 
         name = current.text()
         self._tmpl_current_name = name
@@ -1669,7 +1669,7 @@ class MainWindow(QMainWindow):
         self._refresh_tmpl_io_table()
 
         # Switch to the Template tab automatically
-        self._tabs.setCurrentIndex(2)
+        self._tabs.setCurrentIndex(1)
 
         name = current.text()
         self._tmpl_current_name = name
@@ -1766,7 +1766,7 @@ class MainWindow(QMainWindow):
         self._refresh_tmpl_io_table()
 
         # Switch to the Template tab automatically
-        self._tabs.setCurrentIndex(2)
+        self._tabs.setCurrentIndex(1)
 
         name = current.text()
         self._tmpl_current_name = name

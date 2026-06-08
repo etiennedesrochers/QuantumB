@@ -4,6 +4,7 @@ Produces ladder diagrams with rungs of electrical components.
 """
 from __future__ import annotations
 
+import io
 import ezdxf
 from ezdxf import colors
 from ezdxf.document import Drawing
@@ -73,8 +74,8 @@ class DrawingGenerator:
     ) -> tuple[bool, str]:
         """
         Build a ladder diagram and save to *output_path*.
-        If *template_doc* is supplied its model-space entities and layers are
-        copied as a base.
+        If *template_doc* is supplied it is used as the base (full copy:
+        blocks, layers, styles, layouts, etc. are all preserved).
         """
         try:
             io_lookup = {item.tag: item for item in (io_items or [])}
@@ -83,8 +84,11 @@ class DrawingGenerator:
             sym_map = register_all_symbols(doc)
 
             self._setup_layers(doc)
-            self._draw_border(msp)
-            self._draw_title_block(msp)
+            # Only draw our own border/title block when no template is used;
+            # templates already contain their own title block and border.
+            if template_doc is None:
+                self._draw_border(msp)
+                self._draw_title_block(msp)
             self._draw_ladder_rails(msp, len(rungs))
             self._draw_rungs(msp, rungs, sym_map, io_lookup)
 
@@ -98,29 +102,38 @@ class DrawingGenerator:
     # ── Internal helpers ────────────────────────────────────────────────────
 
     def _create_doc(self, template_doc: Drawing | None) -> Drawing:
-        doc = ezdxf.new("R2018", setup=True)
-        if template_doc is not None:
-            # Copy layers from template
-            for layer in template_doc.layers:
-                if layer.dxf.name not in ("0",) and layer.dxf.name not in doc.layers:
-                    doc.layers.new(layer.dxf.name, dxfattribs={"color": layer.dxf.color})
-            # Copy model-space entities, skipping proxy objects which make ODA fail
-            src_msp = template_doc.modelspace()
-            dst_msp = doc.modelspace()
-            for entity in src_msp:
-                if entity.dxftype() in ("ACAD_PROXY_ENTITY", "ACAD_PROXY_OBJECT"):
-                    continue
-                try:
-                    copied = entity.copy()
-                    # Strip all XDATA: it references APPIDs from the source document
-                    # that are not registered in the new document, causing "Invalid RegApp"
-                    # errors when ODA/AutoCAD reads the output file.
-                    if copied.xdata is not None:
-                        for appid in list(copied.xdata.keys()):
-                            copied.discard_xdata(appid)
-                    dst_msp.add_entity(copied)
-                except Exception:
-                    pass
+        if template_doc is None:
+            return ezdxf.new("R2018", setup=True)
+
+        # Make a true in-memory copy of the template by round-tripping through
+        # the DXF writer/reader.  This preserves ALL table entries (layers,
+        # linetypes, text styles, blocks, …), layouts, and paper-space content
+        # – something that manual entity-by-entity copying cannot achieve.
+        buf = io.StringIO()
+        template_doc.write(buf)
+        buf.seek(0)
+        doc = ezdxf.read(buf)
+
+        # Remove xref-dependent layers (name contains "|").  They reference an
+        # xref block record that only exists in the original host drawing; without
+        # it AutoCAD rejects the file with "Layer name with vertical bar is not
+        # marked dependent".
+        xref_layers = [l.dxf.name for l in doc.layers if "|" in l.dxf.name]
+        for name in xref_layers:
+            try:
+                doc.layers.remove(name)
+            except Exception:
+                pass
+
+        # Remap entities on xref-dependent layers to layer "0" so no reference
+        # to a removed layer remains anywhere in the document.
+        for entity in doc.modelspace():
+            try:
+                if entity.dxf.hasattr("layer") and "|" in entity.dxf.layer:
+                    entity.dxf.layer = "0"
+            except Exception:
+                pass
+
         return doc
 
     def _setup_layers(self, doc):

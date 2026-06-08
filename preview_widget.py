@@ -9,6 +9,20 @@ from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 
 from i18n import tr
 
+# ---------------------------------------------------------------------------
+# Optional heavy dependencies – imported once at module load so every
+# subsequent preview render avoids the import-lookup overhead.
+# ---------------------------------------------------------------------------
+try:
+    import io as _io
+    from matplotlib.figure import Figure
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from ezdxf.addons.drawing import RenderContext, Frontend
+    from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
+    _RENDER_AVAILABLE = True
+except ImportError:
+    _RENDER_AVAILABLE = False
+
 
 # ---------------------------------------------------------------------------
 # Background preview renderer
@@ -39,19 +53,25 @@ class PreviewWorker(QObject):
     def run(self):
         if self._cancelled:
             return
+        if not _RENDER_AVAILABLE:
+            self.finished.emit(self._name, b"", self._dpi_factor, self._generation, 0.0, 1.0, 0.0, 1.0)
+            return
         try:
-            import io as _io
-            from matplotlib.figure import Figure
-            from matplotlib.backends.backend_agg import FigureCanvasAgg
-            from ezdxf.addons.drawing import RenderContext, Frontend
-            from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
+            dpi = min(384, max(96, int(96 * self._dpi_factor)))
+
+            # --- PNG cache hit: skip the full matplotlib render ---
+            cached = self._mgr.get_png_cache(self._name, dpi)
+            if cached is not None and not self._cancelled:
+                png_bytes, x_min, x_max, y_min, y_max = cached
+                self.finished.emit(self._name, png_bytes, self._dpi_factor, self._generation,
+                                   x_min, x_max, y_min, y_max)
+                return
 
             doc = self._mgr.load_template(self._name)
             if doc is None or self._cancelled:
                 self.finished.emit(self._name, b"", self._dpi_factor, self._generation, 0.0, 1.0, 0.0, 1.0)
                 return
 
-            dpi = min(384, max(96, int(96 * self._dpi_factor)))
             fig = Figure(figsize=(5, 3.5), facecolor="white")
             FigureCanvasAgg(fig)
             ax = fig.add_axes([0, 0, 1, 1])
@@ -89,7 +109,13 @@ class PreviewWorker(QObject):
             buf = _io.BytesIO()
             fig.savefig(buf, format="png", dpi=dpi, facecolor="white")
             buf.seek(0)
-            self.finished.emit(self._name, buf.read(), self._dpi_factor, self._generation, x_min, x_max, y_min, y_max)
+            png_bytes = buf.read()
+
+            # Store in cache so zoom re-renders at the same DPI are instant.
+            self._mgr.set_png_cache(self._name, dpi, png_bytes, x_min, x_max, y_min, y_max)
+
+            self.finished.emit(self._name, png_bytes, self._dpi_factor, self._generation,
+                               x_min, x_max, y_min, y_max)
         except Exception as exc:
             import traceback
             print(f"[preview] render failed for {self._name!r}: {exc}")

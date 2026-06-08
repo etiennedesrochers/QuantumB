@@ -207,6 +207,10 @@ class TemplateManager:
         self.templates_dir = templates_dir if templates_dir is not None else TEMPLATES_DIR
         self.templates_dir.mkdir(exist_ok=True)
         self._ios_file = self.templates_dir / ".template_ios.json"
+        # {template_name: (Drawing, mtime_float)}
+        self._doc_cache: dict[str, tuple] = {}
+        # {(template_name, dpi_int): (png_bytes, x_min, x_max, y_min, y_max)}
+        self._png_cache: dict[tuple, tuple] = {}
 
     def _load_ios_store(self) -> dict:
         """Load the template IOs metadata file. Returns {} on any error."""
@@ -250,6 +254,11 @@ class TemplateManager:
 
         dest = self.templates_dir / f"{template_name}.dxf"
         shutil.copy2(src, dest)
+        # Invalidate caches so the next preview re-loads from the new file.
+        self._doc_cache.pop(template_name, None)
+        stale = [k for k in self._png_cache if k[0] == template_name]
+        for k in stale:
+            del self._png_cache[k]
         return True, f"Template '{template_name}' saved."
 
     # ── listing ─────────────────────────────────────────────────────────────
@@ -260,20 +269,56 @@ class TemplateManager:
     # ── loading ─────────────────────────────────────────────────────────────
 
     def load_template(self, template_name: str) -> Drawing | None:
-        """Return an ezdxf Drawing object for *template_name*, or None."""
+        """Return an ezdxf Drawing object for *template_name*, or None.
+
+        The result is cached in memory keyed by (name, mtime) so repeated
+        calls for the same unchanged file skip the disk read entirely.
+        """
         path = self.templates_dir / f"{template_name}.dxf"
         if not path.exists():
             return None
         try:
-            # Use recover.readfile so non-standard / DWG-converted DXF files
-            # (which may have structural issues) are loaded tolerantly.
-            doc, _ = ezdxf.recover.readfile(str(path))
-            return doc
+            mtime = path.stat().st_mtime
+        except OSError:
+            return None
+
+        cached = self._doc_cache.get(template_name)
+        if cached is not None and cached[1] == mtime:
+            return cached[0]
+
+        # Try the fast reader first; fall back to the recovery reader for
+        # non-standard or DWG-converted files that may have structural quirks.
+        doc = None
+        try:
+            doc = ezdxf.readfile(str(path))
         except Exception:
             try:
-                return ezdxf.readfile(str(path))
+                doc, _ = ezdxf.recover.readfile(str(path))
             except Exception:
                 return None
+
+        self._doc_cache[template_name] = (doc, mtime)
+        # Invalidate any PNG renders that were derived from the old version.
+        stale = [k for k in self._png_cache if k[0] == template_name]
+        for k in stale:
+            del self._png_cache[k]
+        return doc
+
+    def get_png_cache(self, template_name: str, dpi: int) -> tuple | None:
+        """Return cached (png_bytes, x_min, x_max, y_min, y_max) or None."""
+        return self._png_cache.get((template_name, dpi))
+
+    def set_png_cache(self, template_name: str, dpi: int,
+                      png_bytes: bytes, x_min: float, x_max: float,
+                      y_min: float, y_max: float) -> None:
+        """Store a rendered PNG and its axis bounds in the cache.
+
+        The cache is capped at 30 entries (templates × DPI levels) to avoid
+        unbounded memory growth.
+        """
+        if len(self._png_cache) >= 30:
+            self._png_cache.pop(next(iter(self._png_cache)))
+        self._png_cache[(template_name, dpi)] = (png_bytes, x_min, x_max, y_min, y_max)
 
     def delete_template(self, template_name: str) -> tuple[bool, str]:
         path = self.templates_dir / f"{template_name}.dxf"
@@ -289,6 +334,11 @@ class TemplateManager:
             if template_name in pts:
                 del pts[template_name]
                 self._save_insertion_points(pts)
+            # Clear caches
+            self._doc_cache.pop(template_name, None)
+            stale = [k for k in self._png_cache if k[0] == template_name]
+            for k in stale:
+                del self._png_cache[k]
             return True, f"Template '{template_name}' deleted."
         return False, "Template not found."
 

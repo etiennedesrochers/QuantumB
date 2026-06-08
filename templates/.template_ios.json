@@ -1,18 +1,170 @@
 {
-  "C050": [
+  "1_Condenser_Fan": [
     {
-      "name": "test",
-      "description": "tst",
+      "name": "CD-F_EN#",
+      "description": "Conderser Fan Enable #",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "CD-F_MOD#",
+      "description": "Condenser Fan Modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": ""
+    }
+  ],
+  "2_Supply_Fan": [
+    {
+      "name": "SF_STS1",
+      "description": "Supply Fan Status 1",
       "signal_type": "Analog",
       "direction": "Input",
       "io_type": "test"
     },
     {
-      "name": "C#",
-      "description": "test",
+      "name": "SF_STS2",
+      "description": "Supply Fan Status 2",
       "signal_type": "Analog",
       "direction": "Input",
       "io_type": "test"
+    },
+    {
+      "name": "SUPP-F_EN",
+      "description": "Supply Fan Enable",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "SUPP-F_MOD",
+      "description": "Supply Fan Modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": ""
+    }
+  ],
+  "3_Return_Fan": [
+    {
+      "name": "RTRN-F_EN",
+      "description": "Return Fan Enable",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "RTRN-F_MOD",
+      "description": "Return Fan Modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "RTRN-F_STS1",
+      "description": "Return Fan Status 1",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
+    },
+    {
+      "name": "RTRN-F_STS2",
+      "description": "Return Fan Status 2",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
+    },
+    {
+      "name": "RTRN-F_STS3",
+      "description": "Return Fan Status 3",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
+    }
+  ],
+  "3_Supply_Fan": [
+    {
+      "name": "SUPP-F_EN",
+      "description": "Supply Fan Enable",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "SUPP-F_MOD",
+      "description": "Supply Fan Modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "SF_STS1",
+      "description": "Supply Fan Status 1",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
+    },
+    {
+      "name": "SF_STS2",
+      "description": "Supply Fan Status 2",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
+    },
+    {
+      "name": "SF_STS3",
+      "description": "Supply Fan Status 3",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
+    }
+  ],
+  "AHU_HEAT_COIL": [
+    {
+      "name": "ELEC_HEAT_EN",
+      "description": "Electrical Heat Enable",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "ELEC_HEAT_MOD",
+      "description": "Electrical Heat Modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": ""
+    }
+  ],
+  "ENTH-WHEEL": [
+    {
+      "name": "ENT_WH_EN",
+      "description": "Ent Wheel Enable",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "ENT_WH_MOD",
+      "description": "Ent Wheel Modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": ""
+    },
+    {
+      "name": "ENT_WH_STS",
+      "description": "Ent Wheel Status",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
+    }
+  ],
+  "GAS SENSOR": [
+    {
+      "name": "GAS_SENSOR",
+      "description": "Gas Sensor",
+      "signal_type": "Digital",
+      "direction": "Input",
+      "io_type": "testtt"
     }
   ]
 }

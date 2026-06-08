@@ -6,5 +6,13 @@
   {
     "name": "$, $+X",
     "description": "Remplace la valeurs par une $ par un incrément qui augemente à toutes les pages ou il est présent, $+X est la valeur +X"
+  },
+  {
+    "name": "#+A",
+    "description": "Remplace # par le numero de circuit et A par une lettre auto incrémenter selon le nombre de fois que le même template est présent dans le drawing"
+  },
+  {
+    "name": "IO",
+    "description": "Dans les IO des template on doit toujours penser que l'ont concoit en venant du controlleur"
   }
 ]
