@@ -1,0 +1,12 @@
+[
+  {
+    "name": "tet",
+    "circuit_number": "#",
+    "description": "tt",
+    "templates": [
+      "C050",
+      "C050",
+      "C050"
+    ]
+  }
+]

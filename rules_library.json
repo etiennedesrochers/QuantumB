@@ -1,0 +1,10 @@
+[
+  {
+    "name": "#",
+    "description": "Remplace # avec le numéro de circuit du circuit, il faut que le numéro de circuit soit #"
+  },
+  {
+    "name": "$, $+X",
+    "description": "Remplace la valeurs par une $ par un incrément qui augemente à toutes les pages ou il est présent, $+X est la valeur +X"
+  }
+]

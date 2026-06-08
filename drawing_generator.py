@@ -1,0 +1,289 @@
+"""
+Drawing generator for AutoCAD Electrical diagrams.
+Produces ladder diagrams with rungs of electrical components.
+"""
+from __future__ import annotations
+
+import ezdxf
+from ezdxf import colors
+from ezdxf.document import Drawing
+from ezdxf.layouts import Modelspace
+from pathlib import Path
+from dataclasses import dataclass, field
+
+from symbols.electrical_symbols import register_all_symbols
+from io_manager import IOItem
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Data model
+# ─────────────────────────────────────────────────────────────────────────────
+
+@dataclass
+class Component:
+    symbol: str                         # display name from SYMBOL_REGISTRY
+    tag: str = ""                       # manual tag / component reference
+    description: str = ""
+    io_tag: str = ""                    # linked I/O item tag (empty = no link)
+    tag_source: str = "manual"          # "manual" or an IOItem field name
+    description_source: str = "manual"  # "manual" or an IOItem field name
+
+
+@dataclass
+class Rung:
+    components: list[Component] = field(default_factory=list)
+    rung_number: int = 0
+    description: str = ""
+
+
+@dataclass
+class LadderConfig:
+    title: str = "ELECTRICAL DRAWING"
+    project: str = ""
+    drawing_number: str = "001"
+    revision: str = "A"
+    drawn_by: str = ""
+    # Ladder geometry
+    left_rail_x: float = 10.0
+    right_rail_x: float = 210.0
+    first_rung_y: float = 270.0
+    rung_spacing: float = 20.0
+    component_spacing: float = 20.0
+    # Paper: A3 landscape default
+    paper_width: float = 420.0
+    paper_height: float = 297.0
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Generator
+# ─────────────────────────────────────────────────────────────────────────────
+
+class DrawingGenerator:
+    def __init__(self, config: LadderConfig | None = None):
+        self.config = config or LadderConfig()
+
+    # ── Public API ──────────────────────────────────────────────────────────
+
+    def generate(
+        self,
+        rungs: list[Rung],
+        output_path: str,
+        template_doc: Drawing | None = None,
+        io_items: list[IOItem] | None = None,
+    ) -> tuple[bool, str]:
+        """
+        Build a ladder diagram and save to *output_path*.
+        If *template_doc* is supplied its model-space entities and layers are
+        copied as a base.
+        """
+        try:
+            io_lookup = {item.tag: item for item in (io_items or [])}
+            doc = self._create_doc(template_doc)
+            msp = doc.modelspace()
+            sym_map = register_all_symbols(doc)
+
+            self._setup_layers(doc)
+            self._draw_border(msp)
+            self._draw_title_block(msp)
+            self._draw_ladder_rails(msp, len(rungs))
+            self._draw_rungs(msp, rungs, sym_map, io_lookup)
+
+            # Audit fixes invalid APPID/RegApp entries that cause ODA to reject the file.
+            doc.audit()
+            doc.saveas(output_path)
+            return True, f"Drawing saved to {output_path}"
+        except Exception as exc:
+            return False, f"Error generating drawing: {exc}"
+
+    # ── Internal helpers ────────────────────────────────────────────────────
+
+    def _create_doc(self, template_doc: Drawing | None) -> Drawing:
+        doc = ezdxf.new("R2018", setup=True)
+        if template_doc is not None:
+            # Copy layers from template
+            for layer in template_doc.layers:
+                if layer.dxf.name not in ("0",) and layer.dxf.name not in doc.layers:
+                    doc.layers.new(layer.dxf.name, dxfattribs={"color": layer.dxf.color})
+            # Copy model-space entities, skipping proxy objects which make ODA fail
+            src_msp = template_doc.modelspace()
+            dst_msp = doc.modelspace()
+            for entity in src_msp:
+                if entity.dxftype() in ("ACAD_PROXY_ENTITY", "ACAD_PROXY_OBJECT"):
+                    continue
+                try:
+                    copied = entity.copy()
+                    # Strip all XDATA: it references APPIDs from the source document
+                    # that are not registered in the new document, causing "Invalid RegApp"
+                    # errors when ODA/AutoCAD reads the output file.
+                    if copied.xdata is not None:
+                        for appid in list(copied.xdata.keys()):
+                            copied.discard_xdata(appid)
+                    dst_msp.add_entity(copied)
+                except Exception:
+                    pass
+        return doc
+
+    def _setup_layers(self, doc):
+        layers = {
+            "WIRES":       colors.WHITE,
+            "COMPONENTS":  colors.CYAN,
+            "TAGS":        colors.YELLOW,
+            "BORDER":      colors.WHITE,
+            "TITLE_BLOCK": colors.WHITE,
+            "RAIL":        colors.WHITE,
+        }
+        for name, color in layers.items():
+            if name not in doc.layers:
+                doc.layers.new(name, dxfattribs={"color": color})
+
+    def _draw_border(self, msp: Modelspace):
+        cfg = self.config
+        pts = [
+            (5, 5),
+            (cfg.paper_width - 5, 5),
+            (cfg.paper_width - 5, cfg.paper_height - 5),
+            (5, cfg.paper_height - 5),
+        ]
+        msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": "BORDER", "lineweight": 50})
+
+    def _draw_title_block(self, msp: Modelspace):
+        cfg = self.config
+        pw, ph = cfg.paper_width, cfg.paper_height
+        tb_y = 5
+        tb_h = 25
+        tb_x = 5
+        tb_w = pw - 10
+
+        # Outer box
+        msp.add_lwpolyline(
+            [(tb_x, tb_y), (tb_x + tb_w, tb_y), (tb_x + tb_w, tb_y + tb_h), (tb_x, tb_y + tb_h)],
+            close=True,
+            dxfattribs={"layer": "TITLE_BLOCK"},
+        )
+
+        col_w = tb_w / 5
+        fields = [
+            ("PROJECT", cfg.project),
+            ("TITLE", cfg.title),
+            ("DWG NO", cfg.drawing_number),
+            ("REV", cfg.revision),
+            ("DRAWN BY", cfg.drawn_by),
+        ]
+        for i, (label, value) in enumerate(fields):
+            x = tb_x + i * col_w
+            # Vertical divider
+            msp.add_line((x, tb_y), (x, tb_y + tb_h), dxfattribs={"layer": "TITLE_BLOCK"})
+            # Mid horizontal
+            mid_y = tb_y + tb_h / 2
+            msp.add_line((x, mid_y), (x + col_w, mid_y), dxfattribs={"layer": "TITLE_BLOCK"})
+            # Label (small)
+            msp.add_text(
+                label,
+                dxfattribs={"layer": "TITLE_BLOCK", "height": 2.5, "insert": (x + 1, mid_y + 1)},
+            )
+            # Value (larger)
+            msp.add_text(
+                value,
+                dxfattribs={"layer": "TITLE_BLOCK", "height": 4, "insert": (x + 1, tb_y + 1)},
+            )
+
+    def _draw_ladder_rails(self, msp: Modelspace, num_rungs: int):
+        cfg = self.config
+        bottom_y = cfg.first_rung_y - (num_rungs) * cfg.rung_spacing
+        # L rail
+        msp.add_line(
+            (cfg.left_rail_x, cfg.first_rung_y + cfg.rung_spacing),
+            (cfg.left_rail_x, bottom_y),
+            dxfattribs={"layer": "RAIL", "lineweight": 50},
+        )
+        # R rail
+        msp.add_line(
+            (cfg.right_rail_x, cfg.first_rung_y + cfg.rung_spacing),
+            (cfg.right_rail_x, bottom_y),
+            dxfattribs={"layer": "RAIL", "lineweight": 50},
+        )
+        # Rail labels
+        msp.add_text("L1", dxfattribs={"height": 4, "insert": (cfg.left_rail_x - 8, cfg.first_rung_y + cfg.rung_spacing)})
+        msp.add_text("N", dxfattribs={"height": 4, "insert": (cfg.right_rail_x + 2, cfg.first_rung_y + cfg.rung_spacing)})
+
+    def _draw_rungs(self, msp: Modelspace, rungs: list[Rung], sym_map: dict, io_lookup: dict):
+        cfg = self.config
+        for i, rung in enumerate(rungs):
+            y = cfg.first_rung_y - i * cfg.rung_spacing
+            self._draw_single_rung(msp, rung, y, sym_map, io_lookup)
+
+    def _resolve_component_display(self, comp: Component, io_lookup: dict) -> tuple[str, str]:
+        """Return (display_tag, display_description) after resolving I/O field links."""
+        io_item = io_lookup.get(comp.io_tag) if comp.io_tag else None
+        display_tag = (
+            getattr(io_item, comp.tag_source, comp.tag)
+            if (io_item and comp.tag_source != "manual")
+            else comp.tag
+        )
+        display_desc = (
+            getattr(io_item, comp.description_source, comp.description)
+            if (io_item and comp.description_source != "manual")
+            else comp.description
+        )
+        return display_tag, display_desc
+
+    def _draw_single_rung(self, msp: Modelspace, rung: Rung, y: float, sym_map: dict, io_lookup: dict):
+        cfg = self.config
+        # Rung number on left
+        msp.add_text(
+            str(rung.rung_number if rung.rung_number else ""),
+            dxfattribs={"height": 3, "insert": (cfg.left_rail_x - 8, y - 1.5)},
+        )
+        # Rung description on right
+        if rung.description:
+            msp.add_text(
+                rung.description,
+                dxfattribs={"height": 2.5, "insert": (cfg.right_rail_x + 3, y + 1)},
+            )
+
+        # Place components along the rung
+        n = len(rung.components)
+        if n == 0:
+            # Empty wire
+            msp.add_line((cfg.left_rail_x, y), (cfg.right_rail_x, y), dxfattribs={"layer": "WIRES"})
+            return
+
+        span = cfg.right_rail_x - cfg.left_rail_x
+        step = span / (n + 1)
+        prev_x = cfg.left_rail_x
+
+        for j, comp in enumerate(rung.components):
+            cx = cfg.left_rail_x + step * (j + 1)
+
+            # Wire from previous point to symbol left stub
+            msp.add_line((prev_x, y), (cx - 1, y), dxfattribs={"layer": "WIRES"})
+
+            # Insert symbol block
+            block_name = sym_map.get(comp.symbol)
+            if block_name:
+                msp.add_blockref(
+                    block_name,
+                    (cx, y),
+                    dxfattribs={"layer": "COMPONENTS", "xscale": 1.5, "yscale": 1.5},
+                )
+            else:
+                # Fallback: small circle
+                msp.add_circle((cx, y), 0.5, dxfattribs={"layer": "COMPONENTS"})
+
+            # Tag above / description below — resolved from I/O link if configured
+            display_tag, display_desc = self._resolve_component_display(comp, io_lookup)
+            if display_tag:
+                msp.add_text(
+                    display_tag,
+                    dxfattribs={"layer": "TAGS", "height": 2.5, "insert": (cx - 1, y + 3)},
+                )
+            if display_desc:
+                msp.add_text(
+                    display_desc,
+                    dxfattribs={"layer": "TAGS", "height": 2, "insert": (cx - 3, y - 5)},
+                )
+
+            prev_x = cx + 1
+
+        # Wire from last symbol to right rail
+        msp.add_line((prev_x, y), (cfg.right_rail_x, y), dxfattribs={"layer": "WIRES"})

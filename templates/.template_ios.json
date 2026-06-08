@@ -1,0 +1,18 @@
+{
+  "C050": [
+    {
+      "name": "test",
+      "description": "tst",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
+    },
+    {
+      "name": "C#",
+      "description": "test",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "test"
+    }
+  ]
+}

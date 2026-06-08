@@ -1,0 +1,16 @@
+[
+  {
+    "name": "test",
+    "description": "tst",
+    "io_template": "tesss",
+    "signal_category": "Analog",
+    "direction": "Input"
+  },
+  {
+    "name": "testtt",
+    "description": "eee",
+    "io_template": "tt5",
+    "signal_category": "Digital",
+    "direction": "Input"
+  }
+]

@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "settings": {
+    "title": "Test projet",
+    "project": "Companige",
+    "drawing_number": "001",
+    "revision": "A",
+    "drawn_by": "Etienne Desrochers",
+    "paper_size": "A3 Landscape"
+  },
+  "project_circuits": [
+    "tet",
+    "tet"
+  ],
+  "io_items": [
+    {
+      "tag": "test",
+      "io_type": "Input",
+      "address": "",
+      "description": "tst",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "C1",
+      "io_type": "Input",
+      "address": "",
+      "description": "test",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "test",
+      "io_type": "Input",
+      "address": "",
+      "description": "tst",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "C1",
+      "io_type": "Input",
+      "address": "",
+      "description": "test",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "test",
+      "io_type": "Input",
+      "address": "",
+      "description": "tst",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "C1",
+      "io_type": "Input",
+      "address": "",
+      "description": "test",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "test",
+      "io_type": "Input",
+      "address": "",
+      "description": "tst",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "C2",
+      "io_type": "Input",
+      "address": "",
+      "description": "test",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "test",
+      "io_type": "Input",
+      "address": "",
+      "description": "tst",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "C2",
+      "io_type": "Input",
+      "address": "",
+      "description": "test",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "test",
+      "io_type": "Input",
+      "address": "",
+      "description": "tst",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "C2",
+      "io_type": "Input",
+      "address": "",
+      "description": "test",
+      "panel": "",
+      "signal_type": "Analog",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    }
+  ],
+  "rungs": []
+}
