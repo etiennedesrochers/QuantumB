@@ -7,6 +7,17 @@
       "C050",
       "C050",
       "C050"
-    ]
+    ],
+    "valves": []
+  },
+  {
+    "name": "Circuit Base",
+    "circuit_number": "#",
+    "description": "Circuit pour exemple",
+    "templates": [
+      "1_Condenser_Fan",
+      "3_Supply_Fan"
+    ],
+    "valves": []
   }
 ]

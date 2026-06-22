@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "settings": {
+    "title": "Test projet",
+    "project": "Companige",
+    "drawing_number": "001",
+    "revision": "A",
+    "drawn_by": "Etienne Desrochers",
+    "paper_size": "A3 Landscape",
+    "module": "8UI6UO"
+  },
+  "project_circuits": [
+    "Circuit Base"
+  ],
+  "io_items": [
+    {
+      "tag": "CD-F_EN1",
+      "io_type": "Output",
+      "address": "",
+      "description": "Conderser Fan Enable 1",
+      "panel": "",
+      "signal_type": "Digital",
+      "io_type_name": "",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "CD-F_MOD1",
+      "io_type": "Output",
+      "address": "",
+      "description": "Condenser Fan Modulation",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "SUPP-F_EN",
+      "io_type": "Output",
+      "address": "",
+      "description": "Supply Fan Enable",
+      "panel": "",
+      "signal_type": "Digital",
+      "io_type_name": "",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "SUPP-F_MOD",
+      "io_type": "Output",
+      "address": "",
+      "description": "Supply Fan Modulation",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "SF_STS1",
+      "io_type": "Input",
+      "address": "",
+      "description": "Supply Fan Status 1",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "Status",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "SF_STS2",
+      "io_type": "Input",
+      "address": "",
+      "description": "Supply Fan Status 2",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "Status",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    },
+    {
+      "tag": "SF_STS3",
+      "io_type": "Input",
+      "address": "",
+      "description": "Supply Fan Status 3",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "Status",
+      "terminal": "",
+      "cable": "",
+      "notes": ""
+    }
+  ],
+  "rungs": []
+}

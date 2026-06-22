@@ -6,7 +6,7 @@
       "signal_type": "Digital",
       "direction": "Output",
       "io_type": ""
-    }, 
+    },
     {
       "name": "CD-F_MOD#",
       "description": "Condenser Fan Modulation",
@@ -21,14 +21,14 @@
       "description": "Supply Fan Status 1",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     },
     {
       "name": "SF_STS2",
       "description": "Supply Fan Status 2",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     },
     {
       "name": "SUPP-F_EN",
@@ -102,21 +102,21 @@
       "description": "Supply Fan Status 1",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     },
     {
       "name": "SF_STS2",
       "description": "Supply Fan Status 2",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     },
     {
       "name": "SF_STS3",
       "description": "Supply Fan Status 3",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     }
   ],
   "AHU_HEAT_COIL": [
@@ -227,6 +227,15 @@
       "signal_type": "Analog",
       "direction": "Input",
       "io_type": "test"
+    }
+  ],
+  "C063": [
+    {
+      "name": "Test",
+      "description": "Description",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "Status"
     }
   ]
 }

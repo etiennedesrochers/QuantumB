@@ -3,7 +3,8 @@ Dialog classes for the AutoCAD Electrical Drawing Generator UI.
 """
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QLocale
+from PySide6.QtGui import QValidator
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -30,6 +31,23 @@ from PySide6.QtWidgets import (
 
 from drawing_generator import Rung, Component
 from symbols.electrical_symbols import SYMBOL_REGISTRY
+
+
+class CoordSpinBox(QDoubleSpinBox):
+    """QDoubleSpinBox with 7 decimal places, dot as separator, and comma→dot auto-conversion."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
+        self.setDecimals(7)
+        self.setRange(-999999.0, 999999.0)
+        self.setMinimumWidth(130)
+
+    def validate(self, text: str, pos: int):
+        return super().validate(text.replace(",", "."), pos)
+
+    def valueFromText(self, text: str) -> float:
+        return super().valueFromText(text.replace(",", "."))
 from io_manager import IO_TYPES, IO_FIELDS
 from i18n import tr
 from models import Circuit
@@ -464,16 +482,10 @@ class ModulePinDialog(QDialog):
         self._name_edit = QLineEdit()
         form.addRow(tr("lbl_pin_name_colon"), self._name_edit)
 
-        self._x_spin = QDoubleSpinBox()
-        self._x_spin.setRange(-999999.0, 999999.0)
-        self._x_spin.setDecimals(3)
-        self._x_spin.setMinimumWidth(110)
+        self._x_spin = CoordSpinBox()
         form.addRow("X:", self._x_spin)
 
-        self._y_spin = QDoubleSpinBox()
-        self._y_spin.setRange(-999999.0, 999999.0)
-        self._y_spin.setDecimals(3)
-        self._y_spin.setMinimumWidth(110)
+        self._y_spin = CoordSpinBox()
         form.addRow("Y:", self._y_spin)
 
         if data:
@@ -642,12 +654,14 @@ class ModuleOtherIODialog(QDialog):
 class ModuleDialog(QDialog):
     """Add / edit a module."""
 
-    def __init__(self, parent=None, data: dict | None = None, io_values: list[str] | None = None):
+    def __init__(self, parent=None, data: dict | None = None, io_values: list[str] | None = None,
+                 templates: list[str] | None = None):
         super().__init__(parent)
         self.setWindowTitle(tr("dlg_module_title"))
         self.resize(660, 540)
         self.result_data: dict | None = None
         self._io_values = io_values or []
+        self._templates = templates or []
         self._other_ios: list[dict] = []
         self._build(data)
 
@@ -660,9 +674,14 @@ class ModuleDialog(QDialog):
         self._name_edit    = QLineEdit()
         self._company_edit = QLineEdit()
         self._desc_edit    = QLineEdit()
-        form.addRow(tr("lbl_module_name_colon"),    self._name_edit)
-        form.addRow(tr("lbl_module_company_colon"), self._company_edit)
-        form.addRow(tr("lbl_module_desc_colon"),    self._desc_edit)
+        self._template_cb  = QComboBox()
+        self._template_cb.addItem("")  # blank = none
+        for t in self._templates:
+            self._template_cb.addItem(t)
+        form.addRow(tr("lbl_module_name_colon"),     self._name_edit)
+        form.addRow(tr("lbl_module_company_colon"),  self._company_edit)
+        form.addRow(tr("lbl_module_desc_colon"),     self._desc_edit)
+        form.addRow(tr("lbl_module_template_colon"), self._template_cb)
         layout.addWidget(basic_grp)
 
         # ── I/O tabs ────────────────────────────────────────────────────────
@@ -723,6 +742,9 @@ class ModuleDialog(QDialog):
             self._name_edit.setText(data.get("name", ""))
             self._company_edit.setText(data.get("company", ""))
             self._desc_edit.setText(data.get("description", ""))
+            tmpl = data.get("template", "")
+            idx = self._template_cb.findText(tmpl)
+            self._template_cb.setCurrentIndex(idx if idx >= 0 else 0)
             self._inputs_widget.set_pins(data.get("inputs", []))
             self._outputs_widget.set_pins(data.get("outputs", []))
             self._input_commons_widget.set_pins(data.get("input_commons", []))
@@ -774,6 +796,7 @@ class ModuleDialog(QDialog):
             "name":                name,
             "company":             self._company_edit.text().strip(),
             "description":         self._desc_edit.text().strip(),
+            "template":            self._template_cb.currentText(),
             "inputs":              self._inputs_widget.get_pins(),
             "outputs":             self._outputs_widget.get_pins(),
             "input_commons":       self._input_commons_widget.get_pins(),

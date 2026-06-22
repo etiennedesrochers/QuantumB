@@ -71,15 +71,24 @@ class DrawingGenerator:
         output_path: str,
         template_doc: Drawing | None = None,
         io_items: list[IOItem] | None = None,
+        io_template_placements: list[tuple[Drawing, float, float]] | None = None,
     ) -> tuple[bool, str]:
         """
         Build a ladder diagram and save to *output_path*.
         If *template_doc* is supplied it is used as the base (full copy:
         blocks, layers, styles, layouts, etc. are all preserved).
+        If *io_template_placements* is supplied, each ``(doc, dx, dy)`` entry
+        is merged into the generated document translated by ``(dx, dy)``.
+        This is used to place per-IO-point wiring diagrams at their module
+        slot positions on controller pages.
         """
         try:
+
             io_lookup = {item.tag: item for item in (io_items or [])}
             doc = self._create_doc(template_doc)
+            if io_template_placements:
+                for tmpl_doc, dx, dy in io_template_placements:
+                    self._place_io_template(doc, tmpl_doc, dx, dy)
             msp = doc.modelspace()
             sym_map = register_all_symbols(doc)
 
@@ -100,6 +109,27 @@ class DrawingGenerator:
             return False, f"Error generating drawing: {exc}"
 
     # ── Internal helpers ────────────────────────────────────────────────────
+
+    def _place_io_template(self, doc: Drawing, source_doc: Drawing, dx: float, dy: float) -> None:
+        """Copy all modelspace entities from *source_doc* into *doc*, translated by (dx, dy)."""
+        try:
+            from ezdxf import xref
+            from ezdxf.math import Matrix44
+
+            existing_handles = {e.dxf.handle for e in doc.modelspace() if e.dxf.hasattr("handle")}
+
+            xref.load_modelspace(source_doc, doc)
+
+            if dx != 0.0 or dy != 0.0:
+                matrix = Matrix44.translate(dx, dy, 0)
+                for entity in doc.modelspace():
+                    if entity.dxf.hasattr("handle") and entity.dxf.handle not in existing_handles:
+                        try:
+                            entity.transform(matrix)
+                        except Exception:
+                            pass
+        except Exception as exc:
+            print(f"Warning: failed to place I/O template at ({dx}, {dy}): {exc}")
 
     def _create_doc(self, template_doc: Drawing | None) -> Drawing:
         if template_doc is None:

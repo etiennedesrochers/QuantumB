@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import math
 import os
 import sys
 from pathlib import Path
@@ -50,6 +51,7 @@ from models import Circuit, Valve
 from preview_widget import PreviewWorker, ZoomablePreview
 from dialogs import (
     _make_toolbar_row,
+    CoordSpinBox,
     ComponentDialog,
     RungDialog,
     IODialog,
@@ -216,105 +218,22 @@ class MainWindow(QMainWindow):
         self._lbl_revision_w   = QLabel()
         self._lbl_drawn_by_w   = QLabel()
         self._lbl_paper_size_w = QLabel()
+        self._lbl_module_w = QLabel()
+        self._module_cb = QComboBox()
         form.addRow(self._lbl_title_w,      self._e_title)
         form.addRow(self._lbl_project_w,    self._e_project)
         form.addRow(self._lbl_drawing_no_w, self._e_dwgno)
         form.addRow(self._lbl_revision_w,   self._e_rev)
         form.addRow(self._lbl_drawn_by_w,   self._e_drawnby)
         form.addRow(self._lbl_paper_size_w, self._paper_cb)
+        form.addRow(self._lbl_module_w,     self._module_cb)
         layout.addWidget(self._grp_settings)
 
-        self._grp_templates = QGroupBox()
-        tmpl_lay = QVBoxLayout(self._grp_templates)
-        self._tmpl_list = QListWidget()
-        tmpl_lay.addWidget(self._tmpl_list)
-        btn_row = QWidget()
-        btn_lay = QHBoxLayout(btn_row)
-        btn_lay.setContentsMargins(0, 0, 0, 0)
-        self._btn_import_tmpl = QPushButton()
-        self._btn_import_tmpl.clicked.connect(self._import_template)
-        self._btn_delete_tmpl = QPushButton()
-        self._btn_delete_tmpl.clicked.connect(self._delete_template)
-        btn_lay.addWidget(self._btn_import_tmpl)
-        btn_lay.addWidget(self._btn_delete_tmpl)
-        btn_lay.addStretch()
-        tmpl_lay.addWidget(btn_row)
-        layout.addWidget(self._grp_templates, 1)
-
-        self._tmpl_list.currentItemChanged.connect(self._on_template_selected)
-
-        sep = QFrame()
-        sep.setFrameShape(QFrame.HLine)
-        layout.addWidget(sep)
-
-        self._grp_ctrl_templates = QGroupBox()
-        ctrl_tmpl_lay = QVBoxLayout(self._grp_ctrl_templates)
-        self._ctrl_tmpl_list = QListWidget()
-        ctrl_tmpl_lay.addWidget(self._ctrl_tmpl_list)
-        ctrl_btn_row = QWidget()
-        ctrl_btn_lay = QHBoxLayout(ctrl_btn_row)
-        ctrl_btn_lay.setContentsMargins(0, 0, 0, 0)
-        self._btn_import_ctrl_tmpl = QPushButton()
-        self._btn_import_ctrl_tmpl.clicked.connect(self._import_ctrl_template)
-        self._btn_delete_ctrl_tmpl = QPushButton()
-        self._btn_delete_ctrl_tmpl.clicked.connect(self._delete_ctrl_template)
-        ctrl_btn_lay.addWidget(self._btn_import_ctrl_tmpl)
-        ctrl_btn_lay.addWidget(self._btn_delete_ctrl_tmpl)
-        ctrl_btn_lay.addStretch()
-        ctrl_tmpl_lay.addWidget(ctrl_btn_row)
-        layout.addWidget(self._grp_ctrl_templates, 1)
-
-        self._ctrl_tmpl_list.currentItemChanged.connect(self._on_ctrl_template_selected)
-
-        sep2 = QFrame()
-        sep2.setFrameShape(QFrame.HLine)
-        layout.addWidget(sep2)
-
-        self._grp_io_templates = QGroupBox()
-        io_tmpl_lay = QVBoxLayout(self._grp_io_templates)
-        self._io_tmpl_list = QListWidget()
-        io_tmpl_lay.addWidget(self._io_tmpl_list)
-        io_btn_row = QWidget()
-        io_btn_lay = QHBoxLayout(io_btn_row)
-        io_btn_lay.setContentsMargins(0, 0, 0, 0)
-        self._btn_import_io_tmpl = QPushButton()
-        self._btn_import_io_tmpl.clicked.connect(self._import_io_template)
-        self._btn_delete_io_tmpl = QPushButton()
-        self._btn_delete_io_tmpl.clicked.connect(self._delete_io_template)
-        io_btn_lay.addWidget(self._btn_import_io_tmpl)
-        io_btn_lay.addWidget(self._btn_delete_io_tmpl)
-        io_btn_lay.addStretch()
-        io_tmpl_lay.addWidget(io_btn_row)
-
-        ins_row = QWidget()
-        ins_lay = QHBoxLayout(ins_row)
-        ins_lay.setContentsMargins(0, 0, 0, 0)
-        self._lbl_io_tmpl_ins_x = QLabel()
-        self._io_tmpl_ins_x = QDoubleSpinBox()
-        self._io_tmpl_ins_x.setRange(-999999.0, 999999.0)
-        self._io_tmpl_ins_x.setDecimals(3)
-        self._io_tmpl_ins_x.setMinimumWidth(90)
-        self._lbl_io_tmpl_ins_y = QLabel()
-        self._io_tmpl_ins_y = QDoubleSpinBox()
-        self._io_tmpl_ins_y.setRange(-999999.0, 999999.0)
-        self._io_tmpl_ins_y.setDecimals(3)
-        self._io_tmpl_ins_y.setMinimumWidth(90)
-        ins_lay.addWidget(self._lbl_io_tmpl_ins_x)
-        ins_lay.addWidget(self._io_tmpl_ins_x)
-        ins_lay.addWidget(self._lbl_io_tmpl_ins_y)
-        ins_lay.addWidget(self._io_tmpl_ins_y)
-        io_tmpl_lay.addWidget(ins_row)
-
-        layout.addWidget(self._grp_io_templates, 1)
-
-        self._io_tmpl_list.currentItemChanged.connect(self._on_io_template_selected)
-        self._io_tmpl_list.itemDoubleClicked.connect(self._open_io_template_config)
-        self._io_tmpl_ins_x.valueChanged.connect(self._on_io_tmpl_ins_changed)
-        self._io_tmpl_ins_y.valueChanged.connect(self._on_io_tmpl_ins_changed)
-
-        sep3 = QFrame()
-        sep3.setFrameShape(QFrame.HLine)
-        layout.addWidget(sep3)
+        self._lbl_io_summary = QLabel()
+        self._lbl_io_summary.setStyleSheet("color: gray; font-size: 11px;")
+        self._lbl_io_summary.setAlignment(Qt.AlignCenter)
+        self._lbl_io_summary.setWordWrap(True)
+        layout.addWidget(self._lbl_io_summary)
 
         self._btn_generate = QPushButton()
         self._btn_generate.setMinimumHeight(36)
@@ -373,6 +292,95 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(6, 6, 6, 6)
+
+        # ── Template type selector (3 sub-tabs: Regular / Controller / IO) ─────
+        self._tmpl_type_tabs = QTabWidget()
+
+        # Tab 0: Regular templates
+        tab0 = QWidget()
+        t0_lay = QVBoxLayout(tab0)
+        t0_lay.setContentsMargins(4, 4, 4, 4)
+        self._tmpl_list = QListWidget()
+        self._tmpl_list.currentItemChanged.connect(self._on_template_selected)
+        t0_lay.addWidget(self._tmpl_list)
+        t0_btn = QWidget()
+        t0_btn_lay = QHBoxLayout(t0_btn)
+        t0_btn_lay.setContentsMargins(0, 0, 0, 0)
+        self._btn_import_tmpl = QPushButton()
+        self._btn_import_tmpl.clicked.connect(self._import_template)
+        self._btn_delete_tmpl = QPushButton()
+        self._btn_delete_tmpl.clicked.connect(self._delete_template)
+        self._btn_open_tmpl_folder = QPushButton()
+        self._btn_open_tmpl_folder.clicked.connect(self._open_template_folder)
+        t0_btn_lay.addWidget(self._btn_import_tmpl)
+        t0_btn_lay.addWidget(self._btn_delete_tmpl)
+        t0_btn_lay.addWidget(self._btn_open_tmpl_folder)
+        t0_btn_lay.addStretch()
+        t0_lay.addWidget(t0_btn)
+        self._tmpl_type_tabs.addTab(tab0, "")
+
+        # Tab 1: Controller templates
+        tab1 = QWidget()
+        t1_lay = QVBoxLayout(tab1)
+        t1_lay.setContentsMargins(4, 4, 4, 4)
+        self._ctrl_tmpl_list = QListWidget()
+        self._ctrl_tmpl_list.currentItemChanged.connect(self._on_ctrl_template_selected)
+        t1_lay.addWidget(self._ctrl_tmpl_list)
+        t1_btn = QWidget()
+        t1_btn_lay = QHBoxLayout(t1_btn)
+        t1_btn_lay.setContentsMargins(0, 0, 0, 0)
+        self._btn_import_ctrl_tmpl = QPushButton()
+        self._btn_import_ctrl_tmpl.clicked.connect(self._import_ctrl_template)
+        self._btn_delete_ctrl_tmpl = QPushButton()
+        self._btn_delete_ctrl_tmpl.clicked.connect(self._delete_ctrl_template)
+        self._btn_open_ctrl_tmpl_folder = QPushButton()
+        self._btn_open_ctrl_tmpl_folder.clicked.connect(self._open_ctrl_template_folder)
+        t1_btn_lay.addWidget(self._btn_import_ctrl_tmpl)
+        t1_btn_lay.addWidget(self._btn_delete_ctrl_tmpl)
+        t1_btn_lay.addWidget(self._btn_open_ctrl_tmpl_folder)
+        t1_btn_lay.addStretch()
+        t1_lay.addWidget(t1_btn)
+        self._tmpl_type_tabs.addTab(tab1, "")
+
+        # Tab 2: IO templates
+        tab2 = QWidget()
+        t2_lay = QVBoxLayout(tab2)
+        t2_lay.setContentsMargins(4, 4, 4, 4)
+        self._io_tmpl_list = QListWidget()
+        self._io_tmpl_list.currentItemChanged.connect(self._on_io_template_selected)
+        self._io_tmpl_list.itemDoubleClicked.connect(self._open_io_template_config)
+        t2_lay.addWidget(self._io_tmpl_list)
+        t2_btn = QWidget()
+        t2_btn_lay = QHBoxLayout(t2_btn)
+        t2_btn_lay.setContentsMargins(0, 0, 0, 0)
+        self._btn_import_io_tmpl = QPushButton()
+        self._btn_import_io_tmpl.clicked.connect(self._import_io_template)
+        self._btn_delete_io_tmpl = QPushButton()
+        self._btn_delete_io_tmpl.clicked.connect(self._delete_io_template)
+        self._btn_open_io_tmpl_folder = QPushButton()
+        self._btn_open_io_tmpl_folder.clicked.connect(self._open_io_template_folder)
+        t2_btn_lay.addWidget(self._btn_import_io_tmpl)
+        t2_btn_lay.addWidget(self._btn_delete_io_tmpl)
+        t2_btn_lay.addWidget(self._btn_open_io_tmpl_folder)
+        t2_btn_lay.addStretch()
+        t2_lay.addWidget(t2_btn)
+        ins_row = QWidget()
+        ins_lay = QHBoxLayout(ins_row)
+        ins_lay.setContentsMargins(0, 0, 0, 0)
+        self._lbl_io_tmpl_ins_x = QLabel()
+        self._io_tmpl_ins_x = CoordSpinBox()
+        self._lbl_io_tmpl_ins_y = QLabel()
+        self._io_tmpl_ins_y = CoordSpinBox()
+        ins_lay.addWidget(self._lbl_io_tmpl_ins_x)
+        ins_lay.addWidget(self._io_tmpl_ins_x)
+        ins_lay.addWidget(self._lbl_io_tmpl_ins_y)
+        ins_lay.addWidget(self._io_tmpl_ins_y)
+        t2_lay.addWidget(ins_row)
+        self._io_tmpl_ins_x.valueChanged.connect(self._on_io_tmpl_ins_changed)
+        self._io_tmpl_ins_y.valueChanged.connect(self._on_io_tmpl_ins_changed)
+        self._tmpl_type_tabs.addTab(tab2, "")
+
+        layout.addWidget(self._tmpl_type_tabs, 1)
 
         # ── Preview ───────────────────────────────────────────────────────────
         self._grp_tmpl_preview = QGroupBox()
@@ -716,6 +724,10 @@ class MainWindow(QMainWindow):
 
     def _refresh_modules_table(self):
         self._modules_table.setRowCount(0)
+        # Keep current selection in the settings combobox
+        prev_module = self._module_cb.currentText()
+        self._module_cb.clear()
+        self._module_cb.addItem("")  # blank = none selected
         for i, mod in enumerate(self._modules):
             row = self._modules_table.rowCount()
             self._modules_table.insertRow(row)
@@ -727,9 +739,22 @@ class MainWindow(QMainWindow):
                 str(len(mod.get("other_ios", []))),
             ]):
                 self._modules_table.setItem(row, col, QTableWidgetItem(val))
+        # Repopulate combobox items (names only)
+        for mod in self._modules:
+            name = mod.get("name", "")
+            if name:
+                self._module_cb.addItem(name)
+        # Restore previous selection if still present
+        idx = self._module_cb.findText(prev_module)
+        self._module_cb.setCurrentIndex(idx if idx >= 0 else 0)
+        self._refresh_io_summary()
+
+    def _module_template_names(self) -> list[str]:
+        """Return controller template names for module assignment."""
+        return self._ctrl_template_mgr.list_templates()
 
     def _add_module(self):
-        dlg = ModuleDialog(self, io_values=self._module_io_values)
+        dlg = ModuleDialog(self, io_values=self._module_io_values, templates=self._module_template_names())
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._modules.append(dlg.result_data)
             self._refresh_modules_table()
@@ -739,7 +764,8 @@ class MainWindow(QMainWindow):
         idx = self._modules_table.currentRow()
         if idx < 0:
             return
-        dlg = ModuleDialog(self, self._modules[idx], io_values=self._module_io_values)
+        dlg = ModuleDialog(self, self._modules[idx], io_values=self._module_io_values,
+                           templates=self._module_template_names())
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._modules[idx] = dlg.result_data
             self._refresh_modules_table()
@@ -1429,6 +1455,17 @@ class MainWindow(QMainWindow):
 
     # ── I/O CRUD ──────────────────────────────────────────────────────────────
 
+    def _refresh_io_summary(self):
+        if not hasattr(self, "_lbl_io_summary"):
+            return
+        total_io = len(self._io_items)
+        total_in  = sum(1 for io in self._io_items if io.io_type == "Input")
+        total_out = total_io - total_in
+        num_mod   = len(self._modules)
+        self._lbl_io_summary.setText(
+            f"{num_mod} module(s)  ·  {total_io} IO(s)  ({total_in} in / {total_out} out)"
+        )
+
     def _refresh_io_table(self):
         self._io_table.setRowCount(0)
         self._io_items.clear()
@@ -1461,7 +1498,9 @@ class MainWindow(QMainWindow):
                         io_type=io.get("direction", "Input"),
                         description=io_desc,
                         signal_type=io.get("signal_type", ""),
+                        io_type_name=io.get("io_type", ""),
                     ))
+        self._refresh_io_summary()
 
     def _add_io(self):
         dlg = IODialog(self)
@@ -1587,9 +1626,6 @@ class MainWindow(QMainWindow):
             self._tmpl_preview_lbl.set_text(tr("lbl_no_template_selected"))
             self._tmpl_attrib_status.setText(tr("lbl_no_template_selected"))
             return
-
-        # Switch to the Template tab automatically
-        self._tabs.setCurrentIndex(1)
 
         name = current.text()
         self._tmpl_current_name = name
@@ -1770,9 +1806,6 @@ class MainWindow(QMainWindow):
         self._tmpl_ios = []
         self._refresh_tmpl_io_table()
 
-        # Switch to the Template tab automatically
-        self._tabs.setCurrentIndex(1)
-
         name = current.text()
         self._tmpl_current_name = name
         self._active_template_mgr = self._ctrl_template_mgr
@@ -1868,9 +1901,6 @@ class MainWindow(QMainWindow):
         self._tmpl_attrib_table.blockSignals(False)
         self._tmpl_ios = []
         self._refresh_tmpl_io_table()
-
-        # Switch to the Template tab automatically
-        self._tabs.setCurrentIndex(1)
 
         name = current.text()
         self._tmpl_current_name = name
@@ -1978,6 +2008,18 @@ class MainWindow(QMainWindow):
                 self._refresh_template_list()
             else:
                 QMessageBox.critical(self, tr("msg_error_title"), msg)
+
+    def _open_template_folder(self):
+        import subprocess
+        subprocess.Popen(["explorer", str(self._template_mgr.templates_dir)])
+
+    def _open_ctrl_template_folder(self):
+        import subprocess
+        subprocess.Popen(["explorer", str(self._ctrl_template_mgr.templates_dir)])
+
+    def _open_io_template_folder(self):
+        import subprocess
+        subprocess.Popen(["explorer", str(self._io_template_mgr.templates_dir)])
 
     def _on_tmpl_block_selected(self, row: int):
         """Populate the attribute table for the selected block."""
@@ -2125,6 +2167,7 @@ class MainWindow(QMainWindow):
             "revision":       self._e_rev.text().strip(),
             "drawn_by":       self._e_drawnby.text().strip(),
             "paper_size":     self._paper_cb.currentText(),
+            "module":         self._module_cb.currentText(),
         }
 
     def _apply_settings(self, s: dict):
@@ -2136,6 +2179,9 @@ class MainWindow(QMainWindow):
         paper = s.get("paper_size", "A3 Landscape")
         if paper in _PAPER_SIZES:
             self._paper_cb.setCurrentText(paper)
+        module = s.get("module", "")
+        idx = self._module_cb.findText(module)
+        self._module_cb.setCurrentIndex(idx if idx >= 0 else 0)
 
     def _open_project(self):
         if not self._confirm_discard():
@@ -2287,6 +2333,92 @@ class MainWindow(QMainWindow):
                     errors.append(f"{page_str}: {msg}")
                 page += 1
 
+        # ── Controller pages ──────────────────────────────────────────────────
+        # Calculate how many controller pages are needed based on the selected
+        # module's IO capacity and the total IOs in the project.
+        module_name = self._module_cb.currentText()
+        module_def = next((m for m in self._modules if m.get("name") == module_name), None)
+        if module_def and self._io_items:
+            mod_inputs  = len(module_def.get("inputs", []))
+            mod_outputs = len(module_def.get("outputs", []))
+            total_inputs  = sum(1 for io in self._io_items if io.io_type == "Input")
+            total_outputs = sum(1 for io in self._io_items if io.io_type == "Output")
+
+            num_ctrl = 1  # at least one if a module is selected
+            if mod_inputs > 0 and total_inputs > 0:
+                num_ctrl = max(num_ctrl, math.ceil(total_inputs / mod_inputs))
+            if mod_outputs > 0 and total_outputs > 0:
+                num_ctrl = max(num_ctrl, math.ceil(total_outputs / mod_outputs))
+
+            ctrl_tmpl_name = module_def.get("template", "")
+
+            # Build a lookup: io_type_name → io type dict (from io_types_library)
+            io_type_map = {t["name"]: t for t in self._io_types}
+
+            # Split io_items by direction for paging
+            input_ios  = [io for io in io_items if io.io_type == "Input"]
+            output_ios = [io for io in io_items if io.io_type == "Output"]
+            mod_input_slots  = module_def.get("inputs", [])
+            mod_output_slots = module_def.get("outputs", [])
+
+            for ctrl_idx in range(1, num_ctrl + 1):
+                page_str = f"C{ctrl_idx:03d}"
+                dxf_path = output_dir / f"{page_str}.dxf"
+                # Reload a fresh copy of the templates for each page
+                ctrl_tmpl_doc = (
+                    self._ctrl_template_mgr.load_template(ctrl_tmpl_name)
+                    if ctrl_tmpl_name else None
+                )
+
+                # Build per-slot IO template placements for this page
+                io_template_placements: list = []
+
+                # Inputs slice for this page
+                start_in = (ctrl_idx - 1) * mod_inputs
+                page_inputs = input_ios[start_in : start_in + mod_inputs]
+                for slot_idx, io_item in enumerate(page_inputs):
+                    io_type_def = io_type_map.get(io_item.io_type_name, {})
+                    tmpl_name = io_type_def.get("io_template", "")
+                    if not tmpl_name or slot_idx >= len(mod_input_slots):
+                        continue
+                    tmpl_doc = self._io_template_mgr.load_template(tmpl_name)
+                    if tmpl_doc is None:
+                        continue
+                    slot = mod_input_slots[slot_idx]
+                    ip_x, ip_y = self._io_template_mgr.get_insertion_point(tmpl_name)
+                    io_template_placements.append(
+                        (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y)
+                    )
+
+                # Outputs slice for this page
+                start_out = (ctrl_idx - 1) * mod_outputs
+                page_outputs = output_ios[start_out : start_out + mod_outputs]
+                for slot_idx, io_item in enumerate(page_outputs):
+                    io_type_def = io_type_map.get(io_item.io_type_name, {})
+                    tmpl_name = io_type_def.get("io_template", "")
+                    if not tmpl_name or slot_idx >= len(mod_output_slots):
+                        continue
+                    tmpl_doc = self._io_template_mgr.load_template(tmpl_name)
+                    if tmpl_doc is None:
+                        continue
+                    slot = mod_output_slots[slot_idx]
+                    ip_x, ip_y = self._io_template_mgr.get_insertion_point(tmpl_name)
+                    io_template_placements.append(
+                        (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y)
+                    )
+
+                page_config = dataclasses.replace(config, drawing_number=page_str)
+                gen = DrawingGenerator(page_config)
+                ok, msg = gen.generate(
+                    [], str(dxf_path), ctrl_tmpl_doc,
+                    io_items=io_items,
+                    io_template_placements=io_template_placements or None,
+                )
+                if ok:
+                    generated_dxf.append(dxf_path)
+                else:
+                    errors.append(f"{page_str}: {msg}")
+
         # Convert DXF → DWG if ODA converter is available
         if use_dwg and generated_dxf:
             converted, total_dxf, conv_error = convert_folder_dxf_to_dwg(str(output_dir))
@@ -2309,6 +2441,13 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, tr("msg_generate_title"), summary)
         else:
             QMessageBox.information(self, tr("msg_success_title"), summary)
+
+        # Open the output folder in the file explorer
+        try:
+            os.startfile(str(output_dir))
+        except AttributeError:
+            import subprocess
+            subprocess.Popen(["xdg-open", str(output_dir)])
 
     # ── Retranslation & language ──────────────────────────────────────────────
 
@@ -2335,15 +2474,19 @@ class MainWindow(QMainWindow):
         self._lbl_revision_w.setText(tr("lbl_revision"))
         self._lbl_drawn_by_w.setText(tr("lbl_drawn_by"))
         self._lbl_paper_size_w.setText(tr("lbl_paper_size"))
-        self._grp_templates.setTitle(tr("grp_templates"))
+        self._lbl_module_w.setText(tr("lbl_module"))
+        self._tmpl_type_tabs.setTabText(0, tr("grp_templates"))
+        self._tmpl_type_tabs.setTabText(1, tr("grp_ctrl_templates"))
+        self._tmpl_type_tabs.setTabText(2, tr("grp_io_templates"))
         self._btn_import_tmpl.setText(tr("btn_import"))
         self._btn_delete_tmpl.setText(tr("btn_delete"))
-        self._grp_ctrl_templates.setTitle(tr("grp_ctrl_templates"))
+        self._btn_open_tmpl_folder.setText(tr("btn_open_folder"))
         self._btn_import_ctrl_tmpl.setText(tr("btn_import"))
         self._btn_delete_ctrl_tmpl.setText(tr("btn_delete"))
-        self._grp_io_templates.setTitle(tr("grp_io_templates"))
+        self._btn_open_ctrl_tmpl_folder.setText(tr("btn_open_folder"))
         self._btn_import_io_tmpl.setText(tr("btn_import"))
         self._btn_delete_io_tmpl.setText(tr("btn_delete"))
+        self._btn_open_io_tmpl_folder.setText(tr("btn_open_folder"))
         self._lbl_io_tmpl_ins_x.setText(tr("lbl_io_tmpl_ins_x"))
         self._lbl_io_tmpl_ins_y.setText(tr("lbl_io_tmpl_ins_y"))
         self._btn_generate.setText(tr("btn_generate"))

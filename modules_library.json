@@ -3,16 +3,135 @@
     "name": "8UI6UO",
     "company": "Distech",
     "description": "8 input 6 output",
+    "template": "ECY-S1000",
     "inputs": [
       {
-        "name": "",
-        "x": 0.0,
-        "y": 0.0
+        "name": "Input 1",
+        "x": 7.648,
+        "y": 17.5
+      },
+      {
+        "name": "Input 2",
+        "x": 7.648,
+        "y": 15.9997
+      },
+      {
+        "name": "Input 3",
+        "x": 7.648,
+        "y": 15.0
+      },
+      {
+        "name": "Input 4",
+        "x": 7.648,
+        "y": 13.502
+      },
+      {
+        "name": "Input 5",
+        "x": 7.648,
+        "y": 10.5012
+      },
+      {
+        "name": "Input 6",
+        "x": 7.648,
+        "y": 9.0015
+      },
+      {
+        "name": "Input 7",
+        "x": 7.648,
+        "y": 8.0007
+      },
+      {
+        "name": "Input 8",
+        "x": 7.648,
+        "y": 6.5016
       }
     ],
-    "outputs": [],
-    "input_commons": [],
-    "output_commons": [],
+    "outputs": [
+      {
+        "name": "Output 1",
+        "x": 9.32,
+        "y": 17.5
+      },
+      {
+        "name": "Output 2",
+        "x": 9.32,
+        "y": 15.4934
+      },
+      {
+        "name": "Output 3",
+        "x": 9.32,
+        "y": 13.4934
+      },
+      {
+        "name": "Output 4",
+        "x": 9.32,
+        "y": 11.493
+      },
+      {
+        "name": "Output 5",
+        "x": 9.32,
+        "y": 9.4937
+      },
+      {
+        "name": "Output",
+        "x": 9.32,
+        "y": 7.4936
+      }
+    ],
+    "input_commons": [
+      {
+        "name": "COM_1",
+        "x": 7.6485,
+        "y": 16.75
+      },
+      {
+        "name": "COM_2",
+        "x": 7.6485,
+        "y": 16.75
+      },
+      {
+        "name": "COM_3",
+        "x": 7.6485,
+        "y": 16.75
+      },
+      {
+        "name": "COM_4",
+        "x": 7.6485,
+        "y": 16.75
+      }
+    ],
+    "output_commons": [
+      {
+        "name": "COM_O_1",
+        "x": 9.32,
+        "y": 16.4935
+      },
+      {
+        "name": "COM_O_2",
+        "x": 9.32,
+        "y": 14.4936
+      },
+      {
+        "name": "COM_O_3",
+        "x": 9.32,
+        "y": 12.4933
+      },
+      {
+        "name": "COM_O_4",
+        "x": 9.32,
+        "y": 10.4935
+      },
+      {
+        "name": "COM_O_5",
+        "x": 9.32,
+        "y": 8.4936
+      },
+      {
+        "name": "COM_O_6",
+        "x": 9.32,
+        "y": 6.4932
+      }
+    ],
     "input_common_shared": true,
     "other_ios": []
   }
