@@ -57,6 +57,7 @@ from dialogs import (
     ModuleDialog,
     RuleDialog,
     TemplateIODialog,
+    IOTemplateConfigDialog,
     CircuitDialog,
     ValveDialog,
     ValveIODialog,
@@ -114,6 +115,7 @@ class MainWindow(QMainWindow):
         self._tmpl_current_block: str | None = None
         self._tmpl_ios: list[dict] = []
         self._tmpl_current_name: str | None = None
+        self._active_tmpl_type: str = "regular"  # "regular" | "controller" | "io"
         self._preview_worker: PreviewWorker | None = None
         self._preview_thread: QThread | None = None
         self._preview_generation: int = 0
@@ -305,6 +307,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self._grp_io_templates, 1)
 
         self._io_tmpl_list.currentItemChanged.connect(self._on_io_template_selected)
+        self._io_tmpl_list.itemDoubleClicked.connect(self._open_io_template_config)
         self._io_tmpl_ins_x.valueChanged.connect(self._on_io_tmpl_ins_changed)
         self._io_tmpl_ins_y.valueChanged.connect(self._on_io_tmpl_ins_changed)
 
@@ -1494,6 +1497,8 @@ class MainWindow(QMainWindow):
         name = current.text()
         self._tmpl_current_name = name
         self._active_template_mgr = self._template_mgr
+        self._active_tmpl_type = "regular"
+        self._update_tmpl_io_ui()
 
         # Start background preview render
         self._start_preview_render(name)
@@ -1674,6 +1679,8 @@ class MainWindow(QMainWindow):
         name = current.text()
         self._tmpl_current_name = name
         self._active_template_mgr = self._ctrl_template_mgr
+        self._active_tmpl_type = "controller"
+        self._update_tmpl_io_ui()
 
         self._start_preview_render(name)
 
@@ -1771,6 +1778,8 @@ class MainWindow(QMainWindow):
         name = current.text()
         self._tmpl_current_name = name
         self._active_template_mgr = self._io_template_mgr
+        self._active_tmpl_type = "io"
+        self._update_tmpl_io_ui()
 
         self._start_preview_render(name)
 
@@ -1793,6 +1802,32 @@ class MainWindow(QMainWindow):
         self._io_tmpl_ins_y.setValue(y)
         self._io_tmpl_ins_x.blockSignals(False)
         self._io_tmpl_ins_y.blockSignals(False)
+
+    def _update_tmpl_io_ui(self) -> None:
+        """Show/hide Add button and update section title based on active template type."""
+        is_io = self._active_tmpl_type == "io"
+        self._btn_add_tmpl_io.setVisible(not is_io)
+        if is_io:
+            self._grp_tmpl_ios.setTitle(tr("grp_io_template_channels"))
+        else:
+            self._grp_tmpl_ios.setTitle(tr("grp_template_ios"))
+
+    def _open_io_template_config(self, item) -> None:
+        """Open the IO template config dialog on double-click."""
+        name = item.text()
+        ios = self._io_template_mgr.get_template_ios(name)
+        dlg = IOTemplateConfigDialog(
+            self,
+            template_name=name,
+            ios=ios,
+            io_types=self._io_types,
+        )
+        if dlg.exec() == QDialog.Accepted and dlg.result_ios is not None:
+            self._io_template_mgr.set_template_ios(name, dlg.result_ios)
+            # Refresh the inline IO table if this template is currently shown
+            if self._tmpl_current_name == name:
+                self._tmpl_ios = dlg.result_ios
+                self._refresh_tmpl_io_table()
 
     def _on_io_tmpl_ins_changed(self):
         """Save the insertion point for the currently selected IO template."""
@@ -2252,7 +2287,7 @@ class MainWindow(QMainWindow):
             tr("col_attrib_default"), tr("col_attrib_value"), tr("col_attrib_flags"),
         ])
         # Template I/O list
-        self._grp_tmpl_ios.setTitle(tr("grp_template_ios"))
+        self._update_tmpl_io_ui()
         self._btn_add_tmpl_io.setText(tr("btn_add_template_io"))
         self._btn_edit_tmpl_io.setText(tr("btn_edit_template_io"))
         self._btn_remove_tmpl_io.setText(tr("btn_remove"))

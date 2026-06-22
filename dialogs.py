@@ -928,6 +928,107 @@ class TemplateIODialog(QDialog):
 
 
 # ---------------------------------------------------------------------------
+# IO Template Config Dialog
+# ---------------------------------------------------------------------------
+
+class IOTemplateConfigDialog(QDialog):
+    """Configure I/O channels for an IO template.
+
+    Unlike the regular template I/O section this dialog does not allow adding
+    new channels.  Its purpose is to set the signal type (Analog / Digital)
+    and direction (Input / Output) for each existing channel.
+    """
+
+    def __init__(self, parent=None, template_name: str = "",
+                 ios: list[dict] | None = None,
+                 io_types: list[dict] | None = None):
+        super().__init__(parent)
+        self.setWindowTitle(tr("dlg_io_template_config_title", name=template_name))
+        self.setMinimumWidth(580)
+        self.setMinimumHeight(380)
+        self.result_ios: list[dict] | None = None
+        self._ios: list[dict] = [dict(io) for io in (ios or [])]
+        self._io_types = io_types or []
+        self._build()
+
+    def _build(self):
+        layout = QVBoxLayout(self)
+
+        _cols = [
+            tr("col_io_name"),
+            tr("col_description"),
+            tr("col_signal_type"),
+            tr("col_io_direction"),
+            tr("col_io_type"),
+        ]
+        self._table = QTableWidget(0, len(_cols))
+        self._table.setHorizontalHeaderLabels(_cols)
+        self._table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self._table.setSelectionBehavior(QTableWidget.SelectRows)
+        self._table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self._table.doubleClicked.connect(self._edit_row)
+        layout.addWidget(self._table)
+
+        # Edit and Remove only – no Add
+        btn_row = QWidget()
+        btn_lay = QHBoxLayout(btn_row)
+        btn_lay.setContentsMargins(0, 0, 0, 0)
+        self._btn_edit = QPushButton(tr("btn_edit_template_io"))
+        self._btn_edit.clicked.connect(self._edit_row)
+        self._btn_remove = QPushButton(tr("btn_remove"))
+        self._btn_remove.clicked.connect(self._remove_row)
+        btn_lay.addWidget(self._btn_edit)
+        btn_lay.addWidget(self._btn_remove)
+        btn_lay.addStretch()
+        layout.addWidget(btn_row)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self._ok)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+        self._refresh_table()
+
+    def _refresh_table(self):
+        self._table.setRowCount(0)
+        for io in self._ios:
+            row = self._table.rowCount()
+            self._table.insertRow(row)
+            for col, key in enumerate(
+                ("name", "description", "signal_type", "direction", "io_type")
+            ):
+                self._table.setItem(row, col, QTableWidgetItem(io.get(key, "")))
+
+    def _selected_row(self) -> int:
+        return self._table.currentRow() if self._table.selectedItems() else -1
+
+    def _edit_row(self):
+        idx = self._selected_row()
+        if idx < 0:
+            return
+        dlg = TemplateIODialog(self, self._ios[idx], io_types=self._io_types)
+        if dlg.exec() == QDialog.Accepted and dlg.result_data:
+            self._ios[idx] = dlg.result_data
+            self._refresh_table()
+
+    def _remove_row(self):
+        idx = self._selected_row()
+        if idx < 0:
+            return
+        name = self._ios[idx].get("name", "")
+        if QMessageBox.question(
+            self, tr("msg_remove_template_io_title"),
+            tr("msg_remove_template_io", name=name),
+        ) == QMessageBox.Yes:
+            self._ios.pop(idx)
+            self._refresh_table()
+
+    def _ok(self):
+        self.result_ios = list(self._ios)
+        self.accept()
+
+
+# ---------------------------------------------------------------------------
 # Template Blocks Dialog
 # ---------------------------------------------------------------------------
 

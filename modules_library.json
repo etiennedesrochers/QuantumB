@@ -1,0 +1,19 @@
+[
+  {
+    "name": "8UI6UO",
+    "company": "Distech",
+    "description": "",
+    "inputs": [
+      {
+        "name": "",
+        "x": 0.0,
+        "y": 0.0
+      }
+    ],
+    "outputs": [],
+    "input_commons": [],
+    "output_commons": [],
+    "input_common_shared": true,
+    "other_ios": []
+  }
+]

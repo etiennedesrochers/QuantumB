@@ -184,6 +184,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "msg_remove_project_circuit": "Remove this instance of \u2018{name}\u2019 from the project?",
         # Template I/O list
         "grp_template_ios": "Template I/O List",
+        "grp_io_template_channels": "IO Template Channels",
+        "dlg_io_template_config_title": "IO Template \u2014 {name}",
         "btn_add_template_io": "Add I/O",
         "btn_edit_template_io": "Edit I/O",
         "dlg_template_io_title": "Template I/O",
@@ -469,6 +471,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "msg_remove_project_circuit": "Supprimer cette instance de \u00ab\u00a0{name}\u00a0\u00bb du projet\u00a0?",
         # Template I/O list
         "grp_template_ios": "Liste E/S du gabarit",
+        "grp_io_template_channels": "Canaux du gabarit E/S",
+        "dlg_io_template_config_title": "Gabarit E/S \u2014 {name}",
         "btn_add_template_io": "Ajouter E/S",
         "btn_edit_template_io": "Modifier E/S",
         "dlg_template_io_title": "E/S du gabarit",
