@@ -61,6 +61,7 @@ from dialogs import (
     CircuitDialog,
     ValveDialog,
     ValveIODialog,
+    IOTypeDialog,
 )
 import valve_manager as vm
 
@@ -335,6 +336,7 @@ class MainWindow(QMainWindow):
         self._tabs.addTab(self._build_rules_tab(), "")
         self._tabs.addTab(self._build_modules_tab(), "")
         self._tabs.addTab(self._build_valves_tab(), "")
+        self._tabs.addTab(self._build_io_types_tab(), "")
         return self._tabs
 
     # ── I/O tab ───────────────────────────────────────────────────────────────
@@ -606,6 +608,45 @@ class MainWindow(QMainWindow):
         self._module_io_values = mm.load_io_values()
         self._refresh_modules_table()
 
+    # ── IO Types tab ──────────────────────────────────────────────────────────
+
+    def _build_io_types_tab(self) -> QWidget:
+        widget = QWidget()
+        outer = QVBoxLayout(widget)
+        outer.setContentsMargins(6, 6, 6, 6)
+
+        header = QWidget()
+        h_lay = QHBoxLayout(header)
+        h_lay.setContentsMargins(0, 0, 0, 0)
+        self._lbl_io_types_hdr = QLabel()
+        self._lbl_io_types_hdr.setFont(QFont("", 10, QFont.Bold))
+        h_lay.addWidget(self._lbl_io_types_hdr)
+        h_lay.addStretch()
+        self._btn_add_io_type    = QPushButton()
+        self._btn_edit_io_type   = QPushButton()
+        self._btn_remove_io_type = QPushButton()
+        self._btn_add_io_type.clicked.connect(self._add_io_type)
+        self._btn_edit_io_type.clicked.connect(self._edit_io_type)
+        self._btn_remove_io_type.clicked.connect(self._remove_io_type)
+        for btn in (self._btn_add_io_type, self._btn_edit_io_type, self._btn_remove_io_type):
+            h_lay.addWidget(btn)
+        outer.addWidget(header)
+
+        # Columns: Name | Description | Signal Category | Direction | IO Template | Shared | Shared Template
+        self._io_types_table = QTableWidget(0, 7)
+        self._io_types_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self._io_types_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self._io_types_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self._io_types_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self._io_types_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self._io_types_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents)
+        self._io_types_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
+        self._io_types_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self._io_types_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self._io_types_table.doubleClicked.connect(self._edit_io_type)
+        outer.addWidget(self._io_types_table)
+        return widget
+
     def _load_io_types(self):
         path = Path(__file__).parent / "io_types_library.json"
         try:
@@ -613,6 +654,62 @@ class MainWindow(QMainWindow):
                 self._io_types = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
             self._io_types = []
+        self._refresh_io_types_table()
+
+    def _save_io_types(self):
+        path = Path(__file__).parent / "io_types_library.json"
+        path.write_text(json.dumps(self._io_types, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    def _refresh_io_types_table(self):
+        self._io_types_table.setRowCount(0)
+        for entry in self._io_types:
+            row = self._io_types_table.rowCount()
+            self._io_types_table.insertRow(row)
+            shared = entry.get("shared", False)
+            for col, val in enumerate([
+                entry.get("name", ""),
+                entry.get("description", ""),
+                entry.get("signal_category", ""),
+                entry.get("direction", ""),
+                entry.get("io_template", ""),
+                tr("opt_yes") if shared else "",
+                entry.get("shared_template", "") if shared else "",
+            ]):
+                self._io_types_table.setItem(row, col, QTableWidgetItem(val))
+
+    def _io_template_names(self) -> list[str]:
+        """Return the list of available IO template names."""
+        return self._io_template_mgr.list_templates()
+
+    def _add_io_type(self):
+        dlg = IOTypeDialog(self, io_templates=self._io_template_names())
+        if dlg.exec() == QDialog.Accepted and dlg.result_data:
+            self._io_types.append(dlg.result_data)
+            self._refresh_io_types_table()
+            self._save_io_types()
+
+    def _edit_io_type(self):
+        idx = self._io_types_table.currentRow()
+        if idx < 0:
+            return
+        dlg = IOTypeDialog(self, data=self._io_types[idx],
+                           io_templates=self._io_template_names())
+        if dlg.exec() == QDialog.Accepted and dlg.result_data:
+            self._io_types[idx] = dlg.result_data
+            self._refresh_io_types_table()
+            self._save_io_types()
+
+    def _remove_io_type(self):
+        idx = self._io_types_table.currentRow()
+        if idx < 0:
+            return
+        name = self._io_types[idx].get("name", "")
+        if QMessageBox.question(
+            self, tr("msg_remove_io_type_title"), tr("msg_remove_io_type", name=name)
+        ) == QMessageBox.Yes:
+            self._io_types.pop(idx)
+            self._refresh_io_types_table()
+            self._save_io_types()
 
     def _save_modules(self):
         mm.save_modules(self._modules)
@@ -2257,6 +2354,17 @@ class MainWindow(QMainWindow):
         self._tabs.setTabText(3, tr("tab_rules"))
         self._tabs.setTabText(4, tr("tab_modules"))
         self._tabs.setTabText(5, tr("tab_valves"))
+        self._tabs.setTabText(6, tr("tab_io_types"))
+        # IO Types tab
+        self._lbl_io_types_hdr.setText(tr("lbl_io_types_hdr"))
+        self._btn_add_io_type.setText(tr("btn_add_io_type"))
+        self._btn_edit_io_type.setText(tr("btn_edit_io_type"))
+        self._btn_remove_io_type.setText(tr("btn_remove"))
+        self._io_types_table.setHorizontalHeaderLabels([
+            tr("col_io_type_name"), tr("col_description"),
+            tr("col_signal_category"), tr("col_io_direction"), tr("col_io_template"),
+            tr("col_io_type_shared"), tr("col_io_type_shared_template"),
+        ])
         # Circuits tab
         _circuit_cols = [
             tr("col_rung_num"),

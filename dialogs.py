@@ -1335,6 +1335,121 @@ class ValveIODialog(QDialog):
 
 
 # ---------------------------------------------------------------------------
+# IO Type Dialog  (add / edit a single IO type entry in the library)
+# ---------------------------------------------------------------------------
+
+class IOTypeDialog(QDialog):
+    """Add or edit a single IO type definition."""
+
+    _SIGNAL_CATEGORIES = ["Analog", "Digital"]
+    _DIRECTIONS        = ["Input", "Output"]
+
+    def __init__(self, parent=None, data: dict | None = None,
+                 io_templates: list[str] | None = None):
+        super().__init__(parent)
+        self.setWindowTitle(tr("dlg_io_type_title"))
+        self.setMinimumWidth(400)
+        self.result_data: dict | None = None
+        self._io_templates = io_templates or []
+        self._build(data)
+
+    def _build(self, data: dict | None):
+        layout = QVBoxLayout(self)
+        form = QFormLayout()
+        layout.addLayout(form)
+
+        self._name_edit = QLineEdit()
+        form.addRow(tr("lbl_io_type_name_colon"), self._name_edit)
+
+        self._desc_edit = QLineEdit()
+        form.addRow(tr("col_description") + ":", self._desc_edit)
+
+        self._signal_cb = QComboBox()
+        self._signal_cb.addItems(self._SIGNAL_CATEGORIES)
+        form.addRow(tr("col_signal_type") + ":", self._signal_cb)
+
+        self._dir_cb = QComboBox()
+        self._dir_cb.addItems(self._DIRECTIONS)
+        form.addRow(tr("lbl_io_direction"), self._dir_cb)
+
+        self._tmpl_cb = QComboBox()
+        self._tmpl_cb.setEditable(True)
+        self._tmpl_cb.addItem("")
+        self._tmpl_cb.addItems(self._io_templates)
+        form.addRow(tr("lbl_io_type_template_colon"), self._tmpl_cb)
+
+        # ── Shared input section ──────────────────────────────────────────────
+        self._shared_chk = QCheckBox()
+        self._shared_chk.setText(tr("lbl_io_type_shared"))
+        self._shared_row_lbl = QLabel(tr("lbl_io_type_shared_colon"))
+        form.addRow(self._shared_row_lbl, self._shared_chk)
+
+        self._shared_tmpl_cb = QComboBox()
+        self._shared_tmpl_cb.setEditable(True)
+        self._shared_tmpl_cb.addItem("")
+        self._shared_tmpl_cb.addItems(self._io_templates)
+        self._shared_tmpl_lbl = QLabel(tr("lbl_io_type_shared_template_colon"))
+        form.addRow(self._shared_tmpl_lbl, self._shared_tmpl_cb)
+
+        self._dir_cb.currentTextChanged.connect(self._sync_shared_visibility)
+        self._shared_chk.toggled.connect(self._sync_shared_visibility)
+
+        if data:
+            self._name_edit.setText(data.get("name", ""))
+            self._desc_edit.setText(data.get("description", ""))
+            self._signal_cb.setCurrentText(data.get("signal_category", self._SIGNAL_CATEGORIES[0]))
+            self._dir_cb.setCurrentText(data.get("direction", self._DIRECTIONS[0]))
+            tmpl_val = data.get("io_template", "")
+            idx = self._tmpl_cb.findText(tmpl_val)
+            if idx >= 0:
+                self._tmpl_cb.setCurrentIndex(idx)
+            else:
+                self._tmpl_cb.setCurrentText(tmpl_val)
+            self._shared_chk.setChecked(bool(data.get("shared", False)))
+            shared_tmpl = data.get("shared_template", "")
+            sidx = self._shared_tmpl_cb.findText(shared_tmpl)
+            if sidx >= 0:
+                self._shared_tmpl_cb.setCurrentIndex(sidx)
+            else:
+                self._shared_tmpl_cb.setCurrentText(shared_tmpl)
+
+        self._sync_shared_visibility()
+
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self._ok)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def _sync_shared_visibility(self):
+        is_input = self._dir_cb.currentText() == "Input"
+        self._shared_row_lbl.setVisible(is_input)
+        self._shared_chk.setVisible(is_input)
+        show_shared_tmpl = is_input and self._shared_chk.isChecked()
+        self._shared_tmpl_lbl.setVisible(show_shared_tmpl)
+        self._shared_tmpl_cb.setVisible(show_shared_tmpl)
+        if not is_input:
+            self._shared_chk.setChecked(False)
+
+    def _ok(self):
+        name = self._name_edit.text().strip()
+        if not name:
+            QMessageBox.warning(self, tr("msg_validation"), tr("msg_io_type_name_required"))
+            return
+        is_input = self._dir_cb.currentText() == "Input"
+        shared = is_input and self._shared_chk.isChecked()
+        self.result_data = {
+            "name":            name,
+            "description":     self._desc_edit.text().strip(),
+            "signal_category": self._signal_cb.currentText(),
+            "direction":       self._dir_cb.currentText(),
+            "io_template":     self._tmpl_cb.currentText().strip(),
+            "shared":          shared,
+            "shared_template": self._shared_tmpl_cb.currentText().strip() if shared else "",
+        }
+        self.accept()
+
+
+# ---------------------------------------------------------------------------
 # Valve Dialog  (add / edit a valve instance in the project)
 # ---------------------------------------------------------------------------
 

@@ -1,16 +1,11 @@
 [
   {
-    "name": "test",
-    "description": "tst",
-    "io_template": "tesss",
+    "name": "Status",
+    "description": "Status",
     "signal_category": "Analog",
-    "direction": "Input"
-  },
-  {
-    "name": "testtt",
-    "description": "eee",
-    "io_template": "tt5",
-    "signal_category": "Digital",
-    "direction": "Input"
+    "direction": "Input",
+    "io_template": "I_Status",
+    "shared": true,
+    "shared_template": "I_Status2"
   }
 ]
