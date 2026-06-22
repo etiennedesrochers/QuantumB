@@ -2282,6 +2282,33 @@ class MainWindow(QMainWindow):
         #$, $+1
         return rungs, io_items, config
 
+    def _enrich_io_item(
+        self,
+        io_item: "IOItem",
+        ctrl_idx: int,
+        slot_idx: int,
+        io_type: str,
+    ) -> "IOItem":
+        """Return a copy of *io_item* with computed fields filled in.
+
+        Called once per slot before the IO template is placed on the drawing.
+        *io_item* is never modified; a new dataclass instance is returned.
+
+        Args:
+            io_item:   The original IO point.
+            ctrl_idx:  1-based controller/module index (page number).
+            slot_idx:  0-based slot position within the module.
+            io_type:   ``"Input"`` or ``"Output"``.
+        """
+        import dataclasses as _dc
+        copy = _dc.replace(io_item)
+
+        # Build address like "II101" (Input, module 1, slot 01) or "OA201"
+        type_prefix = io_type[0].upper()  # "I" or "O"
+        sig_prefix = (io_item.signal_type[0].upper() if io_item.signal_type else "D")
+        copy.address = f"{sig_prefix}{type_prefix}{ctrl_idx}{slot_idx + 1:02d}"
+        return copy
+
     def _generate(self):
         if not self._project_circuit_refs:
             QMessageBox.warning(self, tr("msg_generate_title"), tr("msg_generate_no_circuits"))
@@ -2326,7 +2353,7 @@ class MainWindow(QMainWindow):
 
                 page_config = dataclasses.replace(config, drawing_number=page_str)
                 gen = DrawingGenerator(page_config)
-                ok, msg = gen.generate(rungs, str(dxf_path), template_doc, io_items=io_items)
+                ok, msg = gen.generate(rungs, str(dxf_path), template_doc, io_items=io_items, controller_number=page)
                 if ok:
                     generated_dxf.append(dxf_path)
                 else:
@@ -2376,9 +2403,20 @@ class MainWindow(QMainWindow):
                 # Inputs slice for this page
                 start_in = (ctrl_idx - 1) * mod_inputs
                 page_inputs = input_ios[start_in : start_in + mod_inputs]
+                input_common_shared = module_def.get("input_common_shared", False)
                 for slot_idx, io_item in enumerate(page_inputs):
                     io_type_def = io_type_map.get(io_item.io_type_name, {})
-                    tmpl_name = io_type_def.get("io_template", "")
+                    # Use shared_template for the second input in each pair (odd slot)
+                    # when the module supports shared commons and the IO type is shared.
+                    is_shared_slot = (
+                        input_common_shared
+                        and io_type_def.get("shared", False)
+                        and slot_idx % 2 == 1
+                    )
+                    if is_shared_slot:
+                        tmpl_name = io_type_def.get("shared_template", "") or io_type_def.get("io_template", "")
+                    else:
+                        tmpl_name = io_type_def.get("io_template", "")
                     if not tmpl_name or slot_idx >= len(mod_input_slots):
                         continue
                     tmpl_doc = self._io_template_mgr.load_template(tmpl_name)
@@ -2386,8 +2424,9 @@ class MainWindow(QMainWindow):
                         continue
                     slot = mod_input_slots[slot_idx]
                     ip_x, ip_y = self._io_template_mgr.get_insertion_point(tmpl_name)
+                    enriched = self._enrich_io_item(io_item, ctrl_idx, slot_idx, "Input")
                     io_template_placements.append(
-                        (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y)
+                        (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y, enriched)
                     )
 
                 # Outputs slice for this page
@@ -2403,8 +2442,9 @@ class MainWindow(QMainWindow):
                         continue
                     slot = mod_output_slots[slot_idx]
                     ip_x, ip_y = self._io_template_mgr.get_insertion_point(tmpl_name)
+                    enriched = self._enrich_io_item(io_item, ctrl_idx, slot_idx, "Output")
                     io_template_placements.append(
-                        (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y)
+                        (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y, enriched)
                     )
 
                 page_config = dataclasses.replace(config, drawing_number=page_str)

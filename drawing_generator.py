@@ -71,14 +71,16 @@ class DrawingGenerator:
         output_path: str,
         template_doc: Drawing | None = None,
         io_items: list[IOItem] | None = None,
-        io_template_placements: list[tuple[Drawing, float, float]] | None = None,
+        io_template_placements: list[tuple[Drawing, float, float, IOItem]] | None = None,
+        controller_number: int = 1,
     ) -> tuple[bool, str]:
         """
         Build a ladder diagram and save to *output_path*.
         If *template_doc* is supplied it is used as the base (full copy:
         blocks, layers, styles, layouts, etc. are all preserved).
-        If *io_template_placements* is supplied, each ``(doc, dx, dy)`` entry
-        is merged into the generated document translated by ``(dx, dy)``.
+        If *io_template_placements* is supplied, each ``(doc, dx, dy, io_item)`` entry
+        is copied (via :meth:`_prepare_io_doc`) and merged into the generated document
+        translated by ``(dx, dy)``.
         This is used to place per-IO-point wiring diagrams at their module
         slot positions on controller pages.
         """
@@ -87,8 +89,14 @@ class DrawingGenerator:
             io_lookup = {item.tag: item for item in (io_items or [])}
             doc = self._create_doc(template_doc)
             if io_template_placements:
-                for tmpl_doc, dx, dy in io_template_placements:
-                    self._place_io_template(doc, tmpl_doc, dx, dy)
+                for entry in io_template_placements:
+                    if len(entry) == 4:
+                        tmpl_doc, dx, dy, io_item = entry
+                        prepared = self._prepare_io_doc(tmpl_doc, io_item, controller_number)
+                    else:
+                        tmpl_doc, dx, dy = entry
+                        prepared = tmpl_doc
+                    self._place_io_template(doc, prepared, dx, dy)
             msp = doc.modelspace()
             sym_map = register_all_symbols(doc)
 
@@ -109,6 +117,50 @@ class DrawingGenerator:
             return False, f"Error generating drawing: {exc}"
 
     # ── Internal helpers ────────────────────────────────────────────────────
+    #Need to add the information of the io
+    def _prepare_io_doc(self, source_doc: Drawing, io_item: IOItem, controller_number: int) -> Drawing:
+        """Return an in-memory copy of *source_doc* with placeholder attribute text
+        replaced by values from *io_item*.
+
+        The original *source_doc* is never modified.
+
+        Placeholder substitutions applied to every ATTRIB inside INSERT blocks:
+          ``IO_CODE``     → io_item.tag          (e.g. "DI_001")
+          ``COM_IO_CODE`` → io_item.tag + "_COM"
+          ``num``         → io_item.address       (e.g. "AI101")
+          ``num_com``     → io_item.address + "_COM"
+        """
+        buf = io.StringIO()
+        source_doc.write(buf)
+        buf.seek(0)
+        copy = ezdxf.read(buf)
+
+        is_input = io_item.io_type.lower() == "input"
+        i = "I" if is_input else "O"
+
+
+        substitutions = {
+            "IO_CODE":     io_item.tag,
+            "COM_IO_CODE": "COM_" + io_item.tag,
+            "num": io_item.address,
+            "num_com":     "COM_" + io_item.address,
+            "%tagstrip%": "CTL" + i + "_" + str(controller_number),
+            "%tagstrip_com%": "COM_CTL" + i + "_" + str(controller_number),
+         }
+
+        for entity in copy.modelspace():
+            if entity.dxftype() != "INSERT":
+                continue
+            try:
+                for attrib in entity.attribs:
+                    text = attrib.dxf.get("text", "")
+                    if text in substitutions:
+                        attrib.dxf.text = substitutions[text]
+            except Exception as exc:
+                print(f"Warning: failed to substitute attributes for IO '{io_item.tag}': {exc}")
+
+        return copy
+
 
     def _place_io_template(self, doc: Drawing, source_doc: Drawing, dx: float, dy: float) -> None:
         """Copy all modelspace entities from *source_doc* into *doc*, translated by (dx, dy)."""
