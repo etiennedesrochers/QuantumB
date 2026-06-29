@@ -22,6 +22,9 @@ class IOItem:
     terminal: str = ""
     cable: str = ""
     notes: str = ""
+    old_name: str = ""       # original name from template (for reference)
+    old_description: str = ""  # original description from template (for reference)
+    number:str="" #number of the io in the list, used for generating the tagstrip and tagstrip_com
 
     def get_field(self, field_name: str) -> str:
         return getattr(self, field_name, "")

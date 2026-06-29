@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QListWidget,
     QMessageBox,
+    QProgressBar,
     QPushButton,
     QSplitter,
     QSpinBox,
@@ -1542,4 +1543,79 @@ class ValveDialog(QDialog):
             "circuit_name": circuit_name,
         }
         self.accept()
+
+
+# ---------------------------------------------------------------------------
+# Generation Progress Dialog
+# ---------------------------------------------------------------------------
+
+class GenerationProgressDialog(QDialog):
+    """Non-modal progress dialog showing generation progress with cancel option."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(tr("dlg_generation_progress") if hasattr(tr, '__call__') else "Generation Progress")
+        self.setMinimumWidth(400)
+        self.setMinimumHeight(150)
+        self.setModal(False)
+        self.cancelled = False
+        self._build()
+
+    def _build(self):
+        layout = QVBoxLayout(self)
+        
+        self._lbl_status = QLabel("Initializing...")
+        layout.addWidget(self._lbl_status)
+        
+        self._progress = QProgressBar()
+        self._progress.setMinimum(0)
+        self._progress.setMaximum(100)
+        self._progress.setValue(0)
+        layout.addWidget(self._progress)
+        
+        self._lbl_detail = QLabel("")
+        self._lbl_detail.setStyleSheet("color: gray; font-size: 10px;")
+        layout.addWidget(self._lbl_detail)
+        
+        layout.addStretch()
+        
+        self._btn_cancel = QPushButton("Cancel")
+        self._btn_cancel.clicked.connect(self._on_cancel)
+        layout.addWidget(self._btn_cancel)
+
+    def _on_cancel(self):
+        self.cancelled = True
+        self._btn_cancel.setEnabled(False)
+        self._btn_cancel.setText("Cancelling...")
+
+    def update_progress(self, current: int, total: int, message: str = "", detail: str = ""):
+        """Update progress bar and status message.
+        
+        Args:
+            current: Current step number (0-based)
+            total: Total number of steps
+            message: Main status message
+            detail: Optional detail text
+        """
+        if total > 0:
+            percentage = int((current / total) * 100)
+            self._progress.setValue(percentage)
+        
+        if message:
+            self._lbl_status.setText(message)
+        
+        if detail:
+            self._lbl_detail.setText(detail)
+        
+        # Process events to keep UI responsive
+        from PySide6.QtWidgets import QApplication
+        QApplication.processEvents()
+
+    def set_status(self, message: str, detail: str = ""):
+        """Set status message without updating progress."""
+        self._lbl_status.setText(message)
+        if detail:
+            self._lbl_detail.setText(detail)
+        from PySide6.QtWidgets import QApplication
+        QApplication.processEvents()
 

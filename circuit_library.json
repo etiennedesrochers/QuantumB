@@ -19,5 +19,28 @@
       "3_Supply_Fan"
     ],
     "valves": []
+  },
+  {
+    "name": "B1",
+    "circuit_number": "#",
+    "description": "",
+    "templates": [
+      "VFD-L",
+      "VFD-L",
+      "VFD-CD"
+    ],
+    "valves": []
+  },
+  {
+    "name": "AHU1",
+    "circuit_number": "0",
+    "description": "",
+    "templates": [
+      "3_Return_Fan",
+      "3_Supply_Fan",
+      "AHU_HEAT_COIL",
+      "ENTH-WHEEL"
+    ],
+    "valves": []
   }
 ]

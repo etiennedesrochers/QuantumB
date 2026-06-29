@@ -18,6 +18,7 @@ class ValveIO:
     signal_type: str = ""   # e.g. "24VDC", "4-20mA"
     direction: str = "Input"  # "Input" or "Output"
     io_type: str = ""
+    controller: str = ""  # controller identifier/name this IO is connected to
 
 
 @dataclass

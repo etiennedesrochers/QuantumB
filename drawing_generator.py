@@ -60,9 +60,16 @@ class LadderConfig:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class DrawingGenerator:
+    # Class-level variables shared across all instances
+    _biggest_fuse_number: int = 0
+    
     def __init__(self, config: LadderConfig | None = None):
         self.config = config or LadderConfig()
+        self.biggest_fuse_number = DrawingGenerator._biggest_fuse_number
 
+
+    def reset_static(self):
+        self.fuse_counter = 0
     # ── Public API ──────────────────────────────────────────────────────────
 
     def generate(
@@ -73,6 +80,7 @@ class DrawingGenerator:
         io_items: list[IOItem] | None = None,
         io_template_placements: list[tuple[Drawing, float, float, IOItem]] | None = None,
         controller_number: int = 1,
+        progress_callback: callable | None = None,
     ) -> tuple[bool, str]:
         """
         Build a ladder diagram and save to *output_path*.
@@ -85,7 +93,7 @@ class DrawingGenerator:
         slot positions on controller pages.
         """
         try:
-
+            
             io_lookup = {item.tag: item for item in (io_items or [])}
             doc = self._create_doc(template_doc)
             if io_template_placements:
@@ -101,6 +109,10 @@ class DrawingGenerator:
             sym_map = register_all_symbols(doc)
 
             self._setup_layers(doc)
+            #if the controller number i =0 then not a controller
+            #we need to replace some text in it
+            if controller_number ==0:
+                self.replace_value_dwg(doc,io_items)
             # Only draw our own border/title block when no template is used;
             # templates already contain their own title block and border.
             if template_doc is None:
@@ -116,6 +128,80 @@ class DrawingGenerator:
         except Exception as exc:
             return False, f"Error generating drawing: {exc}"
 
+    def replace_value_dwg(self,doc,item_list: list[IOItem],controller_number:int=0):
+        """
+        Replace placeholder values, to find them we need to look for the old name.
+        Fuse numbers continue sequentially across documents.
+        Multiple FU! in same document share the same base number.
+        FU!+x are offsets from that base.
+        
+        Returns the highest fuse number used, to pass to the next document.
+        """
+        # Ensure we have the latest persisted value from the class variable
+        self.biggest_fuse_number = DrawingGenerator._biggest_fuse_number
+        doc_base = None  # Will be set on first FU! encountered
+        
+        for item in item_list:
+            if item.old_name:
+                for entity in doc.modelspace():
+                    if entity.dxftype() == "INSERT":
+                        for attrib in entity.attribs:
+
+                            self.replace_name(attrib, item)
+                            doc_base = self.replace_fuse(attrib, doc_base)
+                            self.replace_tagstrip(item, entity, attrib)
+        
+        # Sync to class variable so next instance picks it up
+        DrawingGenerator._biggest_fuse_number = self.biggest_fuse_number
+        return self.biggest_fuse_number
+
+                            
+                            
+    def replace_name(self,attrib, item: IOItem):
+        if attrib.dxf.get("text", "") == item.old_name:
+            attrib.dxf.text = item.tag
+        if attrib.dxf.get("text", "") == "COM_" + item.old_name:
+            attrib.dxf.text = "COM_" + item.tag
+        
+
+    def replace_fuse(self, attrib, doc_base):
+        text = attrib.dxf.get("text", "")
+        
+        # Initialize document base on first FU! or FU!+x encountered
+        if doc_base is None:
+            doc_base = self.biggest_fuse_number + 1
+        
+        # Check for FU!+x pattern first (more specific)
+        # FU!+x means doc_base + x (all FU!+x variants of same base in a document)
+        if "FU!+" in text:
+            offset = int(text.split("+")[1])
+            fuse_num = doc_base + offset
+            self.biggest_fuse_number = max(self.biggest_fuse_number, fuse_num)
+            DrawingGenerator._biggest_fuse_number = self.biggest_fuse_number
+            attrib.dxf.text = "FU" + str(fuse_num)
+        
+        # Check for exact FU! match (all FU! in same doc use same base)
+        elif text == "FU!":
+            self.biggest_fuse_number = max(self.biggest_fuse_number, doc_base)
+            DrawingGenerator._biggest_fuse_number = self.biggest_fuse_number
+            attrib.dxf.text = "FU" + str(doc_base)
+        
+        return doc_base
+
+    def replace_tagstrip(self,item,entity,attrib):
+        #We need for %tagstrip% and %tagstrip_com% to be replaced with the controller number
+        if attrib.dxf.get("text", "") == "%"+item.old_name+"%":
+            attrib.dxf.text = item.address
+            #For this entity if it has the TERM01 Attribute then we change the value of that attribute
+            if entity.has_attrib("TERM01"):
+                term_attrib = entity.get_attrib("TERM01")
+                term_attrib.dxf.text = item.number
+            
+        if attrib.dxf.get("text", "") == "%COM_"+item.old_name+"%":
+            attrib.dxf.text = "COM_" + item.address
+            if entity.has_attrib("TERM01"):
+                term_attrib = entity.get_attrib("TERM01")
+                term_attrib.dxf.text = item.number
     # ── Internal helpers ────────────────────────────────────────────────────
     #Need to add the information of the io
     def _prepare_io_doc(self, source_doc: Drawing, io_item: IOItem, controller_number: int) -> Drawing:
@@ -129,6 +215,7 @@ class DrawingGenerator:
           ``COM_IO_CODE`` → io_item.tag + "_COM"
           ``num``         → io_item.address       (e.g. "AI101")
           ``num_com``     → io_item.address + "_COM"
+          ``pos``         → io_item.number      (e.g. "1")
         """
         buf = io.StringIO()
         source_doc.write(buf)
@@ -145,7 +232,8 @@ class DrawingGenerator:
             "num": io_item.address,
             "num_com":     "COM_" + io_item.address,
             "%tagstrip%": "CTL" + i + "_" + str(controller_number),
-            "%tagstrip_com%": "COM_CTL" + i + "_" + str(controller_number),
+            "%tagstrip_com%": "COM_" + i + "_" + str(controller_number),
+            "POS": io_item.number,
          }
 
         for entity in copy.modelspace():
@@ -158,6 +246,7 @@ class DrawingGenerator:
                         attrib.dxf.text = substitutions[text]
             except Exception as exc:
                 print(f"Warning: failed to substitute attributes for IO '{io_item.tag}': {exc}")
+            
 
         return copy
 

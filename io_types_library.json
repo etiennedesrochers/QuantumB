@@ -9,11 +9,74 @@
     "shared_template": "I_Status2"
   },
   {
-    "name": "Name",
-    "description": "Desciption",
+    "name": "18v",
+    "description": "Fournis 18 v",
     "signal_category": "Analog",
     "direction": "Input",
-    "io_template": "I_Status",
+    "io_template": "in_18v",
+    "shared": false,
+    "shared_template": ""
+  },
+  {
+    "name": "non connecter",
+    "description": "input non connecté",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "in_not_connected_1",
+    "shared": true,
+    "shared_template": "in_not_connected_2"
+  },
+  {
+    "name": "Oil Pressure",
+    "description": "Pression",
+    "signal_category": "Digital",
+    "direction": "Input",
+    "io_template": "in_oil_pressure_1",
+    "shared": true,
+    "shared_template": "in_oil_pressure_2"
+  },
+  {
+    "name": "Pressure",
+    "description": "Pressure",
+    "signal_category": "Digital",
+    "direction": "Input",
+    "io_template": "in_pressure_switch_1",
+    "shared": true,
+    "shared_template": "in_pressure_switch_2"
+  },
+  {
+    "name": "Status Box",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "in_status_box_1",
+    "shared": true,
+    "shared_template": "in_status_box_2"
+  },
+  {
+    "name": "Enable",
+    "description": "",
+    "signal_category": "Digital",
+    "direction": "Output",
+    "io_template": "out_fan_enable",
+    "shared": false,
+    "shared_template": ""
+  },
+  {
+    "name": "Modulation",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Output",
+    "io_template": "out_mod",
+    "shared": false,
+    "shared_template": ""
+  },
+  {
+    "name": "Relay",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Output",
+    "io_template": "out_relay",
     "shared": false,
     "shared_template": ""
   }

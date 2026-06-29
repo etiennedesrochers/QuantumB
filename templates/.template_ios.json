@@ -5,14 +5,14 @@
       "description": "Conderser Fan Enable #",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Fan Enable"
     },
     {
       "name": "CD-F_MOD#",
       "description": "Condenser Fan Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Modulation"
     }
   ],
   "2_Supply_Fan": [
@@ -35,14 +35,14 @@
       "description": "Supply Fan Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Fan Enable"
     },
     {
       "name": "SUPP-F_MOD",
       "description": "Supply Fan Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Modulation"
     }
   ],
   "3_Return_Fan": [
@@ -51,35 +51,35 @@
       "description": "Return Fan Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Fan Enable"
     },
     {
       "name": "RTRN-F_MOD",
       "description": "Return Fan Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Modulation"
     },
     {
       "name": "RTRN-F_STS1",
       "description": "Return Fan Status 1",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     },
     {
       "name": "RTRN-F_STS2",
       "description": "Return Fan Status 2",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     },
     {
       "name": "RTRN-F_STS3",
       "description": "Return Fan Status 3",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     }
   ],
   "3_Supply_Fan": [
@@ -88,14 +88,14 @@
       "description": "Supply Fan Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Fan Enable"
     },
     {
       "name": "SUPP-F_MOD",
       "description": "Supply Fan Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Modulation"
     },
     {
       "name": "SF_STS1",
@@ -125,14 +125,14 @@
       "description": "Electrical Heat Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Fan Enable"
     },
     {
       "name": "ELEC_HEAT_MOD",
       "description": "Electrical Heat Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Modulation"
     }
   ],
   "ENTH-WHEEL": [
@@ -141,30 +141,30 @@
       "description": "Ent Wheel Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Enable"
     },
     {
       "name": "ENT_WH_MOD",
       "description": "Ent Wheel Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Modulation"
     },
     {
       "name": "ENT_WH_STS",
       "description": "Ent Wheel Status",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     }
   ],
   "GAS SENSOR": [
     {
       "name": "GAS_SENSOR",
       "description": "Gas Sensor",
-      "signal_type": "Digital",
+      "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "testtt"
+      "io_type": "non connecter"
     }
   ],
   "Humidifier": [
@@ -173,14 +173,14 @@
       "description": "Humidifier Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Enable"
     },
     {
       "name": "HUM_MOD-A",
       "description": "Humidifier Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Modulation"
     }
   ],
   "VFD-CD": [
@@ -189,21 +189,21 @@
       "description": "Condenser Fan # Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Enable"
     },
     {
       "name": "CD-F_MOD#",
       "description": "Condenser Fan # Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Modulation"
     },
     {
       "name": "CD_F-STS#",
       "description": "Conder Fan # Status",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     }
   ],
   "VFD-L": [
@@ -212,21 +212,21 @@
       "description": "Compressor #-A Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Enable"
     },
     {
       "name": "CP_MOD#-A",
       "description": "Compressor #-A Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": ""
+      "io_type": "Modulation"
     },
     {
       "name": "CP_STS#-A",
       "description": "Compressor #-A Status",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "test"
+      "io_type": "Status"
     }
   ],
   "C063": [

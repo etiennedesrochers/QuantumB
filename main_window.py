@@ -64,8 +64,10 @@ from dialogs import (
     ValveDialog,
     ValveIODialog,
     IOTypeDialog,
+    GenerationProgressDialog,
 )
 import valve_manager as vm
+import app_config as ac
 
 
 # ---------------------------------------------------------------------------
@@ -138,6 +140,7 @@ class MainWindow(QMainWindow):
         self._load_modules()
         self._load_io_types()
         self._load_valve_config()
+        self._load_app_config()
         self._retranslate_ui()
         self._update_window_title()
 
@@ -172,6 +175,13 @@ class MainWindow(QMainWindow):
         self._act_del_tmpl = QAction("", self)
         self._act_del_tmpl.triggered.connect(self._delete_template)
         self._menu_templates.addAction(self._act_del_tmpl)
+
+        self._menu_view = mb.addMenu("")
+        self._act_toggle_preview = QAction("", self)
+        self._act_toggle_preview.setCheckable(True)
+        self._act_toggle_preview.setChecked(ac.get_show_template_preview())
+        self._act_toggle_preview.triggered.connect(self._toggle_template_preview)
+        self._menu_view.addAction(self._act_toggle_preview)
 
         self._menu_lang = mb.addMenu("")
         for code, name in available_languages().items():
@@ -389,6 +399,7 @@ class MainWindow(QMainWindow):
         self._tmpl_preview_lbl = ZoomablePreview()
         prev_lay.addWidget(self._tmpl_preview_lbl)
         layout.addWidget(self._grp_tmpl_preview, 2)
+        # Preview will be shown/hidden based on config in _load_app_config()
 
         # ── Blocks + Attributes splitter ──────────────────────────────────────
         blocks_splitter = QSplitter(Qt.Horizontal)
@@ -1025,6 +1036,17 @@ class MainWindow(QMainWindow):
         self._valve_qty_sb.blockSignals(False)
         self._valve_template_cb.blockSignals(False)
 
+    def _load_app_config(self):
+        """Load application configuration and apply settings."""
+        show_preview = ac.get_show_template_preview()
+        self._grp_tmpl_preview.setVisible(show_preview)
+
+    def _toggle_template_preview(self):
+        """Toggle the visibility of the template preview widget."""
+        show = self._act_toggle_preview.isChecked()
+        ac.set_show_template_preview(show)
+        self._grp_tmpl_preview.setVisible(show)
+
     def _refresh_valve_circuit_combo(self):
         """Repopulate the circuit filter combo (with an ‘All’ option at top)."""
         prev = self._valve_circuit_cb.currentText()
@@ -1461,10 +1483,37 @@ class MainWindow(QMainWindow):
         total_io = len(self._io_items)
         total_in  = sum(1 for io in self._io_items if io.io_type == "Input")
         total_out = total_io - total_in
-        num_mod   = len(self._modules)
+        #For the numner of modules we will need to count the number of io
+        #and look how many we need 
+        num_mod = max(total_in // len(self._modules[0].get("inputs")),
+                      (total_out // len(self._modules[0].get("outputs")))) +1
         self._lbl_io_summary.setText(
             f"{num_mod} module(s)  ·  {total_io} IO(s)  ({total_in} in / {total_out} out)"
         )
+        input_count =0
+        output_count=0
+
+        #For each io, we will assign a module number on the address
+        #CTL(I for Input and O for output)_(controller number)
+        #We will also add a number 
+        for item in self._io_items:
+            analog = item.signal_type.lower() in ("analog", "analog_input", "analog_output")
+            if analog:
+                analog = "A"
+            else:
+                analog = "D"
+            #if item is input
+            if item.io_type == "Input":
+                item.address = f"CTL{(self._io_items.index(item) // len(self._modules[0].get("inputs"))) + 1}-I"
+                input_count += 1
+                zero = "0" if input_count < 10 else ""
+                item.number = f"{analog}I{(self._io_items.index(item) // len(self._modules[0].get("inputs"))) + 1}{zero}{input_count}"
+                
+            else:
+                item.address = f"CTL{(self._io_items.index(item) // len(self._modules[0].get("outputs"))) + 1}-O"
+                output_count += 1
+                zero = "0" if output_count < 10 else ""
+                item.number = f"{analog}O{(self._io_items.index(item) // len(self._modules[0].get("outputs"))) + 1}{zero}{output_count}"
 
     def _refresh_io_table(self):
         self._io_table.setRowCount(0)
@@ -1478,6 +1527,8 @@ class MainWindow(QMainWindow):
             for tmpl_name in circuit.templates:
                 ios = self._template_mgr.get_template_ios(tmpl_name)
                 for io in ios:
+                    io_old_name = io.get("name", "")
+                    io_old_desc = io.get("description", "")
                     io_name = io.get("name", "").replace("#", circuit_no)
                     io_desc = io.get("description", "").replace("#", circuit_no)
                     row = self._io_table.rowCount()
@@ -1499,6 +1550,8 @@ class MainWindow(QMainWindow):
                         description=io_desc,
                         signal_type=io.get("signal_type", ""),
                         io_type_name=io.get("io_type", ""),
+                        old_name=io_old_name,
+                        old_description=io_old_desc,
                     ))
         self._refresh_io_summary()
 
@@ -2336,144 +2389,205 @@ class MainWindow(QMainWindow):
         oda = _find_oda_converter()
         use_dwg = oda is not None
 
+        # Create progress dialog
+        progress_dlg = GenerationProgressDialog(self)
+        progress_dlg.show()
+
         page = 1
         generated_dxf: list[Path] = []
         errors: list[str] = []
 
-        for circuit_name in self._project_circuit_refs:
-            circuit = self._lookup_circuit(circuit_name)
-            if circuit is None:
-                continue
-            templates = circuit.templates if circuit.templates else []
-            for tmpl_name in templates:
-                page_str = f"E{page:03d}"
-                dxf_path = output_dir / f"{page_str}.dxf"
-
-                template_doc = self._template_mgr.load_template(tmpl_name) if tmpl_name else None
-
-                page_config = dataclasses.replace(config, drawing_number=page_str)
-                gen = DrawingGenerator(page_config)
-                ok, msg = gen.generate(rungs, str(dxf_path), template_doc, io_items=io_items, controller_number=page)
-                if ok:
-                    generated_dxf.append(dxf_path)
-                else:
-                    errors.append(f"{page_str}: {msg}")
-                page += 1
-
-        # ── Controller pages ──────────────────────────────────────────────────
-        # Calculate how many controller pages are needed based on the selected
-        # module's IO capacity and the total IOs in the project.
+        # Pre-calculate total pages for progress tracking
+        total_circuit_pages = sum(
+            len(self._lookup_circuit(cn).templates or [])
+            for cn in self._project_circuit_refs
+            if self._lookup_circuit(cn)
+        )
+        
         module_name = self._module_cb.currentText()
         module_def = next((m for m in self._modules if m.get("name") == module_name), None)
+        total_controller_pages = 0
         if module_def and self._io_items:
             mod_inputs  = len(module_def.get("inputs", []))
             mod_outputs = len(module_def.get("outputs", []))
             total_inputs  = sum(1 for io in self._io_items if io.io_type == "Input")
             total_outputs = sum(1 for io in self._io_items if io.io_type == "Output")
 
-            num_ctrl = 1  # at least one if a module is selected
+            total_controller_pages = 1
             if mod_inputs > 0 and total_inputs > 0:
-                num_ctrl = max(num_ctrl, math.ceil(total_inputs / mod_inputs))
+                total_controller_pages = max(total_controller_pages, math.ceil(total_inputs / mod_inputs))
             if mod_outputs > 0 and total_outputs > 0:
-                num_ctrl = max(num_ctrl, math.ceil(total_outputs / mod_outputs))
+                total_controller_pages = max(total_controller_pages, math.ceil(total_outputs / mod_outputs))
 
-            ctrl_tmpl_name = module_def.get("template", "")
+        total_pages = total_circuit_pages + total_controller_pages + (1 if use_dwg else 0)
+        current_page = 0
 
-            # Build a lookup: io_type_name → io type dict (from io_types_library)
-            io_type_map = {t["name"]: t for t in self._io_types}
+        try:
+            for circuit_name in self._project_circuit_refs:
+                circuit = self._lookup_circuit(circuit_name)
+                if circuit is None:
+                    continue
+                templates = circuit.templates if circuit.templates else []
+                for tmpl_name in templates:
+                    if progress_dlg.cancelled:
+                        break
+                    
+                    page_str = f"E{page:03d}"
+                    dxf_path = output_dir / f"{page_str}.dxf"
 
-            # Split io_items by direction for paging
-            input_ios  = [io for io in io_items if io.io_type == "Input"]
-            output_ios = [io for io in io_items if io.io_type == "Output"]
-            mod_input_slots  = module_def.get("inputs", [])
-            mod_output_slots = module_def.get("outputs", [])
+                    template_doc = self._template_mgr.load_template(tmpl_name) if tmpl_name else None
 
-            for ctrl_idx in range(1, num_ctrl + 1):
-                page_str = f"C{ctrl_idx:03d}"
-                dxf_path = output_dir / f"{page_str}.dxf"
-                # Reload a fresh copy of the templates for each page
-                ctrl_tmpl_doc = (
-                    self._ctrl_template_mgr.load_template(ctrl_tmpl_name)
-                    if ctrl_tmpl_name else None
-                )
-
-                # Build per-slot IO template placements for this page
-                io_template_placements: list = []
-
-                # Inputs slice for this page
-                start_in = (ctrl_idx - 1) * mod_inputs
-                page_inputs = input_ios[start_in : start_in + mod_inputs]
-                input_common_shared = module_def.get("input_common_shared", False)
-                for slot_idx, io_item in enumerate(page_inputs):
-                    io_type_def = io_type_map.get(io_item.io_type_name, {})
-                    # Use shared_template for the second input in each pair (odd slot)
-                    # when the module supports shared commons and the IO type is shared.
-                    is_shared_slot = (
-                        input_common_shared
-                        and io_type_def.get("shared", False)
-                        and slot_idx % 2 == 1
-                    )
-                    if is_shared_slot:
-                        tmpl_name = io_type_def.get("shared_template", "") or io_type_def.get("io_template", "")
+                    page_config = dataclasses.replace(config, drawing_number=0)
+                    gen = DrawingGenerator(page_config)
+                    
+                    progress_dlg.update_progress(current_page, total_pages, f"Generating circuit page {page_str}", f"Template: {tmpl_name}")
+                    
+                    ok, msg = gen.generate(rungs, str(dxf_path), template_doc, io_items=io_items, controller_number=0)
+                    if ok:
+                        generated_dxf.append(dxf_path)
                     else:
-                        tmpl_name = io_type_def.get("io_template", "")
-                    if not tmpl_name or slot_idx >= len(mod_input_slots):
-                        continue
-                    tmpl_doc = self._io_template_mgr.load_template(tmpl_name)
-                    if tmpl_doc is None:
-                        continue
-                    slot = mod_input_slots[slot_idx]
-                    ip_x, ip_y = self._io_template_mgr.get_insertion_point(tmpl_name)
-                    enriched = self._enrich_io_item(io_item, ctrl_idx, slot_idx, "Input")
-                    io_template_placements.append(
-                        (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y, enriched)
-                    )
+                        errors.append(f"{page_str}: {msg}")
+                    page += 1
+                    current_page += 1
 
-                # Outputs slice for this page
-                start_out = (ctrl_idx - 1) * mod_outputs
-                page_outputs = output_ios[start_out : start_out + mod_outputs]
-                for slot_idx, io_item in enumerate(page_outputs):
-                    io_type_def = io_type_map.get(io_item.io_type_name, {})
-                    tmpl_name = io_type_def.get("io_template", "")
-                    if not tmpl_name or slot_idx >= len(mod_output_slots):
-                        continue
-                    tmpl_doc = self._io_template_mgr.load_template(tmpl_name)
-                    if tmpl_doc is None:
-                        continue
-                    slot = mod_output_slots[slot_idx]
-                    ip_x, ip_y = self._io_template_mgr.get_insertion_point(tmpl_name)
-                    enriched = self._enrich_io_item(io_item, ctrl_idx, slot_idx, "Output")
-                    io_template_placements.append(
-                        (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y, enriched)
-                    )
+                if progress_dlg.cancelled:
+                    break
 
-                page_config = dataclasses.replace(config, drawing_number=page_str)
-                gen = DrawingGenerator(page_config)
-                ok, msg = gen.generate(
-                    [], str(dxf_path), ctrl_tmpl_doc,
-                    io_items=io_items,
-                    io_template_placements=io_template_placements or None,
-                )
-                if ok:
-                    generated_dxf.append(dxf_path)
+            if not progress_dlg.cancelled:
+                # ── Controller pages ──────────────────────────────────────────────────
+                # Calculate how many controller pages are needed based on the selected
+                # module's IO capacity and the total IOs in the project.
+                module_name = self._module_cb.currentText()
+                module_def = next((m for m in self._modules if m.get("name") == module_name), None)
+                if module_def and self._io_items:
+                    mod_inputs  = len(module_def.get("inputs", []))
+                    mod_outputs = len(module_def.get("outputs", []))
+                    total_inputs  = sum(1 for io in self._io_items if io.io_type == "Input")
+                    total_outputs = sum(1 for io in self._io_items if io.io_type == "Output")
+
+                    num_ctrl = 1  # at least one if a module is selected
+                    if mod_inputs > 0 and total_inputs > 0:
+                        num_ctrl = max(num_ctrl, math.ceil(total_inputs / mod_inputs))
+                    if mod_outputs > 0 and total_outputs > 0:
+                        num_ctrl = max(num_ctrl, math.ceil(total_outputs / mod_outputs))
+
+                    ctrl_tmpl_name = module_def.get("template", "")
+
+                    # Build a lookup: io_type_name → io type dict (from io_types_library)
+                    io_type_map = {t["name"]: t for t in self._io_types}
+
+                    # Split io_items by direction for paging
+                    input_ios  = [io for io in io_items if io.io_type == "Input"]
+                    output_ios = [io for io in io_items if io.io_type == "Output"]
+                    mod_input_slots  = module_def.get("inputs", [])
+                    mod_output_slots = module_def.get("outputs", [])
+
+                    for ctrl_idx in range(1, num_ctrl + 1):
+                        if progress_dlg.cancelled:
+                            break
+                        
+                        page_str = f"C{ctrl_idx:03d}"
+                        dxf_path = output_dir / f"{page_str}.dxf"
+                        # Reload a fresh copy of the templates for each page
+                        ctrl_tmpl_doc = (
+                            self._ctrl_template_mgr.load_template(ctrl_tmpl_name)
+                            if ctrl_tmpl_name else None
+                        )
+
+                        # Build per-slot IO template placements for this page
+                        io_template_placements: list = []
+
+                        # Inputs slice for this page
+                        start_in = (ctrl_idx - 1) * mod_inputs
+                        page_inputs = input_ios[start_in : start_in + mod_inputs]
+                        input_common_shared = module_def.get("input_common_shared", False)
+                        for slot_idx, io_item in enumerate(page_inputs):
+                            io_type_def = io_type_map.get(io_item.io_type_name, {})
+                            # Use shared_template for the second input in each pair (odd slot)
+                            # when the module supports shared commons and the IO type is shared.
+                            is_shared_slot = (
+                                input_common_shared
+                                and io_type_def.get("shared", False)
+                                and slot_idx % 2 == 1
+                            )
+                            if is_shared_slot:
+                                tmpl_name = io_type_def.get("shared_template", "") or io_type_def.get("io_template", "")
+                            else:
+                                tmpl_name = io_type_def.get("io_template", "")
+                            if not tmpl_name or slot_idx >= len(mod_input_slots):
+                                continue
+                            tmpl_doc = self._io_template_mgr.load_template(tmpl_name)
+                            if tmpl_doc is None:
+                                continue
+                            slot = mod_input_slots[slot_idx]
+                            ip_x, ip_y = self._io_template_mgr.get_insertion_point(tmpl_name)
+                            enriched = self._enrich_io_item(io_item, ctrl_idx, slot_idx, "Input")
+                            io_template_placements.append(
+                                (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y, enriched)
+                            )
+
+                        # Outputs slice for this page
+                        start_out = (ctrl_idx - 1) * mod_outputs
+                        page_outputs = output_ios[start_out : start_out + mod_outputs]
+                        for slot_idx, io_item in enumerate(page_outputs):
+                            io_type_def = io_type_map.get(io_item.io_type_name, {})
+                            tmpl_name = io_type_def.get("io_template", "")
+                            if not tmpl_name or slot_idx >= len(mod_output_slots):
+                                continue
+                            tmpl_doc = self._io_template_mgr.load_template(tmpl_name)
+                            if tmpl_doc is None:
+                                continue
+                            slot = mod_output_slots[slot_idx]
+                            ip_x, ip_y = self._io_template_mgr.get_insertion_point(tmpl_name)
+                            enriched = self._enrich_io_item(io_item, ctrl_idx, slot_idx, "Output")
+                            io_template_placements.append(
+                                (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y, enriched)
+                            )
+
+                        page_config = dataclasses.replace(config, drawing_number=page_str)
+                        gen = DrawingGenerator(page_config)
+                        
+                        progress_dlg.update_progress(current_page, total_pages, f"Generating controller page {page_str}", f"Module: {module_name}")
+                        
+                        ok, msg = gen.generate(
+                            [], str(dxf_path), ctrl_tmpl_doc,
+                            io_items=io_items,
+                            io_template_placements=io_template_placements or None,
+                        )
+                        if ok:
+                            generated_dxf.append(dxf_path)
+                        else:
+                            errors.append(f"{page_str}: {msg}")
+                        
+                        current_page += 1
+
+            if not progress_dlg.cancelled:
+                # Convert DXF → DWG if ODA converter is available
+                if use_dwg and generated_dxf:
+                    progress_dlg.set_status("Converting DXF to DWG...", "This may take a few moments")
+                    converted, total_dxf, conv_error = convert_folder_dxf_to_dwg(str(output_dir))
+                    if conv_error:
+                        errors.append(f"DWG conversion: {conv_error}")
+                    if converted > 0:
+                        total = converted
+                        ext = "DWG"
+                    else:
+                        # Conversion failed entirely – keep DXF
+                        total = len(generated_dxf)
+                        ext = "DXF"
                 else:
-                    errors.append(f"{page_str}: {msg}")
+                    total = len(generated_dxf)
+                    ext = "DXF"
 
-        # Convert DXF → DWG if ODA converter is available
-        if use_dwg and generated_dxf:
-            converted, total_dxf, conv_error = convert_folder_dxf_to_dwg(str(output_dir))
-            if conv_error:
-                errors.append(f"DWG conversion: {conv_error}")
-            if converted > 0:
-                total = converted
-                ext = "DWG"
-            else:
-                # Conversion failed entirely – keep DXF
-                total = len(generated_dxf)
-                ext = "DXF"
-        else:
-            total = len(generated_dxf)
-            ext = "DXF"
+                progress_dlg.set_status("Complete!", f"{total} {ext} file(s) generated")
+
+        finally:
+            # Close progress dialog
+            progress_dlg.close()
+
+        if progress_dlg.cancelled:
+            QMessageBox.information(self, tr("msg_generate_title"), "Generation cancelled by user.")
+            return
 
         summary = f"{total} {ext} file(s) saved to:\n{output_dir}"
         if errors:
@@ -2503,6 +2617,8 @@ class MainWindow(QMainWindow):
         self._menu_templates.setTitle(tr("menu_templates"))
         self._act_import_tmpl.setText(tr("menu_import_template"))
         self._act_del_tmpl.setText(tr("menu_delete_template"))
+        self._menu_view.setTitle(tr("menu_view"))
+        self._act_toggle_preview.setText(tr("menu_show_template_preview"))
         self._menu_lang.setTitle(tr("menu_language"))
         self._menu_help.setTitle(tr("menu_help"))
         self._act_about.setText(tr("menu_about"))
