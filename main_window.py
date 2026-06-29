@@ -38,7 +38,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from template_manager import TemplateManager, CTRL_TEMPLATES_DIR, IO_TEMPLATES_DIR, LADDER_TEMPLATES_DIR, _find_oda_converter, convert_dxf_to_dwg, convert_folder_dxf_to_dwg
+from template_manager import TemplateManager, CTRL_TEMPLATES_DIR, IO_TEMPLATES_DIR, LADDER_TEMPLATES_DIR, VALVES_TEMPLATES_DIR, _find_oda_converter, convert_dxf_to_dwg, convert_folder_dxf_to_dwg
 from drawing_generator import DrawingGenerator, LadderConfig, Rung, Component
 from io_manager import IOItem
 from i18n import tr, set_language, available_languages
@@ -106,6 +106,7 @@ class MainWindow(QMainWindow):
         self._ctrl_template_mgr = TemplateManager(CTRL_TEMPLATES_DIR)
         self._io_template_mgr = TemplateManager(IO_TEMPLATES_DIR)
         self._ladder_template_mgr = TemplateManager(LADDER_TEMPLATES_DIR)
+        self._valves_template_mgr = TemplateManager(VALVES_TEMPLATES_DIR)
         self._active_template_mgr = self._template_mgr
         self._rungs: list[Rung] = []
         self._io_items: list[IOItem] = []
@@ -138,6 +139,7 @@ class MainWindow(QMainWindow):
         self._refresh_ctrl_template_list()
         self._refresh_io_template_list()
         self._refresh_ladder_template_list()
+        self._refresh_valves_template_list()
         self._load_library()
         self._load_rules()
         self._load_modules()
@@ -418,6 +420,32 @@ class MainWindow(QMainWindow):
         t3_btn_lay.addStretch()
         t3_lay.addWidget(t3_btn)
         self._tmpl_type_tabs.addTab(tab3, "")
+
+        # Tab 4: Valves templates
+        tab4 = QWidget()
+        t4_lay = QVBoxLayout(tab4)
+        t4_lay.setContentsMargins(4, 4, 4, 4)
+        self._valves_tmpl_list = QListWidget()
+        self._valves_tmpl_list.currentItemChanged.connect(self._on_valves_template_selected)
+        t4_lay.addWidget(self._valves_tmpl_list)
+        t4_btn = QWidget()
+        t4_btn_lay = QHBoxLayout(t4_btn)
+        t4_btn_lay.setContentsMargins(0, 0, 0, 0)
+        self._btn_import_valves_tmpl = QPushButton()
+        self._btn_import_valves_tmpl.clicked.connect(self._import_valves_template)
+        self._btn_delete_valves_tmpl = QPushButton()
+        self._btn_delete_valves_tmpl.clicked.connect(self._delete_valves_template)
+        self._btn_edit_valves_tmpl = QPushButton()
+        self._btn_edit_valves_tmpl.clicked.connect(self._edit_valves_template)
+        self._btn_open_valves_tmpl_folder = QPushButton()
+        self._btn_open_valves_tmpl_folder.clicked.connect(self._open_valves_template_folder)
+        t4_btn_lay.addWidget(self._btn_import_valves_tmpl)
+        t4_btn_lay.addWidget(self._btn_delete_valves_tmpl)
+        t4_btn_lay.addWidget(self._btn_edit_valves_tmpl)
+        t4_btn_lay.addWidget(self._btn_open_valves_tmpl_folder)
+        t4_btn_lay.addStretch()
+        t4_lay.addWidget(t4_btn)
+        self._tmpl_type_tabs.addTab(tab4, "")
 
         layout.addWidget(self._tmpl_type_tabs, 1)
 
@@ -2212,6 +2240,113 @@ class MainWindow(QMainWindow):
         import subprocess
         subprocess.Popen(["explorer", str(self._ladder_template_mgr.templates_dir)])
 
+    def _refresh_valves_template_list(self):
+        self._valves_tmpl_list.clear()
+        for name in self._valves_template_mgr.list_templates():
+            self._valves_tmpl_list.addItem(name)
+
+    def _import_valves_template(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, tr("msg_import_template_title"), "",
+            tr("msg_import_filter"),
+        )
+        if not path:
+            return
+        name, ok = QInputDialog.getText(
+            self, tr("msg_template_name_title"), tr("msg_template_name_prompt"),
+            text=Path(path).stem,
+        )
+        if not ok or not name.strip():
+            return
+        success, msg = self._valves_template_mgr.save_template(path, name.strip())
+        if success:
+            QMessageBox.information(self, tr("msg_import_success_title"), msg)
+            self._refresh_valves_template_list()
+            items = self._valves_tmpl_list.findItems(name.strip(), Qt.MatchExactly)
+            if items:
+                self._valves_tmpl_list.setCurrentItem(items[0])
+        else:
+            QMessageBox.critical(self, tr("msg_import_error_title"), msg)
+
+    def _delete_valves_template(self):
+        sel = self._valves_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_delete_template_title"), tr("msg_delete_template_none"))
+            return
+        name = sel.text()
+        if QMessageBox.question(self, tr("msg_confirm_delete_title"), tr("msg_confirm_delete", name=name)) == QMessageBox.Yes:
+            ok, msg = self._valves_template_mgr.delete_template(name)
+            if ok:
+                self._refresh_valves_template_list()
+            else:
+                QMessageBox.critical(self, tr("msg_error_title"), msg)
+
+    def _edit_valves_template(self):
+        """Edit metadata for the selected valves template."""
+        sel = self._valves_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_validation"), "Please select a valves template to edit.")
+            return
+        name = sel.text()
+        
+        # Create and show the metadata dialog
+        dlg = TemplateMetadataDialog(self, template_name=name, data=None)
+        if dlg.exec() == QDialog.Accepted and dlg.result_template:
+            # You can use the result_template here if needed
+            pass
+
+    def _on_valves_template_selected(self, current, previous):
+        """Update the Template tab when a valves template is selected."""
+        if current is None:
+            return
+        # Deselect the other template lists without triggering their signals
+        self._tmpl_list.blockSignals(True)
+        self._tmpl_list.clearSelection()
+        self._tmpl_list.setCurrentRow(-1)
+        self._tmpl_list.blockSignals(False)
+        self._ctrl_tmpl_list.blockSignals(True)
+        self._ctrl_tmpl_list.clearSelection()
+        self._ctrl_tmpl_list.setCurrentRow(-1)
+        self._ctrl_tmpl_list.blockSignals(False)
+        self._io_tmpl_list.blockSignals(True)
+        self._io_tmpl_list.clearSelection()
+        self._io_tmpl_list.setCurrentRow(-1)
+        self._io_tmpl_list.blockSignals(False)
+        self._ladder_tmpl_list.blockSignals(True)
+        self._ladder_tmpl_list.clearSelection()
+        self._ladder_tmpl_list.setCurrentRow(-1)
+        self._ladder_tmpl_list.blockSignals(False)
+
+        self._tmpl_blocks = []
+        self._tmpl_attr_values = {}
+        self._tmpl_current_block = None
+        self._tmpl_current_name = None
+        self._tmpl_axis_bounds = None
+        self._tmpl_block_list.clear()
+        self._tmpl_attrib_table.blockSignals(True)
+        self._tmpl_attrib_table.setRowCount(0)
+        self._tmpl_attrib_table.blockSignals(False)
+        self._tmpl_ios = []
+        self._refresh_tmpl_io_table()
+
+        name = current.text()
+        self._tmpl_current_name = name
+        self._active_template_mgr = self._valves_template_mgr
+        self._active_tmpl_type = "valves"
+        self._update_tmpl_io_ui()
+
+        self._start_preview_render(name)
+
+        self._tmpl_blocks = self._valves_template_mgr.get_template_blocks(name)
+        if self._tmpl_blocks:
+            for blk in self._tmpl_blocks:
+                self._tmpl_block_list.addItem(blk["name"])
+        self._tmpl_block_list.setCurrentRow(0 if self._tmpl_blocks else -1)
+
+    def _open_valves_template_folder(self):
+        import subprocess
+        subprocess.Popen(["explorer", str(self._valves_template_mgr.templates_dir)])
+
     def _on_tmpl_block_selected(self, row: int):
         """Populate the attribute table for the selected block."""
         # Save whatever is currently displayed before switching
@@ -2773,6 +2908,7 @@ class MainWindow(QMainWindow):
         self._tmpl_type_tabs.setTabText(1, tr("grp_ctrl_templates"))
         self._tmpl_type_tabs.setTabText(2, tr("grp_io_templates"))
         self._tmpl_type_tabs.setTabText(3, tr("grp_ladder_templates"))
+        self._tmpl_type_tabs.setTabText(4, tr("grp_valves_templates"))
         self._btn_import_tmpl.setText(tr("btn_import"))
         self._btn_delete_tmpl.setText(tr("btn_delete"))
         self._btn_open_tmpl_folder.setText(tr("btn_open_folder"))
@@ -2786,6 +2922,10 @@ class MainWindow(QMainWindow):
         self._btn_delete_ladder_tmpl.setText(tr("btn_delete"))
         self._btn_edit_ladder_tmpl.setText(tr("btn_edit"))
         self._btn_open_ladder_tmpl_folder.setText(tr("btn_open_folder"))
+        self._btn_import_valves_tmpl.setText(tr("btn_import"))
+        self._btn_delete_valves_tmpl.setText(tr("btn_delete"))
+        self._btn_edit_valves_tmpl.setText(tr("btn_edit"))
+        self._btn_open_valves_tmpl_folder.setText(tr("btn_open_folder"))
         self._lbl_io_tmpl_ins_x.setText(tr("lbl_io_tmpl_ins_x"))
         self._lbl_io_tmpl_ins_y.setText(tr("lbl_io_tmpl_ins_y"))
         self._btn_generate.setText(tr("btn_generate"))
