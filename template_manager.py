@@ -13,7 +13,7 @@ import ezdxf
 import ezdxf.recover
 from ezdxf.document import Drawing
 
-TEMPLATES_DIR = Path(__file__).parent / "templates"
+TEMPLATES_DIR = Path(__file__).parent / "templates" / "templates"
 TEMPLATES_DIR.mkdir(exist_ok=True)
 
 CTRL_TEMPLATES_DIR = Path(__file__).parent / "templates" / "controller"
