@@ -48,7 +48,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "grp_io_templates": "IO Templates",
         "lbl_io_tmpl_ins_x": "X:",
         "lbl_io_tmpl_ins_y": "Y:",
-        # Tabs
+        # Ladder Templates
+        "grp_ladder_templates": "Ladder Templates",
         "tab_ladder": "Ladder Diagram",
         "tab_io": "I/O List",
         # Ladder tab
@@ -358,7 +359,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "grp_io_templates": "Gabarits E/S",
         "lbl_io_tmpl_ins_x": "X\u00a0:",
         "lbl_io_tmpl_ins_y": "Y\u00a0:",
-        # Tabs
+        # Ladder Templates
+        "grp_ladder_templates": "Gabarits Échelle",
         "tab_ladder": "Sch\u00e9ma \u00e0 contacts",
         "tab_io": "Liste E/S",
         # Ladder tab

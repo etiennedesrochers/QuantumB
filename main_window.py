@@ -38,7 +38,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from template_manager import TemplateManager, CTRL_TEMPLATES_DIR, IO_TEMPLATES_DIR, _find_oda_converter, convert_dxf_to_dwg, convert_folder_dxf_to_dwg
+from template_manager import TemplateManager, CTRL_TEMPLATES_DIR, IO_TEMPLATES_DIR, LADDER_TEMPLATES_DIR, _find_oda_converter, convert_dxf_to_dwg, convert_folder_dxf_to_dwg
 from drawing_generator import DrawingGenerator, LadderConfig, Rung, Component
 from io_manager import IOItem
 from i18n import tr, set_language, available_languages
@@ -104,6 +104,7 @@ class MainWindow(QMainWindow):
         self._template_mgr = TemplateManager()
         self._ctrl_template_mgr = TemplateManager(CTRL_TEMPLATES_DIR)
         self._io_template_mgr = TemplateManager(IO_TEMPLATES_DIR)
+        self._ladder_template_mgr = TemplateManager(LADDER_TEMPLATES_DIR)
         self._active_template_mgr = self._template_mgr
         self._rungs: list[Rung] = []
         self._io_items: list[IOItem] = []
@@ -135,6 +136,7 @@ class MainWindow(QMainWindow):
         self._refresh_template_list()
         self._refresh_ctrl_template_list()
         self._refresh_io_template_list()
+        self._refresh_ladder_template_list()
         self._load_library()
         self._load_rules()
         self._load_modules()
@@ -389,6 +391,29 @@ class MainWindow(QMainWindow):
         self._io_tmpl_ins_x.valueChanged.connect(self._on_io_tmpl_ins_changed)
         self._io_tmpl_ins_y.valueChanged.connect(self._on_io_tmpl_ins_changed)
         self._tmpl_type_tabs.addTab(tab2, "")
+
+        # Tab 3: Ladder templates
+        tab3 = QWidget()
+        t3_lay = QVBoxLayout(tab3)
+        t3_lay.setContentsMargins(4, 4, 4, 4)
+        self._ladder_tmpl_list = QListWidget()
+        self._ladder_tmpl_list.currentItemChanged.connect(self._on_ladder_template_selected)
+        t3_lay.addWidget(self._ladder_tmpl_list)
+        t3_btn = QWidget()
+        t3_btn_lay = QHBoxLayout(t3_btn)
+        t3_btn_lay.setContentsMargins(0, 0, 0, 0)
+        self._btn_import_ladder_tmpl = QPushButton()
+        self._btn_import_ladder_tmpl.clicked.connect(self._import_ladder_template)
+        self._btn_delete_ladder_tmpl = QPushButton()
+        self._btn_delete_ladder_tmpl.clicked.connect(self._delete_ladder_template)
+        self._btn_open_ladder_tmpl_folder = QPushButton()
+        self._btn_open_ladder_tmpl_folder.clicked.connect(self._open_ladder_template_folder)
+        t3_btn_lay.addWidget(self._btn_import_ladder_tmpl)
+        t3_btn_lay.addWidget(self._btn_delete_ladder_tmpl)
+        t3_btn_lay.addWidget(self._btn_open_ladder_tmpl_folder)
+        t3_btn_lay.addStretch()
+        t3_lay.addWidget(t3_btn)
+        self._tmpl_type_tabs.addTab(tab3, "")
 
         layout.addWidget(self._tmpl_type_tabs, 1)
 
@@ -1612,7 +1637,9 @@ class MainWindow(QMainWindow):
     def _add_template_io(self):
         if not self._tmpl_current_name:
             return
-        dlg = TemplateIODialog(self, io_types=self._io_types)
+        available_templates = self._template_mgr.list_templates()
+        dlg = TemplateIODialog(self, io_types=self._io_types, 
+                              available_templates=available_templates)
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._tmpl_ios.append(dlg.result_data)
             self._refresh_tmpl_io_table()
@@ -1624,7 +1651,9 @@ class MainWindow(QMainWindow):
         idx = self._tmpl_io_table.currentRow()
         if idx < 0:
             return
-        dlg = TemplateIODialog(self, self._tmpl_ios[idx], io_types=self._io_types)
+        available_templates = self._template_mgr.list_templates()
+        dlg = TemplateIODialog(self, self._tmpl_ios[idx], io_types=self._io_types,
+                              available_templates=available_templates)
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._tmpl_ios[idx] = dlg.result_data
             self._refresh_tmpl_io_table()
@@ -1996,11 +2025,13 @@ class MainWindow(QMainWindow):
         """Open the IO template config dialog on double-click."""
         name = item.text()
         ios = self._io_template_mgr.get_template_ios(name)
+        available_templates = self._template_mgr.list_templates()
         dlg = IOTemplateConfigDialog(
             self,
             template_name=name,
             ios=ios,
             io_types=self._io_types,
+            available_templates=available_templates,
         )
         if dlg.exec() == QDialog.Accepted and dlg.result_ios is not None:
             self._io_template_mgr.set_template_ios(name, dlg.result_ios)
@@ -2019,6 +2050,91 @@ class MainWindow(QMainWindow):
             self._io_tmpl_ins_x.value(),
             self._io_tmpl_ins_y.value(),
         )
+
+    def _refresh_ladder_template_list(self):
+        self._ladder_tmpl_list.clear()
+        for name in self._ladder_template_mgr.list_templates():
+            self._ladder_tmpl_list.addItem(name)
+
+    def _import_ladder_template(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, tr("msg_import_template_title"), "",
+            tr("msg_import_filter"),
+        )
+        if not path:
+            return
+        name, ok = QInputDialog.getText(
+            self, tr("msg_template_name_title"), tr("msg_template_name_prompt"),
+            text=Path(path).stem,
+        )
+        if not ok or not name.strip():
+            return
+        success, msg = self._ladder_template_mgr.save_template(path, name.strip())
+        if success:
+            QMessageBox.information(self, tr("msg_import_success_title"), msg)
+            self._refresh_ladder_template_list()
+            items = self._ladder_tmpl_list.findItems(name.strip(), Qt.MatchExactly)
+            if items:
+                self._ladder_tmpl_list.setCurrentItem(items[0])
+        else:
+            QMessageBox.critical(self, tr("msg_import_error_title"), msg)
+
+    def _delete_ladder_template(self):
+        sel = self._ladder_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_delete_template_title"), tr("msg_delete_template_none"))
+            return
+        name = sel.text()
+        if QMessageBox.question(self, tr("msg_confirm_delete_title"), tr("msg_confirm_delete", name=name)) == QMessageBox.Yes:
+            ok, msg = self._ladder_template_mgr.delete_template(name)
+            if ok:
+                self._refresh_ladder_template_list()
+            else:
+                QMessageBox.critical(self, tr("msg_error_title"), msg)
+
+    def _on_ladder_template_selected(self, current, previous):
+        """Update the Template tab when a ladder template is selected."""
+        if current is None:
+            return
+        # Deselect the other template lists without triggering their signals
+        self._tmpl_list.blockSignals(True)
+        self._tmpl_list.clearSelection()
+        self._tmpl_list.setCurrentRow(-1)
+        self._tmpl_list.blockSignals(False)
+        self._ctrl_tmpl_list.blockSignals(True)
+        self._ctrl_tmpl_list.clearSelection()
+        self._ctrl_tmpl_list.setCurrentRow(-1)
+        self._ctrl_tmpl_list.blockSignals(False)
+        self._io_tmpl_list.blockSignals(True)
+        self._io_tmpl_list.clearSelection()
+        self._io_tmpl_list.setCurrentRow(-1)
+        self._io_tmpl_list.blockSignals(False)
+
+        self._tmpl_blocks = []
+        self._tmpl_attr_values = {}
+        self._tmpl_current_block = None
+        self._tmpl_current_name = None
+        self._tmpl_axis_bounds = None
+        self._tmpl_block_list.clear()
+        self._tmpl_attrib_table.blockSignals(True)
+        self._tmpl_attrib_table.setRowCount(0)
+        self._tmpl_attrib_table.blockSignals(False)
+        self._tmpl_ios = []
+        self._refresh_tmpl_io_table()
+
+        name = current.text()
+        self._tmpl_current_name = name
+        self._active_template_mgr = self._ladder_template_mgr
+        self._active_tmpl_type = "ladder"
+        self._update_tmpl_io_ui()
+
+        self._start_preview_render(name)
+
+        self._tmpl_blocks = self._ladder_template_mgr.get_template_blocks(name)
+        if self._tmpl_blocks:
+            for blk in self._tmpl_blocks:
+                self._tmpl_block_list.addItem(blk.name)
+        self._tmpl_block_list.setCurrentRow(0 if self._tmpl_blocks else -1)
 
     def _refresh_template_list(self):
         self._tmpl_list.clear()
@@ -2073,6 +2189,10 @@ class MainWindow(QMainWindow):
     def _open_io_template_folder(self):
         import subprocess
         subprocess.Popen(["explorer", str(self._io_template_mgr.templates_dir)])
+
+    def _open_ladder_template_folder(self):
+        import subprocess
+        subprocess.Popen(["explorer", str(self._ladder_template_mgr.templates_dir)])
 
     def _on_tmpl_block_selected(self, row: int):
         """Populate the attribute table for the selected block."""
@@ -2634,6 +2754,7 @@ class MainWindow(QMainWindow):
         self._tmpl_type_tabs.setTabText(0, tr("grp_templates"))
         self._tmpl_type_tabs.setTabText(1, tr("grp_ctrl_templates"))
         self._tmpl_type_tabs.setTabText(2, tr("grp_io_templates"))
+        self._tmpl_type_tabs.setTabText(3, tr("grp_ladder_templates"))
         self._btn_import_tmpl.setText(tr("btn_import"))
         self._btn_delete_tmpl.setText(tr("btn_delete"))
         self._btn_open_tmpl_folder.setText(tr("btn_open_folder"))
@@ -2643,6 +2764,9 @@ class MainWindow(QMainWindow):
         self._btn_import_io_tmpl.setText(tr("btn_import"))
         self._btn_delete_io_tmpl.setText(tr("btn_delete"))
         self._btn_open_io_tmpl_folder.setText(tr("btn_open_folder"))
+        self._btn_import_ladder_tmpl.setText(tr("btn_import"))
+        self._btn_delete_ladder_tmpl.setText(tr("btn_delete"))
+        self._btn_open_ladder_tmpl_folder.setText(tr("btn_open_folder"))
         self._lbl_io_tmpl_ins_x.setText(tr("lbl_io_tmpl_ins_x"))
         self._lbl_io_tmpl_ins_y.setText(tr("lbl_io_tmpl_ins_y"))
         self._btn_generate.setText(tr("btn_generate"))

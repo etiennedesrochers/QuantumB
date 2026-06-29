@@ -22,6 +22,9 @@ CTRL_TEMPLATES_DIR.mkdir(exist_ok=True)
 IO_TEMPLATES_DIR = Path(__file__).parent / "templates" / "io"
 IO_TEMPLATES_DIR.mkdir(exist_ok=True)
 
+LADDER_TEMPLATES_DIR = Path(__file__).parent / "templates" / "ladder"
+LADDER_TEMPLATES_DIR.mkdir(exist_ok=True)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # DWG → DXF conversion (optional, requires ODA File Converter)

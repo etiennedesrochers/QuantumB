@@ -31,12 +31,20 @@ class Valve:
 
 
 @dataclass
+class Template:
+    """A template with metadata for ladder diagram placement."""
+    name: str                       # template file name (e.g., "E001", "controller_1")
+    ladder_type: str = ""           # template type (e.g., "io", "controller", "ladder")
+    part_of_ladder: str | int = ""  # which ladder/rung this template belongs to
+
+
+@dataclass
 class Circuit:
     """A named circuit that references an ordered list of templates."""
     name: str
     circuit_number: str
     description: str
-    templates: list[str] = field(default_factory=list)   # template names, may repeat
+    templates: list[str | Template] = field(default_factory=list)   # template names or Template objects
     valves: list = field(default_factory=list)            # list[Valve]
 
     def __post_init__(self):
@@ -45,3 +53,22 @@ class Circuit:
             Valve(**v) if isinstance(v, dict) else v
             for v in self.valves
         ]
+        
+        # Convert template dicts to Template objects
+        converted_templates = []
+        for t in self.templates:
+            if isinstance(t, dict):
+                # If it has the new structure, create a Template object
+                if 'name' in t and ('ladder_type' in t or 'part_of_ladder' in t):
+                    converted_templates.append(Template(**t))
+                # Otherwise it's a legacy template, keep as string
+                elif 'name' in t:
+                    converted_templates.append(t['name'])
+                else:
+                    # Assume it's a simple dict with just name key or it's a string key
+                    converted_templates.append(t)
+            else:
+                # Keep strings and Template objects as-is
+                converted_templates.append(t)
+        self.templates = converted_templates
+

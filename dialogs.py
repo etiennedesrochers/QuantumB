@@ -32,6 +32,8 @@ from PySide6.QtWidgets import (
 
 from drawing_generator import Rung, Component
 from symbols.electrical_symbols import SYMBOL_REGISTRY
+from models import Template
+
 
 
 class CoordSpinBox(QDoubleSpinBox):
@@ -52,6 +54,7 @@ class CoordSpinBox(QDoubleSpinBox):
 from io_manager import IO_TYPES, IO_FIELDS
 from i18n import tr
 from models import Circuit
+from template_metadata_dialog import TemplateMetadataDialog
 
 
 # ---------------------------------------------------------------------------
@@ -869,12 +872,14 @@ def _tmpl_io_type(signal: str, direction: str) -> str:
 class TemplateIODialog(QDialog):
     """Add / edit a single I/O entry on a template."""
 
-    def __init__(self, parent=None, data: dict | None = None, io_types: list[dict] | None = None):
+    def __init__(self, parent=None, data: dict | None = None, io_types: list[dict] | None = None,
+                 available_templates: list[str] | None = None):
         super().__init__(parent)
         self.setWindowTitle(tr("dlg_template_io_title"))
-        self.setMinimumWidth(360)
+        self.setMinimumWidth(400)
         self.result_data: dict | None = None
         self._io_types = io_types or []
+        self._available_templates = available_templates or []
         self._build(data)
 
     def _build(self, data: dict | None):
@@ -899,6 +904,16 @@ class TemplateIODialog(QDialog):
         self._io_type_cb = QComboBox()
         form.addRow(tr("col_io_type") + ":", self._io_type_cb)
 
+        # New ladder fields
+        self._ladder_type_edit = QLineEdit()
+        self._ladder_type_edit.setPlaceholderText("e.g., 24V, 120V, Control")
+        form.addRow("Ladder Type:", self._ladder_type_edit)
+
+        self._ladder_template_cb = QComboBox()
+        self._ladder_template_cb.addItem("")  # Allow empty selection
+        self._ladder_template_cb.addItems(self._available_templates)
+        form.addRow("Ladder Template:", self._ladder_template_cb)
+
         self._signal_cb.currentTextChanged.connect(self._sync_io_type)
         self._dir_cb.currentTextChanged.connect(self._sync_io_type)
 
@@ -907,6 +922,11 @@ class TemplateIODialog(QDialog):
             self._desc_edit.setText(data.get("description", ""))
             self._signal_cb.setCurrentText(data.get("signal_type", _TMPL_IO_SIGNAL_TYPES[0]))
             self._dir_cb.setCurrentText(data.get("direction", _TMPL_IO_DIRECTIONS[0]))
+            self._ladder_type_edit.setText(data.get("ladder_type", ""))
+            if data.get("ladder_template"):
+                idx = self._ladder_template_cb.findText(data["ladder_template"])
+                if idx >= 0:
+                    self._ladder_template_cb.setCurrentIndex(idx)
 
         self._sync_io_type()
 
@@ -942,11 +962,13 @@ class TemplateIODialog(QDialog):
             QMessageBox.warning(self, tr("msg_validation"), tr("msg_io_name_required"))
             return
         self.result_data = {
-            "name":        name,
-            "description": self._desc_edit.text().strip(),
-            "signal_type": self._signal_cb.currentText(),
-            "direction":   self._dir_cb.currentText(),
-            "io_type":     self._io_type_cb.currentText(),
+            "name":              name,
+            "description":       self._desc_edit.text().strip(),
+            "signal_type":       self._signal_cb.currentText(),
+            "direction":         self._dir_cb.currentText(),
+            "io_type":           self._io_type_cb.currentText(),
+            "ladder_type":       self._ladder_type_edit.text().strip(),
+            "ladder_template":   self._ladder_template_cb.currentText(),
         }
         self.accept()
 
@@ -965,7 +987,8 @@ class IOTemplateConfigDialog(QDialog):
 
     def __init__(self, parent=None, template_name: str = "",
                  ios: list[dict] | None = None,
-                 io_types: list[dict] | None = None):
+                 io_types: list[dict] | None = None,
+                 available_templates: list[str] | None = None):
         super().__init__(parent)
         self.setWindowTitle(tr("dlg_io_template_config_title", name=template_name))
         self.setMinimumWidth(580)
@@ -973,6 +996,7 @@ class IOTemplateConfigDialog(QDialog):
         self.result_ios: list[dict] | None = None
         self._ios: list[dict] = [dict(io) for io in (ios or [])]
         self._io_types = io_types or []
+        self._available_templates = available_templates or []
         self._build()
 
     def _build(self):
@@ -984,6 +1008,8 @@ class IOTemplateConfigDialog(QDialog):
             tr("col_signal_type"),
             tr("col_io_direction"),
             tr("col_io_type"),
+            "Ladder Type",
+            "Ladder Template",
         ]
         self._table = QTableWidget(0, len(_cols))
         self._table.setHorizontalHeaderLabels(_cols)
@@ -1019,7 +1045,8 @@ class IOTemplateConfigDialog(QDialog):
             row = self._table.rowCount()
             self._table.insertRow(row)
             for col, key in enumerate(
-                ("name", "description", "signal_type", "direction", "io_type")
+                ("name", "description", "signal_type", "direction", "io_type", 
+                 "ladder_type", "ladder_template")
             ):
                 self._table.setItem(row, col, QTableWidgetItem(io.get(key, "")))
 
@@ -1030,7 +1057,8 @@ class IOTemplateConfigDialog(QDialog):
         idx = self._selected_row()
         if idx < 0:
             return
-        dlg = TemplateIODialog(self, self._ios[idx], io_types=self._io_types)
+        dlg = TemplateIODialog(self, self._ios[idx], io_types=self._io_types,
+                              available_templates=self._available_templates)
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._ios[idx] = dlg.result_data
             self._refresh_table()
@@ -1146,6 +1174,7 @@ class CircuitDialog(QDialog):
         self.setMinimumWidth(500)
         self.result_circuit: Circuit | None = None
         self._available = available_templates or []
+        self._templates: list[Template | str] = []  # Store template objects or strings
         self._build(data)
 
     def _build(self, data: Circuit | None):
@@ -1181,8 +1210,12 @@ class CircuitDialog(QDialog):
         grp_lay.addWidget(pick_row)
 
         self._tmpl_list = QListWidget()
+        # Initialize from existing circuit templates
         if data:
-            self._tmpl_list.addItems(data.templates)
+            self._templates = list(data.templates) if data.templates else []
+            for tmpl in self._templates:
+                display_text = self._format_template_display(tmpl)
+                self._tmpl_list.addItem(display_text)
         grp_lay.addWidget(self._tmpl_list, 1)
 
         # Remove / Up / Down
@@ -1211,6 +1244,19 @@ class CircuitDialog(QDialog):
 
         self._retranslate()
 
+    def _format_template_display(self, tmpl: Template | str) -> str:
+        """Format a template for display in the list widget."""
+        if isinstance(tmpl, Template):
+            parts = [tmpl.name]
+            if tmpl.ladder_type:
+                parts.append(f"[Type: {tmpl.ladder_type}]")
+            if tmpl.part_of_ladder:
+                parts.append(f"[Rung: {tmpl.part_of_ladder}]")
+            return " ".join(parts)
+        else:
+            # Legacy string template
+            return str(tmpl)
+
     def _retranslate(self):
         self.setWindowTitle(tr("dlg_circuit_title"))
         self._lbl_name.setText(tr("lbl_circuit_name"))
@@ -1224,17 +1270,33 @@ class CircuitDialog(QDialog):
 
     def _add_template(self):
         name = self._tmpl_picker.currentText()
-        if name:
+        if not name:
+            return
+        
+        # Show metadata dialog
+        dlg = TemplateMetadataDialog(self, template_name=name)
+        if dlg.exec() == QDialog.Accepted and dlg.result_template:
+            # Add the Template object
+            tmpl = dlg.result_template
+            self._templates.append(tmpl)
+            display_text = self._format_template_display(tmpl)
+            self._tmpl_list.addItem(display_text)
+        else:
+            # User cancelled, add as simple string template
+            self._templates.append(name)
             self._tmpl_list.addItem(name)
 
     def _remove_template(self):
         row = self._tmpl_list.currentRow()
         if row >= 0:
             self._tmpl_list.takeItem(row)
+            self._templates.pop(row)
 
     def _move_template_up(self):
         row = self._tmpl_list.currentRow()
         if row > 0:
+            # Swap in both lists
+            self._templates[row], self._templates[row - 1] = self._templates[row - 1], self._templates[row]
             item = self._tmpl_list.takeItem(row)
             self._tmpl_list.insertItem(row - 1, item)
             self._tmpl_list.setCurrentRow(row - 1)
@@ -1242,6 +1304,8 @@ class CircuitDialog(QDialog):
     def _move_template_down(self):
         row = self._tmpl_list.currentRow()
         if row >= 0 and row < self._tmpl_list.count() - 1:
+            # Swap in both lists
+            self._templates[row], self._templates[row + 1] = self._templates[row + 1], self._templates[row]
             item = self._tmpl_list.takeItem(row)
             self._tmpl_list.insertItem(row + 1, item)
             self._tmpl_list.setCurrentRow(row + 1)
@@ -1251,13 +1315,12 @@ class CircuitDialog(QDialog):
         if not name:
             QMessageBox.warning(self, tr("msg_validation"), tr("msg_circuit_name_required"))
             return
-        templates = [self._tmpl_list.item(i).text()
-                     for i in range(self._tmpl_list.count())]
+        
         self.result_circuit = Circuit(
             name=name,
             circuit_number=self._e_number.text().strip(),
             description=self._e_desc.text().strip(),
-            templates=templates,
+            templates=self._templates,
         )
         self.accept()
 

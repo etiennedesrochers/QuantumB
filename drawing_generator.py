@@ -62,6 +62,7 @@ class LadderConfig:
 class DrawingGenerator:
     # Class-level variables shared across all instances
     _biggest_fuse_number: int = 0
+    _count_link_page: int =0
     
     def __init__(self, config: LadderConfig | None = None):
         self.config = config or LadderConfig()
@@ -140,23 +141,67 @@ class DrawingGenerator:
         # Ensure we have the latest persisted value from the class variable
         self.biggest_fuse_number = DrawingGenerator._biggest_fuse_number
         doc_base = None  # Will be set on first FU! encountered
-        
+        as_replace_link_page= False
         for item in item_list:
             if item.old_name:
                 for entity in doc.modelspace():
                     if entity.dxftype() == "INSERT":
                         for attrib in entity.attribs:
-
                             self.replace_name(attrib, item)
                             doc_base = self.replace_fuse(attrib, doc_base)
-                            self.replace_tagstrip(item, entity, attrib)
+                            self.replace_tagstrip(item,entity,attrib)
+                            as_replace_link_page = self.replace_link_page( attrib,as_replace_link_page)
+                             
         
         # Sync to class variable so next instance picks it up
         DrawingGenerator._biggest_fuse_number = self.biggest_fuse_number
         return self.biggest_fuse_number
 
-                            
-                            
+    def replace_link_page(self,attrib,replace):
+        #Check the attribute to see if it contains LX-$ 
+        #X is a value that is the field and we wont change it 
+        #$ is a value that we will change
+        #We can also have LX-$+x where x is a number that we will add
+
+        #The static variable _count_link_page is use to count
+        #Check if the attribute contains LX-$ or LX-$+x
+
+        #We also have the format GND-$+x
+
+        if attrib.dxf.get("text", "").startswith("L") and attrib.dxf.get("text", "").find("-$") != -1:
+            if not replace:
+                replace = True
+                #Increment the count
+                DrawingGenerator._count_link_page += 1
+            #Replace the $ with the count
+            text = attrib.dxf.get("text", "")
+            additional_offset = 0
+            if text.find("+") != -1:
+                additional_offset = int(text.split("+")[1])
+            text = text.replace("$", str(DrawingGenerator._count_link_page+additional_offset))
+            if text.find("+") != -1:
+                text = text.split("+")[0]
+            attrib.dxf.text = text
+
+        elif attrib.dxf.get("text", "").startswith("GND") and attrib.dxf.get("text", "").find("-$") != -1:
+            if not replace:
+                replace = True
+                #Increment the count
+                DrawingGenerator._count_link_page += 1
+            #Replace the $ with the count
+            text = attrib.dxf.get("text", "")
+            additional_offset = 0
+            if text.find("+") != -1:
+                additional_offset = int(text.split("+")[1])
+            text = text.replace("$", str(DrawingGenerator._count_link_page+additional_offset))
+            #Add a split we dont want the +x to be in the text
+            if text.find("+") != -1:
+                text = text.split("+")[0]
+            attrib.dxf.text = text
+        return replace
+
+        
+        
     def replace_name(self,attrib, item: IOItem):
         if attrib.dxf.get("text", "") == item.old_name:
             attrib.dxf.text = item.tag
