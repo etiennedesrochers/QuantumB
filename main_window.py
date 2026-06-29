@@ -66,6 +66,7 @@ from dialogs import (
     IOTypeDialog,
     GenerationProgressDialog,
 )
+from template_metadata_dialog import TemplateMetadataDialog
 import valve_manager as vm
 import app_config as ac
 
@@ -406,10 +407,13 @@ class MainWindow(QMainWindow):
         self._btn_import_ladder_tmpl.clicked.connect(self._import_ladder_template)
         self._btn_delete_ladder_tmpl = QPushButton()
         self._btn_delete_ladder_tmpl.clicked.connect(self._delete_ladder_template)
+        self._btn_edit_ladder_tmpl = QPushButton()
+        self._btn_edit_ladder_tmpl.clicked.connect(self._edit_ladder_template)
         self._btn_open_ladder_tmpl_folder = QPushButton()
         self._btn_open_ladder_tmpl_folder.clicked.connect(self._open_ladder_template_folder)
         t3_btn_lay.addWidget(self._btn_import_ladder_tmpl)
         t3_btn_lay.addWidget(self._btn_delete_ladder_tmpl)
+        t3_btn_lay.addWidget(self._btn_edit_ladder_tmpl)
         t3_btn_lay.addWidget(self._btn_open_ladder_tmpl_folder)
         t3_btn_lay.addStretch()
         t3_lay.addWidget(t3_btn)
@@ -2092,6 +2096,20 @@ class MainWindow(QMainWindow):
             else:
                 QMessageBox.critical(self, tr("msg_error_title"), msg)
 
+    def _edit_ladder_template(self):
+        """Edit metadata for the selected ladder template."""
+        sel = self._ladder_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_validation"), "Please select a ladder template to edit.")
+            return
+        name = sel.text()
+        
+        # Create and show the metadata dialog
+        dlg = TemplateMetadataDialog(self, template_name=name, data=None)
+        if dlg.exec() == QDialog.Accepted and dlg.result_template:
+            # You can use the result_template here if needed
+            pass
+
     def _on_ladder_template_selected(self, current, previous):
         """Update the Template tab when a ladder template is selected."""
         if current is None:
@@ -2133,7 +2151,7 @@ class MainWindow(QMainWindow):
         self._tmpl_blocks = self._ladder_template_mgr.get_template_blocks(name)
         if self._tmpl_blocks:
             for blk in self._tmpl_blocks:
-                self._tmpl_block_list.addItem(blk.name)
+                self._tmpl_block_list.addItem(blk["name"])
         self._tmpl_block_list.setCurrentRow(0 if self._tmpl_blocks else -1)
 
     def _refresh_template_list(self):
@@ -2766,6 +2784,7 @@ class MainWindow(QMainWindow):
         self._btn_open_io_tmpl_folder.setText(tr("btn_open_folder"))
         self._btn_import_ladder_tmpl.setText(tr("btn_import"))
         self._btn_delete_ladder_tmpl.setText(tr("btn_delete"))
+        self._btn_edit_ladder_tmpl.setText(tr("btn_edit"))
         self._btn_open_ladder_tmpl_folder.setText(tr("btn_open_folder"))
         self._lbl_io_tmpl_ins_x.setText(tr("lbl_io_tmpl_ins_x"))
         self._lbl_io_tmpl_ins_y.setText(tr("lbl_io_tmpl_ins_y"))

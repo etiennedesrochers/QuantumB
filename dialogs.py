@@ -3,6 +3,9 @@ Dialog classes for the AutoCAD Electrical Drawing Generator UI.
 """
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from PySide6.QtCore import Qt, QLocale
 from PySide6.QtGui import QValidator
 from PySide6.QtWidgets import (
@@ -60,6 +63,16 @@ from template_metadata_dialog import TemplateMetadataDialog
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+def _load_ladder_types() -> list[str]:
+    """Load ladder types from ladder_types.json."""
+    try:
+        ladder_types_file = Path(__file__).parent / "ladder_types.json"
+        with open(ladder_types_file, "r") as f:
+            data = json.load(f)
+            return data.get("ladder_types", [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
 
 def _make_toolbar_row(*labels_callbacks: tuple[str, callable]) -> QWidget:
     """Return a widget containing a row of QPushButtons."""
@@ -905,9 +918,11 @@ class TemplateIODialog(QDialog):
         form.addRow(tr("col_io_type") + ":", self._io_type_cb)
 
         # New ladder fields
-        self._ladder_type_edit = QLineEdit()
-        self._ladder_type_edit.setPlaceholderText("e.g., 24V, 120V, Control")
-        form.addRow("Ladder Type:", self._ladder_type_edit)
+        self._ladder_type_cb = QComboBox()
+        self._ladder_type_cb.addItem("")  # Allow empty selection
+        ladder_types = _load_ladder_types()
+        self._ladder_type_cb.addItems(ladder_types)
+        form.addRow("Ladder Type:", self._ladder_type_cb)
 
         self._ladder_template_cb = QComboBox()
         self._ladder_template_cb.addItem("")  # Allow empty selection
@@ -922,7 +937,10 @@ class TemplateIODialog(QDialog):
             self._desc_edit.setText(data.get("description", ""))
             self._signal_cb.setCurrentText(data.get("signal_type", _TMPL_IO_SIGNAL_TYPES[0]))
             self._dir_cb.setCurrentText(data.get("direction", _TMPL_IO_DIRECTIONS[0]))
-            self._ladder_type_edit.setText(data.get("ladder_type", ""))
+            if data.get("ladder_type"):
+                idx = self._ladder_type_cb.findText(data["ladder_type"])
+                if idx >= 0:
+                    self._ladder_type_cb.setCurrentIndex(idx)
             if data.get("ladder_template"):
                 idx = self._ladder_template_cb.findText(data["ladder_template"])
                 if idx >= 0:
@@ -967,7 +985,7 @@ class TemplateIODialog(QDialog):
             "signal_type":       self._signal_cb.currentText(),
             "direction":         self._dir_cb.currentText(),
             "io_type":           self._io_type_cb.currentText(),
-            "ladder_type":       self._ladder_type_edit.text().strip(),
+            "ladder_type":       self._ladder_type_cb.currentText(),
             "ladder_template":   self._ladder_template_cb.currentText(),
         }
         self.accept()

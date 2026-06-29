@@ -36,6 +36,7 @@ class Template:
     name: str                       # template file name (e.g., "E001", "controller_1")
     ladder_type: str = ""           # template type (e.g., "io", "controller", "ladder")
     part_of_ladder: str | int = ""  # which ladder/rung this template belongs to
+    height: float = 0.0             # height of the ladder template
 
 
 @dataclass

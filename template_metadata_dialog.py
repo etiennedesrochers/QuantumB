@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QFormLayout,
     QLineEdit,
+    QDoubleSpinBox,
     QDialogButtonBox,
     QMessageBox,
 )
@@ -47,6 +48,14 @@ class TemplateMetadataDialog(QDialog):
         self._part_of_ladder_edit.setPlaceholderText("e.g., '1', '2', 'main', etc.")
         form.addRow("Part of Ladder:", self._part_of_ladder_edit)
 
+        # Height
+        self._height_spin = QDoubleSpinBox()
+        self._height_spin.setRange(0.0, 9999.99)
+        self._height_spin.setDecimals(2)
+        self._height_spin.setSuffix(" units")
+        self._height_spin.setValue(data.height if data else 0.0)
+        form.addRow("Height:", self._height_spin)
+
         layout.addLayout(form)
 
         # Buttons
@@ -58,11 +67,13 @@ class TemplateMetadataDialog(QDialog):
     def _ok(self):
         ladder_type = self._ladder_type_edit.text().strip()
         part_of_ladder = self._part_of_ladder_edit.text().strip()
+        height = self._height_spin.value()
 
         # Create the Template object
         self.result_template = Template(
             name=self._template_name,
             ladder_type=ladder_type,
             part_of_ladder=part_of_ladder,
+            height=height,
         )
         self.accept()
