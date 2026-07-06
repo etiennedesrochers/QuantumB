@@ -111,6 +111,9 @@ class MainWindow(QMainWindow):
         self._active_template_mgr = self._template_mgr
         self._rungs: list[Rung] = []
         self._io_items: list[IOItem] = []
+        self._io_items_full: list[IOItem] = []          # full list before filtering
+        self._io_filter_type: str = "All"               # "All", "Input", or "Output"
+        self._io_table_row_mapping: list[int] = []      # maps visible rows to _io_items indices
         self._library_circuits: list[Circuit] = []      # global – shared across projects
         self._project_circuit_refs: list[str] = []      # per-project (names, may repeat)
         self._rules: list[dict] = []                    # global rules library
@@ -286,6 +289,19 @@ class MainWindow(QMainWindow):
         self._lbl_io_hdr = QLabel()
         self._lbl_io_hdr.setFont(QFont("", 11, QFont.Bold))
         h_lay.addWidget(self._lbl_io_hdr)
+        h_lay.addSpacing(20)
+        
+        # Filter buttons
+        self._btn_io_filter_all = QPushButton()
+        self._btn_io_filter_all.clicked.connect(lambda: self._apply_io_filter("All"))
+        h_lay.addWidget(self._btn_io_filter_all)
+        self._btn_io_filter_inputs = QPushButton()
+        self._btn_io_filter_inputs.clicked.connect(lambda: self._apply_io_filter("Input"))
+        h_lay.addWidget(self._btn_io_filter_inputs)
+        self._btn_io_filter_outputs = QPushButton()
+        self._btn_io_filter_outputs.clicked.connect(lambda: self._apply_io_filter("Output"))
+        h_lay.addWidget(self._btn_io_filter_outputs)
+        
         h_lay.addStretch()
         self._btn_refresh_io = QPushButton()
         self._btn_refresh_io.clicked.connect(self._refresh_io_table)
@@ -1576,8 +1592,14 @@ class MainWindow(QMainWindow):
                 item.number = f"{analog}O{(self._io_items.index(item) // len(self._modules[0].get("outputs"))) + 1}{zero}{output_count}"
 
     def _refresh_io_table(self):
+        """Refresh the IO table from project circuits and manually added IOs."""
         self._io_table.setRowCount(0)
+        manual_ios = list(self._io_items)  # Save manually added IOs
+        self._io_items_full.clear()
         self._io_items.clear()
+        self._io_table_row_mapping.clear()
+        
+        # Load IOs from circuits
         resolved_numbers = self._resolve_project_circuit_numbers()
         for ref_idx, circuit_name in enumerate(self._project_circuit_refs):
             circuit = self._lookup_circuit(circuit_name)
@@ -1591,20 +1613,7 @@ class MainWindow(QMainWindow):
                 io_old_desc = io.get("description", "")
                 io_name = io.get("name", "").replace("#", circuit_no)
                 io_desc = io.get("description", "").replace("#", circuit_no)
-                row = self._io_table.rowCount()
-                self._io_table.insertRow(row)
-                for col, val in enumerate([
-                    circuit_name,
-                    circuit_no,
-                    "",  # Template name is empty for circuit-level IOs
-                    io_name,
-                    io_desc,
-                    io.get("signal_type", ""),
-                    io.get("direction", ""),
-                    io.get("io_type", ""),
-                ]):
-                    self._io_table.setItem(row, col, QTableWidgetItem(val))
-                self._io_items.append(IOItem(
+                self._io_items_full.append(IOItem(
                     tag=io_name,
                     io_type=io.get("direction", "Input"),
                     description=io_desc,
@@ -1622,20 +1631,7 @@ class MainWindow(QMainWindow):
                     io_old_desc = io.get("description", "")
                     io_name = io.get("name", "").replace("#", circuit_no)
                     io_desc = io.get("description", "").replace("#", circuit_no)
-                    row = self._io_table.rowCount()
-                    self._io_table.insertRow(row)
-                    for col, val in enumerate([
-                        circuit_name,
-                        circuit_no,
-                        tmpl_name,
-                        io_name,
-                        io_desc,
-                        io.get("signal_type", ""),
-                        io.get("direction", ""),
-                        io.get("io_type", ""),
-                    ]):
-                        self._io_table.setItem(row, col, QTableWidgetItem(val))
-                    self._io_items.append(IOItem(
+                    self._io_items_full.append(IOItem(
                         tag=io_name,
                         io_type=io.get("direction", "Input"),
                         description=io_desc,
@@ -1644,7 +1640,60 @@ class MainWindow(QMainWindow):
                         old_name=io_old_name,
                         old_description=io_old_desc,
                     ))
+        
+        # Add back manually added IOs
+        for manual_io in manual_ios:
+            if not any(item.tag == manual_io.tag for item in self._io_items_full):
+                self._io_items_full.append(manual_io)
+        
+        # Apply the current filter
+        self._apply_io_filter(self._io_filter_type)
         self._refresh_io_summary()
+
+    def _apply_io_filter(self, filter_type: str):
+        """Apply the IO filter and update the table display."""
+        self._io_filter_type = filter_type
+        self._io_table.setRowCount(0)
+        self._io_items.clear()
+        self._io_table_row_mapping.clear()
+        
+        # Filter and display items from _io_items_full
+        for idx, item in enumerate(self._io_items_full):
+            # Check if this item matches the filter
+            if filter_type != "All" and item.io_type != filter_type:
+                continue
+            
+            row = self._io_table.rowCount()
+            self._io_table.insertRow(row)
+            for col, val in enumerate([
+                item.old_name or "",  # circuit_name not directly stored, use old_name as fallback
+                "",  # circuit_no not directly stored
+                item.old_description or "",  # template_name not directly stored, use old_description as fallback
+                item.tag,
+                item.description,
+                item.signal_type,
+                item.io_type,
+                item.io_type_name,
+            ]):
+                self._io_table.setItem(row, col, QTableWidgetItem(val))
+            
+            self._io_items.append(item)
+            self._io_table_row_mapping.append(idx)
+        
+        # Update button states
+        self._update_io_filter_button_states()
+
+    def _update_io_filter_button_states(self):
+        """Update the appearance of the filter buttons to show which is active."""
+        for btn, filter_type in [
+            (self._btn_io_filter_all, "All"),
+            (self._btn_io_filter_inputs, "Input"),
+            (self._btn_io_filter_outputs, "Output"),
+        ]:
+            is_active = self._io_filter_type == filter_type
+            font = btn.font()
+            font.setBold(is_active)
+            btn.setFont(font)
 
     def _add_io(self):
         dlg = IODialog(self)
@@ -2569,6 +2618,9 @@ class MainWindow(QMainWindow):
         for r in data.get("rungs", []):
             comps = [Component(**c) for c in r.pop("components", [])]
             self._rungs.append(Rung(components=comps, **r))
+        # Load IO items from project
+        for io_data in data.get("io_items", []):
+            self._io_items.append(IOItem(**io_data))
         self._refresh_io_table()
         self._refresh_project_circuits_table()
         self._project_path = path
@@ -3028,6 +3080,9 @@ class MainWindow(QMainWindow):
         ])
         # I/O tab
         self._lbl_io_hdr.setText(tr("lbl_io_header"))
+        self._btn_io_filter_all.setText(tr("btn_io_filter_all"))
+        self._btn_io_filter_inputs.setText(tr("btn_io_filter_inputs"))
+        self._btn_io_filter_outputs.setText(tr("btn_io_filter_outputs"))
         self._btn_refresh_io.setText(tr("btn_refresh_io"))
         self._io_table.setHorizontalHeaderLabels([
             tr("col_circuit"), tr("col_circuit_number"), tr("col_template"),

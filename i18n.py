@@ -64,6 +64,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         # I/O tab
         "lbl_io_header": "I/O List",
         "btn_refresh_io": "Refresh",
+        "btn_io_filter_all": "All",
+        "btn_io_filter_inputs": "Inputs",
+        "btn_io_filter_outputs": "Outputs",
         "col_circuit": "Circuit",
         "col_template": "Template",
         "col_symbol": "Symbol",
@@ -382,6 +385,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         # I/O tab
         "lbl_io_header": "Liste E/S",
         "btn_refresh_io": "Actualiser",
+        "btn_io_filter_all": "Tous",
+        "btn_io_filter_inputs": "Entrées",
+        "btn_io_filter_outputs": "Sorties",
         "col_circuit": "Circuit",
         "col_template": "Gabarit",
         # Table columns
