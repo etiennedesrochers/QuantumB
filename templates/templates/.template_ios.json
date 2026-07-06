@@ -185,48 +185,66 @@
   ],
   "VFD-CD": [
     {
-      "name": "CD-F_EN#",
+      "name": "Cd-F_En#",
       "description": "Condenser Fan # Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": "Enable"
+      "io_type": "Enable",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     },
     {
-      "name": "CD-F_MOD#",
+      "name": "Cd-F_Mod#",
       "description": "Condenser Fan # Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": "Modulation"
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     },
     {
-      "name": "CD_F-STS#",
+      "name": "Cd_F-Sts#",
       "description": "Conder Fan # Status",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "Status"
+      "io_type": "Status",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     }
   ],
   "VFD-L": [
     {
-      "name": "CP_EN#-A",
+      "name": "Cp_En#-A",
       "description": "Compressor #-A Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": "Enable"
+      "io_type": "Enable",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     },
     {
-      "name": "CP_MOD#-A",
+      "name": "Cp_Mod#-A",
       "description": "Compressor #-A Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": "Modulation"
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     },
     {
-      "name": "CP_STS#-A",
+      "name": "Cp_Sts#-A",
       "description": "Compressor #-A Status",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "Status"
+      "io_type": "Status",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     }
   ],
   "C063": [

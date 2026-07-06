@@ -9,6 +9,7 @@ import math
 import os
 import sys
 from pathlib import Path
+import pandas as pd
 
 from PySide6.QtCore import Qt, QRectF, QThread
 from PySide6.QtGui import QAction, QFont, QPixmap
@@ -1594,7 +1595,7 @@ class MainWindow(QMainWindow):
     def _refresh_io_table(self):
         """Refresh the IO table from project circuits and manually added IOs."""
         self._io_table.setRowCount(0)
-        manual_ios = list(self._io_items)  # Save manually added IOs
+        #manual_ios = list(self._io_items)  # Save manually added IOs
         self._io_items_full.clear()
         self._io_items.clear()
         self._io_table_row_mapping.clear()
@@ -1621,6 +1622,9 @@ class MainWindow(QMainWindow):
                     io_type_name=io.get("io_type", ""),
                     old_name=io_old_name,
                     old_description=io_old_desc,
+                    circuit_name=circuit_name,
+                    circuit_no=circuit_no,
+                    template_name="",
                 ))
             
             # Then add template-based IOs
@@ -1639,16 +1643,122 @@ class MainWindow(QMainWindow):
                         io_type_name=io.get("io_type", ""),
                         old_name=io_old_name,
                         old_description=io_old_desc,
+                        circuit_name=circuit_name,
+                        circuit_no=circuit_no,
+                        template_name=tmpl_name,
                     ))
         
         # Add back manually added IOs
-        for manual_io in manual_ios:
-            if not any(item.tag == manual_io.tag for item in self._io_items_full):
-                self._io_items_full.append(manual_io)
+        #for manual_io in manual_ios:
+        #    if not any(item.tag == manual_io.tag for item in self._io_items_full):
+        #        self._io_items_full.append(manual_io)
         
         # Apply the current filter
         self._apply_io_filter(self._io_filter_type)
         self._refresh_io_summary()
+
+    def _sort_io_items(
+        self,
+        items: list[IOItem],
+        io_type: str,
+    ) -> list[IOItem]:
+        """
+        Sort IO items and add reserved IOs from Order_IO.xlsx.
+
+        Args:
+            items: List of IOItem objects.
+            io_type: "Input" or "Output".
+
+        Returns:
+            Sorted list of IOItem objects.
+        """
+
+        try:
+            file_path = Path(__file__).parent / "order_file" / "Order_IO.xlsx"
+
+            if not file_path.exists():
+                print(f"Warning: Order file not found at {file_path}")
+                return items
+
+            # Read the corresponding worksheet
+            df = pd.read_excel(file_path, sheet_name=io_type)
+
+            if len(df.columns) < 3:
+                print(
+                    f"Warning: Order file has insufficient columns "
+                    f"(expected 3+, got {len(df.columns)})"
+                )
+                return items
+
+            lst_circuit_numbers = self._resolve_project_circuit_numbers()
+
+            for index, row in df.iterrows():
+                try:
+                    tag = str(row.iloc[1]).strip() if pd.notna(row.iloc[1]) else None
+
+                    if not tag or tag.lower() == "nan":
+                        continue
+
+                    circuit_no = row.iloc[2]
+
+                    if (
+                        not any(item.tag == tag for item in items)
+                        and (
+                            str(circuit_no) in lst_circuit_numbers
+                            or str(circuit_no) == "N"
+                        )
+                    ):
+                        items.append(
+                            IOItem(
+                                tag=tag,
+                                io_type=io_type,
+                                description="Reserved",
+                                signal_type="Analog",
+                                io_type_name="non connecter",
+                                old_name=tag,
+                                old_description="Reserved",
+                            )
+                        )
+
+                except (IndexError, TypeError, AttributeError) as e:
+                    print(f"Warning: Skipping row {index} - {e}")
+
+        except Exception as e:
+            print(f"Warning: Error reading order file: {e}")
+            return items
+
+        # Sort according to Excel order
+        try:
+            order_mapping = {
+                str(row.iloc[1]).strip(): index
+                for index, row in df.iterrows()
+                if pd.notna(row.iloc[1])
+            }
+
+            items.sort(key=lambda item: order_mapping.get(item.tag, float("inf")))
+
+        except Exception as e:
+            print(f"Warning: Error sorting items based on order file: {e}")
+
+        # Deduplicate tags within each circuit
+        circuit_io_count = {}
+
+        for item in items:
+            if item.circuit_name and item.circuit_no:
+                base_tag = item.tag.rstrip("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+                if base_tag.endswith("-"):
+                    base_tag = base_tag[:-1]
+
+                key = (item.circuit_name, item.circuit_no, base_tag)
+
+                if key not in circuit_io_count:
+                    circuit_io_count[key] = 0
+                else:
+                    circuit_io_count[key] += 1
+                    letter = chr(ord("A") + circuit_io_count[key])
+                    item.tag = f"{base_tag}-{letter}"
+
+        return items
 
     def _apply_io_filter(self, filter_type: str):
         """Apply the IO filter and update the table display."""
@@ -1657,18 +1767,31 @@ class MainWindow(QMainWindow):
         self._io_items.clear()
         self._io_table_row_mapping.clear()
         
-        # Filter and display items from _io_items_full
+        # Filter items from _io_items_full
+        inputs_list = []
+        outputs_list = []
         for idx, item in enumerate(self._io_items_full):
             # Check if this item matches the filter
             if filter_type != "All" and item.io_type != filter_type:
                 continue
-            
+            if item.io_type == "Input":
+                inputs_list.append(item)
+            else:
+                outputs_list.append(item)
+        
+        # Sort the filtered items separately by type
+        sorted_inputs = self._sort_io_items(inputs_list, "Input") if inputs_list else []
+        sorted_outputs = self._sort_io_items(outputs_list, "Output") if outputs_list else []
+        sorted_items = sorted_inputs + sorted_outputs
+        
+        # Display items in the table
+        for item in sorted_items:
             row = self._io_table.rowCount()
             self._io_table.insertRow(row)
             for col, val in enumerate([
-                item.old_name or "",  # circuit_name not directly stored, use old_name as fallback
-                "",  # circuit_no not directly stored
-                item.old_description or "",  # template_name not directly stored, use old_description as fallback
+                item.circuit_name,
+                item.circuit_no,
+                item.template_name,
                 item.tag,
                 item.description,
                 item.signal_type,
@@ -1678,7 +1801,6 @@ class MainWindow(QMainWindow):
                 self._io_table.setItem(row, col, QTableWidgetItem(val))
             
             self._io_items.append(item)
-            self._io_table_row_mapping.append(idx)
         
         # Update button states
         self._update_io_filter_button_states()
