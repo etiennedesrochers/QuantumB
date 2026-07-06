@@ -886,13 +886,14 @@ class TemplateIODialog(QDialog):
     """Add / edit a single I/O entry on a template."""
 
     def __init__(self, parent=None, data: dict | None = None, io_types: list[dict] | None = None,
-                 available_templates: list[str] | None = None):
+                 available_templates: list[str] | None = None, available_ladder_component_templates: list[str] | None = None):
         super().__init__(parent)
         self.setWindowTitle(tr("dlg_template_io_title"))
         self.setMinimumWidth(400)
         self.result_data: dict | None = None
         self._io_types = io_types or []
         self._available_templates = available_templates or []
+        self._available_ladder_component_templates = available_ladder_component_templates or []
         self._build(data)
 
     def _build(self, data: dict | None):
@@ -929,6 +930,11 @@ class TemplateIODialog(QDialog):
         self._ladder_template_cb.addItems(self._available_templates)
         form.addRow("Ladder Template:", self._ladder_template_cb)
 
+        self._ladder_component_template_cb = QComboBox()
+        self._ladder_component_template_cb.addItem("")  # Allow empty selection
+        self._ladder_component_template_cb.addItems(self._available_ladder_component_templates)
+        form.addRow("Ladder Component Template:", self._ladder_component_template_cb)
+
         self._signal_cb.currentTextChanged.connect(self._sync_io_type)
         self._dir_cb.currentTextChanged.connect(self._sync_io_type)
 
@@ -945,6 +951,10 @@ class TemplateIODialog(QDialog):
                 idx = self._ladder_template_cb.findText(data["ladder_template"])
                 if idx >= 0:
                     self._ladder_template_cb.setCurrentIndex(idx)
+            if data.get("ladder_component_template"):
+                idx = self._ladder_component_template_cb.findText(data["ladder_component_template"])
+                if idx >= 0:
+                    self._ladder_component_template_cb.setCurrentIndex(idx)
 
         self._sync_io_type()
 
@@ -987,6 +997,7 @@ class TemplateIODialog(QDialog):
             "io_type":           self._io_type_cb.currentText(),
             "ladder_type":       self._ladder_type_cb.currentText(),
             "ladder_template":   self._ladder_template_cb.currentText(),
+            "ladder_component_template": self._ladder_component_template_cb.currentText(),
         }
         self.accept()
 
@@ -1186,13 +1197,15 @@ class CircuitDialog(QDialog):
     """Create or edit a Circuit."""
 
     def __init__(self, parent=None, available_templates: list[str] | None = None,
-                 data: Circuit | None = None):
+                 data: Circuit | None = None, io_types: list[dict] | None = None):
         super().__init__(parent)
         self.setWindowTitle(tr("dlg_circuit_title"))
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(600)
         self.result_circuit: Circuit | None = None
         self._available = available_templates or []
+        self._io_types = io_types or []
         self._templates: list[Template | str] = []  # Store template objects or strings
+        self._circuit_ios: list[dict] = []  # Store circuit I/Os
         self._build(data)
 
     def _build(self, data: Circuit | None):
@@ -1254,6 +1267,50 @@ class CircuitDialog(QDialog):
 
         layout.addWidget(self._grp_templates, 1)
 
+        # ── Circuit I/O list ───────────────────────────────────────────────
+        self._grp_ios = QGroupBox()
+        ios_lay = QVBoxLayout(self._grp_ios)
+
+        # Add / Edit / Remove buttons
+        ios_btn_row = QWidget()
+        ios_btn_lay = QHBoxLayout(ios_btn_row)
+        ios_btn_lay.setContentsMargins(0, 0, 0, 0)
+        self._btn_add_io = QPushButton()
+        self._btn_add_io.clicked.connect(self._add_circuit_io)
+        self._btn_edit_io = QPushButton()
+        self._btn_edit_io.clicked.connect(self._edit_circuit_io)
+        self._btn_remove_io = QPushButton()
+        self._btn_remove_io.clicked.connect(self._remove_circuit_io)
+        ios_btn_lay.addWidget(self._btn_add_io)
+        ios_btn_lay.addWidget(self._btn_edit_io)
+        ios_btn_lay.addWidget(self._btn_remove_io)
+        ios_btn_lay.addStretch()
+        ios_lay.addWidget(ios_btn_row)
+
+        # I/O table
+        self._ios_table = QTableWidget()
+        self._ios_table.setColumnCount(6)
+        self._ios_table.setHorizontalHeaderLabels([
+            tr("lbl_io_name_colon"),
+            tr("col_description"),
+            tr("col_signal_type"),
+            tr("col_io_type"),
+            "Ladder Type",
+            "Ladder Template",
+        ])
+        self._ios_table.horizontalHeader().setStretchLastSection(False)
+        self._ios_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self._ios_table.setSelectionMode(QTableWidget.SingleSelection)
+        
+        # Initialize from existing circuit I/Os
+        if data and data.circuit_ios:
+            self._circuit_ios = list(data.circuit_ios)
+            self._populate_ios_table()
+        
+        ios_lay.addWidget(self._ios_table, 1)
+
+        layout.addWidget(self._grp_ios, 1)
+
         # ── Buttons ────────────────────────────────────────────────────────
         btn_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         btn_box.accepted.connect(self._accept)
@@ -1261,6 +1318,26 @@ class CircuitDialog(QDialog):
         layout.addWidget(btn_box)
 
         self._retranslate()
+
+    def _populate_ios_table(self):
+        """Populate the I/O table with current circuit I/Os."""
+        self._ios_table.setRowCount(0)
+        for io_entry in self._circuit_ios:
+            row = self._ios_table.rowCount()
+            self._ios_table.insertRow(row)
+            
+            self._ios_table.setItem(row, 0, QTableWidgetItem(io_entry.get("name", "")))
+            self._ios_table.setItem(row, 1, QTableWidgetItem(io_entry.get("description", "")))
+            self._ios_table.setItem(row, 2, QTableWidgetItem(io_entry.get("signal_type", "")))
+            self._ios_table.setItem(row, 3, QTableWidgetItem(io_entry.get("io_type", "")))
+            self._ios_table.setItem(row, 4, QTableWidgetItem(io_entry.get("ladder_type", "")))
+            self._ios_table.setItem(row, 5, QTableWidgetItem(io_entry.get("ladder_template", "")))
+            
+            # Make cells read-only (editing only via dialog)
+            for col in range(6):
+                self._ios_table.item(row, col).setFlags(
+                    self._ios_table.item(row, col).flags() & ~Qt.ItemIsEditable
+                )
 
     def _format_template_display(self, tmpl: Template | str) -> str:
         """Format a template for display in the list widget."""
@@ -1281,10 +1358,14 @@ class CircuitDialog(QDialog):
         self._lbl_number.setText(tr("lbl_circuit_number"))
         self._lbl_desc.setText(tr("lbl_circuit_desc"))
         self._grp_templates.setTitle(tr("grp_circuit_templates"))
+        self._grp_ios.setTitle(tr("grp_circuit_ios"))
         self._btn_add_tmpl.setText(tr("btn_add_template"))
         self._btn_remove_tmpl.setText(tr("btn_remove"))
         self._btn_tmpl_up.setText(tr("btn_move_up"))
         self._btn_tmpl_down.setText(tr("btn_move_down"))
+        self._btn_add_io.setText(tr("btn_add"))
+        self._btn_edit_io.setText(tr("btn_edit"))
+        self._btn_remove_io.setText(tr("btn_remove"))
 
     def _add_template(self):
         name = self._tmpl_picker.currentText()
@@ -1328,6 +1409,31 @@ class CircuitDialog(QDialog):
             self._tmpl_list.insertItem(row + 1, item)
             self._tmpl_list.setCurrentRow(row + 1)
 
+    def _add_circuit_io(self):
+        """Add a new I/O entry to the circuit."""
+        dlg = CircuitIODialog(self, io_types=self._io_types, 
+                             available_templates=self._available)
+        if dlg.exec() == QDialog.Accepted and dlg.result_data:
+            self._circuit_ios.append(dlg.result_data)
+            self._populate_ios_table()
+
+    def _edit_circuit_io(self):
+        """Edit the selected I/O entry."""
+        row = self._ios_table.currentRow()
+        if row >= 0:
+            dlg = CircuitIODialog(self, data=self._circuit_ios[row], io_types=self._io_types,
+                                 available_templates=self._available)
+            if dlg.exec() == QDialog.Accepted and dlg.result_data:
+                self._circuit_ios[row] = dlg.result_data
+                self._populate_ios_table()
+
+    def _remove_circuit_io(self):
+        """Remove the selected I/O entry."""
+        row = self._ios_table.currentRow()
+        if row >= 0:
+            self._circuit_ios.pop(row)
+            self._populate_ios_table()
+
     def _accept(self):
         name = self._e_name.text().strip()
         if not name:
@@ -1339,7 +1445,121 @@ class CircuitDialog(QDialog):
             circuit_number=self._e_number.text().strip(),
             description=self._e_desc.text().strip(),
             templates=self._templates,
+            circuit_ios=self._circuit_ios,
         )
+        self.accept()
+
+
+# ---------------------------------------------------------------------------
+# Circuit IO Dialog  (add / edit a single I/O entry on a circuit)
+# ---------------------------------------------------------------------------
+
+class CircuitIODialog(QDialog):
+    """Add / edit a single I/O entry on a circuit."""
+
+    def __init__(self, parent=None, data: dict | None = None, io_types: list[dict] | None = None,
+                 available_templates: list[str] | None = None):
+        super().__init__(parent)
+        self.setWindowTitle(tr("dlg_circuit_io_title"))
+        self.setMinimumWidth(400)
+        self.result_data: dict | None = None
+        self._io_types = io_types or []
+        self._available_templates = available_templates or []
+        self._build(data)
+
+    def _build(self, data: dict | None):
+        layout = QVBoxLayout(self)
+        form = QFormLayout()
+        layout.addLayout(form)
+
+        self._name_edit = QLineEdit()
+        form.addRow(tr("lbl_io_name_colon"), self._name_edit)
+
+        self._desc_edit = QLineEdit()
+        form.addRow(tr("col_description") + ":", self._desc_edit)
+
+        self._signal_cb = QComboBox()
+        self._signal_cb.addItems(_TMPL_IO_SIGNAL_TYPES)
+        form.addRow(tr("col_signal_type") + ":", self._signal_cb)
+
+        self._dir_cb = QComboBox()
+        self._dir_cb.addItems(_TMPL_IO_DIRECTIONS)
+        form.addRow(tr("lbl_io_direction"), self._dir_cb)
+
+        self._io_type_cb = QComboBox()
+        form.addRow(tr("col_io_type") + ":", self._io_type_cb)
+
+        # Ladder linking fields
+        self._ladder_type_cb = QComboBox()
+        self._ladder_type_cb.addItem("")  # Allow empty selection
+        ladder_types = _load_ladder_types()
+        self._ladder_type_cb.addItems(ladder_types)
+        form.addRow("Ladder Type:", self._ladder_type_cb)
+
+        self._ladder_template_cb = QComboBox()
+        self._ladder_template_cb.addItem("")  # Allow empty selection
+        self._ladder_template_cb.addItems(self._available_templates)
+        form.addRow("Ladder Template:", self._ladder_template_cb)
+
+        self._signal_cb.currentTextChanged.connect(self._sync_io_type)
+        self._dir_cb.currentTextChanged.connect(self._sync_io_type)
+
+        if data:
+            self._name_edit.setText(data.get("name", ""))
+            self._desc_edit.setText(data.get("description", ""))
+            self._signal_cb.setCurrentText(data.get("signal_type", _TMPL_IO_SIGNAL_TYPES[0]))
+            self._dir_cb.setCurrentText(data.get("direction", _TMPL_IO_DIRECTIONS[0]))
+            if data.get("ladder_type"):
+                idx = self._ladder_type_cb.findText(data["ladder_type"])
+                if idx >= 0:
+                    self._ladder_type_cb.setCurrentIndex(idx)
+            if data.get("ladder_template"):
+                idx = self._ladder_template_cb.findText(data["ladder_template"])
+                if idx >= 0:
+                    self._ladder_template_cb.setCurrentIndex(idx)
+
+        self._sync_io_type()
+
+        if data and data.get("io_type"):
+            idx = self._io_type_cb.findText(data["io_type"])
+            if idx >= 0:
+                self._io_type_cb.setCurrentIndex(idx)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self._ok)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def _sync_io_type(self):
+        sig = self._signal_cb.currentText()
+        direction = self._dir_cb.currentText()
+        previous = self._io_type_cb.currentText()
+        self._io_type_cb.blockSignals(True)
+        self._io_type_cb.clear()
+        matches = [
+            t["name"] for t in self._io_types
+            if t.get("signal_category") == sig and t.get("direction") == direction
+        ]
+        self._io_type_cb.addItems(matches)
+        idx = self._io_type_cb.findText(previous)
+        if idx >= 0:
+            self._io_type_cb.setCurrentIndex(idx)
+        self._io_type_cb.blockSignals(False)
+
+    def _ok(self):
+        name = self._name_edit.text().strip()
+        if not name:
+            QMessageBox.warning(self, tr("msg_validation"), tr("msg_io_name_required"))
+            return
+        self.result_data = {
+            "name":              name,
+            "description":       self._desc_edit.text().strip(),
+            "signal_type":       self._signal_cb.currentText(),
+            "direction":         self._dir_cb.currentText(),
+            "io_type":           self._io_type_cb.currentText(),
+            "ladder_type":       self._ladder_type_cb.currentText(),
+            "ladder_template":   self._ladder_template_cb.currentText(),
+        }
         self.accept()
 
 

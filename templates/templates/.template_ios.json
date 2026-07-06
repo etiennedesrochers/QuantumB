@@ -237,5 +237,25 @@
       "direction": "Input",
       "io_type": "Status"
     }
+  ],
+  "2_Condeser_Fan": [
+    {
+      "name": "CD-F_EN#",
+      "description": "Condenser Enable #",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": "Enable",
+      "ladder_type": "None",
+      "ladder_template": ""
+    },
+    {
+      "name": "CD-F_EN#",
+      "description": "Condenser Fan Modulation #",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": ""
+    }
   ]
 }

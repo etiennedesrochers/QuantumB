@@ -25,6 +25,9 @@ IO_TEMPLATES_DIR.mkdir(exist_ok=True)
 LADDER_TEMPLATES_DIR = Path(__file__).parent / "templates" / "ladder"
 LADDER_TEMPLATES_DIR.mkdir(exist_ok=True)
 
+LADDER_COMPONENT_TEMPLATES_DIR = Path(__file__).parent / "templates" / "ladder_components"
+LADDER_COMPONENT_TEMPLATES_DIR.mkdir(exist_ok=True)
+
 VALVES_TEMPLATES_DIR = Path(__file__).parent / "templates" / "valves"
 VALVES_TEMPLATES_DIR.mkdir(exist_ok=True)
 

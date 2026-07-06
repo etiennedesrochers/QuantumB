@@ -189,6 +189,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "msg_remove_lib_circuit": "Remove circuit \u2018{name}\u2019 from the library?",
         "msg_remove_project_circuit_title": "Remove from Project",
         "msg_remove_project_circuit": "Remove this instance of \u2018{name}\u2019 from the project?",
+        # Circuit I/O list
+        "grp_circuit_ios": "Circuit I/O List",
+        "dlg_circuit_io_title": "Circuit I/O",
+        "btn_add": "Add",
+        "btn_edit": "Edit",
         # Template I/O list
         "grp_template_ios": "Template I/O List",
         "grp_io_template_channels": "IO Template Channels",
@@ -503,6 +508,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "msg_remove_lib_circuit": "Supprimer le circuit \u00ab\u00a0{name}\u00a0\u00bb de la biblioth\u00e8que\u00a0?",
         "msg_remove_project_circuit_title": "Supprimer du projet",
         "msg_remove_project_circuit": "Supprimer cette instance de \u00ab\u00a0{name}\u00a0\u00bb du projet\u00a0?",
+        # Circuit I/O list
+        "grp_circuit_ios": "Liste E/S du circuit",
+        "dlg_circuit_io_title": "E/S du circuit",
+        "btn_add": "Ajouter",
+        "btn_edit": "Modifier",
         # Template I/O list
         "grp_template_ios": "Liste E/S du gabarit",
         "grp_io_template_channels": "Canaux du gabarit E/S",

@@ -38,7 +38,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from template_manager import TemplateManager, CTRL_TEMPLATES_DIR, IO_TEMPLATES_DIR, LADDER_TEMPLATES_DIR, VALVES_TEMPLATES_DIR, _find_oda_converter, convert_dxf_to_dwg, convert_folder_dxf_to_dwg
+from template_manager import TemplateManager, CTRL_TEMPLATES_DIR, IO_TEMPLATES_DIR, LADDER_TEMPLATES_DIR, LADDER_COMPONENT_TEMPLATES_DIR, VALVES_TEMPLATES_DIR, _find_oda_converter, convert_dxf_to_dwg, convert_folder_dxf_to_dwg
 from drawing_generator import DrawingGenerator, LadderConfig, Rung, Component
 from io_manager import IOItem
 from i18n import tr, set_language, available_languages
@@ -87,8 +87,8 @@ _PAPER_SIZES = {
 _IO_COLS   = ("Circuit", "Circuit No", "Template", "Name", "Description", "Signal Type", "Direction", "IO Type")
 _IO_WIDTHS = (120, 80, 110, 110, 180, 90, 80, 130)
 
-_TMPL_IO_COLS   = ("Name", "Description", "Signal Type", "Direction", "IO Type")
-_TMPL_IO_WIDTHS = (120, 200, 90, 80, 130)
+_TMPL_IO_COLS   = ("Name", "Description", "Signal Type", "Direction", "IO Type", "Ladder Type", "Ladder Template", "Ladder Component Template")
+_TMPL_IO_WIDTHS = (120, 200, 90, 80, 130, 100, 140, 180)
 
 
 
@@ -106,6 +106,7 @@ class MainWindow(QMainWindow):
         self._ctrl_template_mgr = TemplateManager(CTRL_TEMPLATES_DIR)
         self._io_template_mgr = TemplateManager(IO_TEMPLATES_DIR)
         self._ladder_template_mgr = TemplateManager(LADDER_TEMPLATES_DIR)
+        self._ladder_component_template_mgr = TemplateManager(LADDER_COMPONENT_TEMPLATES_DIR)
         self._valves_template_mgr = TemplateManager(VALVES_TEMPLATES_DIR)
         self._active_template_mgr = self._template_mgr
         self._rungs: list[Rung] = []
@@ -1407,7 +1408,8 @@ class MainWindow(QMainWindow):
                 self._library_circuit_table.setItem(row, col, QTableWidgetItem(val))
 
     def _add_library_circuit(self):
-        dlg = CircuitDialog(self, available_templates=self._template_mgr.list_templates())
+        dlg = CircuitDialog(self, available_templates=self._template_mgr.list_templates(),
+                           io_types=self._io_types)
         if dlg.exec() == QDialog.Accepted and dlg.result_circuit:
             self._library_circuits.append(dlg.result_circuit)
             self._refresh_library_table()
@@ -1420,7 +1422,8 @@ class MainWindow(QMainWindow):
             return
         dlg = CircuitDialog(self,
                             available_templates=self._template_mgr.list_templates(),
-                            data=self._library_circuits[idx])
+                            data=self._library_circuits[idx],
+                            io_types=self._io_types)
         if dlg.exec() == QDialog.Accepted and dlg.result_circuit:
             # preserve existing valves when re-editing a circuit
             dlg.result_circuit.valves = self._library_circuits[idx].valves
@@ -1581,6 +1584,37 @@ class MainWindow(QMainWindow):
             if circuit is None:
                 continue
             circuit_no = resolved_numbers[ref_idx]
+            
+            # Add circuit-level IOs first
+            for io in circuit.circuit_ios:
+                io_old_name = io.get("name", "")
+                io_old_desc = io.get("description", "")
+                io_name = io.get("name", "").replace("#", circuit_no)
+                io_desc = io.get("description", "").replace("#", circuit_no)
+                row = self._io_table.rowCount()
+                self._io_table.insertRow(row)
+                for col, val in enumerate([
+                    circuit_name,
+                    circuit_no,
+                    "",  # Template name is empty for circuit-level IOs
+                    io_name,
+                    io_desc,
+                    io.get("signal_type", ""),
+                    io.get("direction", ""),
+                    io.get("io_type", ""),
+                ]):
+                    self._io_table.setItem(row, col, QTableWidgetItem(val))
+                self._io_items.append(IOItem(
+                    tag=io_name,
+                    io_type=io.get("direction", "Input"),
+                    description=io_desc,
+                    signal_type=io.get("signal_type", ""),
+                    io_type_name=io.get("io_type", ""),
+                    old_name=io_old_name,
+                    old_description=io_old_desc,
+                ))
+            
+            # Then add template-based IOs
             for tmpl_name in circuit.templates:
                 ios = self._template_mgr.get_template_ios(tmpl_name)
                 for io in ios:
@@ -1658,6 +1692,9 @@ class MainWindow(QMainWindow):
                 io.get("signal_type", ""),
                 io.get("direction", ""),
                 io.get("io_type", ""),
+                io.get("ladder_type", ""),
+                io.get("ladder_template", ""),
+                io.get("ladder_component_template", ""),
             ]):
                 self._tmpl_io_table.setItem(row, col, QTableWidgetItem(val))
 
@@ -1670,8 +1707,10 @@ class MainWindow(QMainWindow):
         if not self._tmpl_current_name:
             return
         available_templates = self._template_mgr.list_templates()
+        available_ladder_component_templates = self._ladder_component_template_mgr.list_templates()
         dlg = TemplateIODialog(self, io_types=self._io_types, 
-                              available_templates=available_templates)
+                              available_templates=available_templates,
+                              available_ladder_component_templates=available_ladder_component_templates)
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._tmpl_ios.append(dlg.result_data)
             self._refresh_tmpl_io_table()
@@ -1684,8 +1723,10 @@ class MainWindow(QMainWindow):
         if idx < 0:
             return
         available_templates = self._template_mgr.list_templates()
+        available_ladder_component_templates = self._ladder_component_template_mgr.list_templates()
         dlg = TemplateIODialog(self, self._tmpl_ios[idx], io_types=self._io_types,
-                              available_templates=available_templates)
+                              available_templates=available_templates,
+                              available_ladder_component_templates=available_ladder_component_templates)
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._tmpl_ios[idx] = dlg.result_data
             self._refresh_tmpl_io_table()

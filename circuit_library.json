@@ -8,7 +8,27 @@
       "C050",
       "C050"
     ],
-    "valves": []
+    "valves": [],
+    "circuit_ios": [
+      {
+        "name": "test#",
+        "description": "ww",
+        "signal_type": "Digital",
+        "direction": "Output",
+        "io_type": "Enable",
+        "ladder_type": "",
+        "ladder_template": ""
+      },
+      {
+        "name": "testi#",
+        "description": "",
+        "signal_type": "Digital",
+        "direction": "Input",
+        "io_type": "Pressure",
+        "ladder_type": "",
+        "ladder_template": ""
+      }
+    ]
   },
   {
     "name": "Circuit Base",
@@ -18,7 +38,8 @@
       "1_Condenser_Fan",
       "3_Supply_Fan"
     ],
-    "valves": []
+    "valves": [],
+    "circuit_ios": []
   },
   {
     "name": "B1",
@@ -29,7 +50,8 @@
       "VFD-L",
       "VFD-CD"
     ],
-    "valves": []
+    "valves": [],
+    "circuit_ios": []
   },
   {
     "name": "AHU1",
@@ -41,6 +63,7 @@
       "AHU_HEAT_COIL",
       "ENTH-WHEEL"
     ],
-    "valves": []
+    "valves": [],
+    "circuit_ios": []
   }
 ]

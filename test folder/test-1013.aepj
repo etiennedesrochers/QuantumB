@@ -12,7 +12,8 @@
   "project_circuits": [
     "B1",
     "B1",
-    "AHU1"
+    "AHU1",
+    "B1"
   ],
   "io_items": [
     {
@@ -28,7 +29,7 @@
       "notes": "",
       "old_name": "CP_EN#-A",
       "old_description": "Compressor #-A Enable",
-      "number": "DO_101"
+      "number": "DO101"
     },
     {
       "tag": "CP_MOD1-A",
@@ -43,7 +44,7 @@
       "notes": "",
       "old_name": "CP_MOD#-A",
       "old_description": "Compressor #-A Modulation",
-      "number": "AO_102"
+      "number": "AO102"
     },
     {
       "tag": "CP_STS1-A",
@@ -58,7 +59,7 @@
       "notes": "",
       "old_name": "CP_STS#-A",
       "old_description": "Compressor #-A Status",
-      "number": "AI_101"
+      "number": "AI101"
     },
     {
       "tag": "CP_EN1-A",
@@ -73,7 +74,7 @@
       "notes": "",
       "old_name": "CP_EN#-A",
       "old_description": "Compressor #-A Enable",
-      "number": "DO_103"
+      "number": "DO103"
     },
     {
       "tag": "CP_MOD1-A",
@@ -88,7 +89,7 @@
       "notes": "",
       "old_name": "CP_MOD#-A",
       "old_description": "Compressor #-A Modulation",
-      "number": "AO_104"
+      "number": "AO104"
     },
     {
       "tag": "CP_STS1-A",
@@ -103,7 +104,7 @@
       "notes": "",
       "old_name": "CP_STS#-A",
       "old_description": "Compressor #-A Status",
-      "number": "AI_102"
+      "number": "AI102"
     },
     {
       "tag": "CD-F_EN1",
@@ -118,7 +119,7 @@
       "notes": "",
       "old_name": "CD-F_EN#",
       "old_description": "Condenser Fan # Enable",
-      "number": "DO_205"
+      "number": "DO205"
     },
     {
       "tag": "CD-F_MOD1",
@@ -133,7 +134,7 @@
       "notes": "",
       "old_name": "CD-F_MOD#",
       "old_description": "Condenser Fan # Modulation",
-      "number": "AO_206"
+      "number": "AO206"
     },
     {
       "tag": "CD_F-STS1",
@@ -148,7 +149,7 @@
       "notes": "",
       "old_name": "CD_F-STS#",
       "old_description": "Conder Fan # Status",
-      "number": "AI_203"
+      "number": "AI203"
     },
     {
       "tag": "CP_EN2-A",
@@ -163,7 +164,7 @@
       "notes": "",
       "old_name": "CP_EN#-A",
       "old_description": "Compressor #-A Enable",
-      "number": "DO_207"
+      "number": "DO207"
     },
     {
       "tag": "CP_MOD2-A",
@@ -178,7 +179,7 @@
       "notes": "",
       "old_name": "CP_MOD#-A",
       "old_description": "Compressor #-A Modulation",
-      "number": "AO_208"
+      "number": "AO208"
     },
     {
       "tag": "CP_STS2-A",
@@ -193,7 +194,7 @@
       "notes": "",
       "old_name": "CP_STS#-A",
       "old_description": "Compressor #-A Status",
-      "number": "AI_204"
+      "number": "AI204"
     },
     {
       "tag": "CP_EN2-A",
@@ -208,7 +209,7 @@
       "notes": "",
       "old_name": "CP_EN#-A",
       "old_description": "Compressor #-A Enable",
-      "number": "DO_309"
+      "number": "DO309"
     },
     {
       "tag": "CP_MOD2-A",
@@ -223,7 +224,7 @@
       "notes": "",
       "old_name": "CP_MOD#-A",
       "old_description": "Compressor #-A Modulation",
-      "number": "AO_310"
+      "number": "AO310"
     },
     {
       "tag": "CP_STS2-A",
@@ -238,7 +239,7 @@
       "notes": "",
       "old_name": "CP_STS#-A",
       "old_description": "Compressor #-A Status",
-      "number": "AI_205"
+      "number": "AI205"
     },
     {
       "tag": "CD-F_EN2",
@@ -253,7 +254,7 @@
       "notes": "",
       "old_name": "CD-F_EN#",
       "old_description": "Condenser Fan # Enable",
-      "number": "DO_311"
+      "number": "DO311"
     },
     {
       "tag": "CD-F_MOD2",
@@ -268,7 +269,7 @@
       "notes": "",
       "old_name": "CD-F_MOD#",
       "old_description": "Condenser Fan # Modulation",
-      "number": "AO_312"
+      "number": "AO312"
     },
     {
       "tag": "CD_F-STS2",
@@ -283,7 +284,7 @@
       "notes": "",
       "old_name": "CD_F-STS#",
       "old_description": "Conder Fan # Status",
-      "number": "AI_306"
+      "number": "AI306"
     },
     {
       "tag": "RTRN-F_EN",
@@ -298,7 +299,7 @@
       "notes": "",
       "old_name": "RTRN-F_EN",
       "old_description": "Return Fan Enable",
-      "number": "DO_413"
+      "number": "DO413"
     },
     {
       "tag": "RTRN-F_MOD",
@@ -313,7 +314,7 @@
       "notes": "",
       "old_name": "RTRN-F_MOD",
       "old_description": "Return Fan Modulation",
-      "number": "AO_414"
+      "number": "AO414"
     },
     {
       "tag": "RTRN-F_STS1",
@@ -328,7 +329,7 @@
       "notes": "",
       "old_name": "RTRN-F_STS1",
       "old_description": "Return Fan Status 1",
-      "number": "AI_307"
+      "number": "AI307"
     },
     {
       "tag": "RTRN-F_STS2",
@@ -343,7 +344,7 @@
       "notes": "",
       "old_name": "RTRN-F_STS2",
       "old_description": "Return Fan Status 2",
-      "number": "AI_308"
+      "number": "AI308"
     },
     {
       "tag": "RTRN-F_STS3",
@@ -358,7 +359,7 @@
       "notes": "",
       "old_name": "RTRN-F_STS3",
       "old_description": "Return Fan Status 3",
-      "number": "AI_309"
+      "number": "AI309"
     },
     {
       "tag": "SUPP-F_EN",
@@ -373,7 +374,7 @@
       "notes": "",
       "old_name": "SUPP-F_EN",
       "old_description": "Supply Fan Enable",
-      "number": "DO_415"
+      "number": "DO415"
     },
     {
       "tag": "SUPP-F_MOD",
@@ -388,7 +389,7 @@
       "notes": "",
       "old_name": "SUPP-F_MOD",
       "old_description": "Supply Fan Modulation",
-      "number": "AO_516"
+      "number": "AO516"
     },
     {
       "tag": "SF_STS1",
@@ -403,7 +404,7 @@
       "notes": "",
       "old_name": "SF_STS1",
       "old_description": "Supply Fan Status 1",
-      "number": "AI_410"
+      "number": "AI410"
     },
     {
       "tag": "SF_STS2",
@@ -418,7 +419,7 @@
       "notes": "",
       "old_name": "SF_STS2",
       "old_description": "Supply Fan Status 2",
-      "number": "AI_411"
+      "number": "AI411"
     },
     {
       "tag": "SF_STS3",
@@ -433,7 +434,7 @@
       "notes": "",
       "old_name": "SF_STS3",
       "old_description": "Supply Fan Status 3",
-      "number": "AI_412"
+      "number": "AI412"
     },
     {
       "tag": "ELEC_HEAT_EN",
@@ -448,7 +449,7 @@
       "notes": "",
       "old_name": "ELEC_HEAT_EN",
       "old_description": "Electrical Heat Enable",
-      "number": "DO_517"
+      "number": "DO517"
     },
     {
       "tag": "ELEC_HEAT_MOD",
@@ -463,7 +464,7 @@
       "notes": "",
       "old_name": "ELEC_HEAT_MOD",
       "old_description": "Electrical Heat Modulation",
-      "number": "AO_518"
+      "number": "AO518"
     },
     {
       "tag": "ENT_WH_EN",
@@ -478,7 +479,7 @@
       "notes": "",
       "old_name": "ENT_WH_EN",
       "old_description": "Ent Wheel Enable",
-      "number": "DO_619"
+      "number": "DO619"
     },
     {
       "tag": "ENT_WH_MOD",
@@ -493,7 +494,7 @@
       "notes": "",
       "old_name": "ENT_WH_MOD",
       "old_description": "Ent Wheel Modulation",
-      "number": "AO_620"
+      "number": "AO620"
     },
     {
       "tag": "ENT_WH_STS",
@@ -508,7 +509,142 @@
       "notes": "",
       "old_name": "ENT_WH_STS",
       "old_description": "Ent Wheel Status",
-      "number": "AI_513"
+      "number": "AI513"
+    },
+    {
+      "tag": "CP_EN3-A",
+      "io_type": "Output",
+      "address": "CTL6-O",
+      "description": "Compressor 3-A Enable",
+      "panel": "",
+      "signal_type": "Digital",
+      "io_type_name": "Enable",
+      "terminal": "",
+      "cable": "",
+      "notes": "",
+      "old_name": "CP_EN#-A",
+      "old_description": "Compressor #-A Enable",
+      "number": "DO621"
+    },
+    {
+      "tag": "CP_MOD3-A",
+      "io_type": "Output",
+      "address": "CTL6-O",
+      "description": "Compressor 3-A Modulation",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "Modulation",
+      "terminal": "",
+      "cable": "",
+      "notes": "",
+      "old_name": "CP_MOD#-A",
+      "old_description": "Compressor #-A Modulation",
+      "number": "AO622"
+    },
+    {
+      "tag": "CP_STS3-A",
+      "io_type": "Input",
+      "address": "CTL5-I",
+      "description": "Compressor 3-A Status",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "Status",
+      "terminal": "",
+      "cable": "",
+      "notes": "",
+      "old_name": "CP_STS#-A",
+      "old_description": "Compressor #-A Status",
+      "number": "AI514"
+    },
+    {
+      "tag": "CP_EN3-A",
+      "io_type": "Output",
+      "address": "CTL7-O",
+      "description": "Compressor 3-A Enable",
+      "panel": "",
+      "signal_type": "Digital",
+      "io_type_name": "Enable",
+      "terminal": "",
+      "cable": "",
+      "notes": "",
+      "old_name": "CP_EN#-A",
+      "old_description": "Compressor #-A Enable",
+      "number": "DO723"
+    },
+    {
+      "tag": "CP_MOD3-A",
+      "io_type": "Output",
+      "address": "CTL7-O",
+      "description": "Compressor 3-A Modulation",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "Modulation",
+      "terminal": "",
+      "cable": "",
+      "notes": "",
+      "old_name": "CP_MOD#-A",
+      "old_description": "Compressor #-A Modulation",
+      "number": "AO724"
+    },
+    {
+      "tag": "CP_STS3-A",
+      "io_type": "Input",
+      "address": "CTL5-I",
+      "description": "Compressor 3-A Status",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "Status",
+      "terminal": "",
+      "cable": "",
+      "notes": "",
+      "old_name": "CP_STS#-A",
+      "old_description": "Compressor #-A Status",
+      "number": "AI515"
+    },
+    {
+      "tag": "CD-F_EN3",
+      "io_type": "Output",
+      "address": "CTL7-O",
+      "description": "Condenser Fan 3 Enable",
+      "panel": "",
+      "signal_type": "Digital",
+      "io_type_name": "Enable",
+      "terminal": "",
+      "cable": "",
+      "notes": "",
+      "old_name": "CD-F_EN#",
+      "old_description": "Condenser Fan # Enable",
+      "number": "DO725"
+    },
+    {
+      "tag": "CD-F_MOD3",
+      "io_type": "Output",
+      "address": "CTL7-O",
+      "description": "Condenser Fan 3 Modulation",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "Modulation",
+      "terminal": "",
+      "cable": "",
+      "notes": "",
+      "old_name": "CD-F_MOD#",
+      "old_description": "Condenser Fan # Modulation",
+      "number": "AO726"
+    },
+    {
+      "tag": "CD_F-STS3",
+      "io_type": "Input",
+      "address": "CTL6-I",
+      "description": "Conder Fan 3 Status",
+      "panel": "",
+      "signal_type": "Analog",
+      "io_type_name": "Status",
+      "terminal": "",
+      "cable": "",
+      "notes": "",
+      "old_name": "CD_F-STS#",
+      "old_description": "Conder Fan # Status",
+      "number": "AI616"
     }
   ],
   "rungs": []

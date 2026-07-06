@@ -47,6 +47,7 @@ class Circuit:
     description: str
     templates: list[str | Template] = field(default_factory=list)   # template names or Template objects
     valves: list = field(default_factory=list)            # list[Valve]
+    circuit_ios: list = field(default_factory=list)       # list[dict] - I/O entries for circuit
 
     def __post_init__(self):
         # Convert plain dicts (from JSON deserialization) to Valve objects
