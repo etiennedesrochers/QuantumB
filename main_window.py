@@ -1569,6 +1569,8 @@ class MainWindow(QMainWindow):
         )
         input_count =0
         output_count=0
+        input_index = 0
+        output_index = 0
 
         #For each io, we will assign a module number on the address
         #CTL(I for Input and O for output)_(controller number)
@@ -1581,16 +1583,18 @@ class MainWindow(QMainWindow):
                 analog = "D"
             #if item is input
             if item.io_type == "Input":
-                item.address = f"CTL{(self._io_items.index(item) // len(self._modules[0].get("inputs"))) + 1}-I"
+                item.address = f"CTL{(input_index // len(self._modules[0].get("inputs"))) + 1}-I"
                 input_count += 1
                 zero = "0" if input_count < 10 else ""
-                item.number = f"{analog}I{(self._io_items.index(item) // len(self._modules[0].get("inputs"))) + 1}{zero}{input_count}"
+                item.number = f"{analog}I{(input_index // len(self._modules[0].get("inputs"))) + 1}{zero}{input_count}"
+                input_index += 1
                 
             else:
-                item.address = f"CTL{(self._io_items.index(item) // len(self._modules[0].get("outputs"))) + 1}-O"
+                item.address = f"CTL{(output_index // len(self._modules[0].get("outputs"))) + 1}-O"
                 output_count += 1
                 zero = "0" if output_count < 10 else ""
-                item.number = f"{analog}O{(self._io_items.index(item) // len(self._modules[0].get("outputs"))) + 1}{zero}{output_count}"
+                item.number = f"{analog}O{(output_index // len(self._modules[0].get("outputs"))) + 1}{zero}{output_count}"
+                output_index += 1
 
     def _refresh_io_table(self):
         """Refresh the IO table from project circuits and manually added IOs."""
@@ -1714,7 +1718,7 @@ class MainWindow(QMainWindow):
                                 io_type=io_type,
                                 description="Reserved",
                                 signal_type="Analog",
-                                io_type_name="non connecter",
+                                io_type_name=("non connecter" if io_type.lower() == "input" else "non connecterO"),
                                 old_name=tag,
                                 old_description="Reserved",
                             )

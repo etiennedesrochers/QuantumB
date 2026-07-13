@@ -79,5 +79,14 @@
     "io_template": "out_relay",
     "shared": false,
     "shared_template": ""
+  },
+  {
+    "name": "non connecterO",
+    "description": "Output non connecter",
+    "signal_category": "Analog",
+    "direction": "Output",
+    "io_template": "non connecterO",
+    "shared": false,
+    "shared_template": ""
   }
 ]
