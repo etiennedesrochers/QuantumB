@@ -55,6 +55,7 @@ def build_executable():
         "--specpath=.",  # Spec file location
         "--add-data=templates:templates",  # Include templates folder
         "--add-data=symbols:symbols",  # Include symbols folder
+        "--add-data=order_file:order_file",  # Include order file folder
         "--hidden-import=PySide6.QtCore",
         "--hidden-import=PySide6.QtGui",
         "--hidden-import=PySide6.QtWidgets",

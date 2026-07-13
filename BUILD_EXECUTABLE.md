@@ -33,7 +33,7 @@ The executable will be created in:
 
 - **Single-file executable**: All dependencies bundled into one `.exe` file
 - **Windowed mode**: No console window on startup (set `console=True` in `QuantumB.spec` if you want console)
-- **Bundled folders**: `templates/` and `symbols/` are included in the executable
+- **Bundled folders**: `templates/`, `symbols/`, and `order_file/` are included in the executable
 
 ## Customization
 
