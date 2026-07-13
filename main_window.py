@@ -144,6 +144,7 @@ class MainWindow(QMainWindow):
         self._refresh_ctrl_template_list()
         self._refresh_io_template_list()
         self._refresh_ladder_template_list()
+        self._refresh_ladder_component_template_list()
         self._refresh_valves_template_list()
         self._load_library()
         self._load_rules()
@@ -464,6 +465,32 @@ class MainWindow(QMainWindow):
         t4_btn_lay.addStretch()
         t4_lay.addWidget(t4_btn)
         self._tmpl_type_tabs.addTab(tab4, "")
+
+        # Tab 5: Ladder component templates
+        tab5 = QWidget()
+        t5_lay = QVBoxLayout(tab5)
+        t5_lay.setContentsMargins(4, 4, 4, 4)
+        self._ladder_component_tmpl_list = QListWidget()
+        self._ladder_component_tmpl_list.currentItemChanged.connect(self._on_ladder_component_template_selected)
+        t5_lay.addWidget(self._ladder_component_tmpl_list)
+        t5_btn = QWidget()
+        t5_btn_lay = QHBoxLayout(t5_btn)
+        t5_btn_lay.setContentsMargins(0, 0, 0, 0)
+        self._btn_import_ladder_component_tmpl = QPushButton()
+        self._btn_import_ladder_component_tmpl.clicked.connect(self._import_ladder_component_template)
+        self._btn_delete_ladder_component_tmpl = QPushButton()
+        self._btn_delete_ladder_component_tmpl.clicked.connect(self._delete_ladder_component_template)
+        self._btn_edit_ladder_component_tmpl = QPushButton()
+        self._btn_edit_ladder_component_tmpl.clicked.connect(self._edit_ladder_component_template)
+        self._btn_open_ladder_component_tmpl_folder = QPushButton()
+        self._btn_open_ladder_component_tmpl_folder.clicked.connect(self._open_ladder_component_template_folder)
+        t5_btn_lay.addWidget(self._btn_import_ladder_component_tmpl)
+        t5_btn_lay.addWidget(self._btn_delete_ladder_component_tmpl)
+        t5_btn_lay.addWidget(self._btn_edit_ladder_component_tmpl)
+        t5_btn_lay.addWidget(self._btn_open_ladder_component_tmpl_folder)
+        t5_btn_lay.addStretch()
+        t5_lay.addWidget(t5_btn)
+        self._tmpl_type_tabs.addTab(tab5, "")
 
         layout.addWidget(self._tmpl_type_tabs, 1)
 
@@ -1939,6 +1966,21 @@ class MainWindow(QMainWindow):
             self._io_tmpl_list.clearSelection()
             self._io_tmpl_list.setCurrentRow(-1)
             self._io_tmpl_list.blockSignals(False)
+            # Deselect the ladder template list without triggering its signal
+            self._ladder_tmpl_list.blockSignals(True)
+            self._ladder_tmpl_list.clearSelection()
+            self._ladder_tmpl_list.setCurrentRow(-1)
+            self._ladder_tmpl_list.blockSignals(False)
+            # Deselect the valves template list without triggering its signal
+            self._valves_tmpl_list.blockSignals(True)
+            self._valves_tmpl_list.clearSelection()
+            self._valves_tmpl_list.setCurrentRow(-1)
+            self._valves_tmpl_list.blockSignals(False)
+            # Deselect the ladder component template list without triggering its signal
+            self._ladder_component_tmpl_list.blockSignals(True)
+            self._ladder_component_tmpl_list.clearSelection()
+            self._ladder_component_tmpl_list.setCurrentRow(-1)
+            self._ladder_component_tmpl_list.blockSignals(False)
 
         self._tmpl_blocks = []
         self._tmpl_attr_values = {}
@@ -2123,6 +2165,21 @@ class MainWindow(QMainWindow):
         self._io_tmpl_list.clearSelection()
         self._io_tmpl_list.setCurrentRow(-1)
         self._io_tmpl_list.blockSignals(False)
+        # Deselect the ladder template list without triggering its signal
+        self._ladder_tmpl_list.blockSignals(True)
+        self._ladder_tmpl_list.clearSelection()
+        self._ladder_tmpl_list.setCurrentRow(-1)
+        self._ladder_tmpl_list.blockSignals(False)
+        # Deselect the valves template list without triggering its signal
+        self._valves_tmpl_list.blockSignals(True)
+        self._valves_tmpl_list.clearSelection()
+        self._valves_tmpl_list.setCurrentRow(-1)
+        self._valves_tmpl_list.blockSignals(False)
+        # Deselect the ladder component template list without triggering its signal
+        self._ladder_component_tmpl_list.blockSignals(True)
+        self._ladder_component_tmpl_list.clearSelection()
+        self._ladder_component_tmpl_list.setCurrentRow(-1)
+        self._ladder_component_tmpl_list.blockSignals(False)
 
         self._tmpl_blocks = []
         self._tmpl_attr_values = {}
@@ -2219,6 +2276,24 @@ class MainWindow(QMainWindow):
         self._ctrl_tmpl_list.clearSelection()
         self._ctrl_tmpl_list.setCurrentRow(-1)
         self._ctrl_tmpl_list.blockSignals(False)
+
+        # Deselect the ladder template list without triggering its signal
+        self._ladder_tmpl_list.blockSignals(True)
+        self._ladder_tmpl_list.clearSelection()
+        self._ladder_tmpl_list.setCurrentRow(-1)
+        self._ladder_tmpl_list.blockSignals(False)
+
+        # Deselect the valves template list without triggering its signal
+        self._valves_tmpl_list.blockSignals(True)
+        self._valves_tmpl_list.clearSelection()
+        self._valves_tmpl_list.setCurrentRow(-1)
+        self._valves_tmpl_list.blockSignals(False)
+
+        # Deselect the ladder component template list without triggering its signal
+        self._ladder_component_tmpl_list.blockSignals(True)
+        self._ladder_component_tmpl_list.clearSelection()
+        self._ladder_component_tmpl_list.setCurrentRow(-1)
+        self._ladder_component_tmpl_list.blockSignals(False)
 
         self._tmpl_blocks = []
         self._tmpl_attr_values = {}
@@ -2371,6 +2446,14 @@ class MainWindow(QMainWindow):
         self._io_tmpl_list.clearSelection()
         self._io_tmpl_list.setCurrentRow(-1)
         self._io_tmpl_list.blockSignals(False)
+        self._valves_tmpl_list.blockSignals(True)
+        self._valves_tmpl_list.clearSelection()
+        self._valves_tmpl_list.setCurrentRow(-1)
+        self._valves_tmpl_list.blockSignals(False)
+        self._ladder_component_tmpl_list.blockSignals(True)
+        self._ladder_component_tmpl_list.clearSelection()
+        self._ladder_component_tmpl_list.setCurrentRow(-1)
+        self._ladder_component_tmpl_list.blockSignals(False)
 
         self._tmpl_blocks = []
         self._tmpl_attr_values = {}
@@ -2456,6 +2539,117 @@ class MainWindow(QMainWindow):
         import subprocess
         subprocess.Popen(["explorer", str(self._ladder_template_mgr.templates_dir)])
 
+    def _refresh_ladder_component_template_list(self):
+        self._ladder_component_tmpl_list.clear()
+        for name in self._ladder_component_template_mgr.list_templates():
+            self._ladder_component_tmpl_list.addItem(name)
+
+    def _import_ladder_component_template(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, tr("msg_import_template_title"), "",
+            tr("msg_import_filter"),
+        )
+        if not path:
+            return
+        name, ok = QInputDialog.getText(
+            self, tr("msg_template_name_title"), tr("msg_template_name_prompt"),
+            text=Path(path).stem,
+        )
+        if not ok or not name.strip():
+            return
+        success, msg = self._ladder_component_template_mgr.save_template(path, name.strip())
+        if success:
+            QMessageBox.information(self, tr("msg_import_success_title"), msg)
+            self._refresh_ladder_component_template_list()
+            items = self._ladder_component_tmpl_list.findItems(name.strip(), Qt.MatchExactly)
+            if items:
+                self._ladder_component_tmpl_list.setCurrentItem(items[0])
+        else:
+            QMessageBox.critical(self, tr("msg_import_error_title"), msg)
+
+    def _delete_ladder_component_template(self):
+        sel = self._ladder_component_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_delete_template_title"), tr("msg_delete_template_none"))
+            return
+        name = sel.text()
+        if QMessageBox.question(self, tr("msg_confirm_delete_title"), tr("msg_confirm_delete", name=name)) == QMessageBox.Yes:
+            ok, msg = self._ladder_component_template_mgr.delete_template(name)
+            if ok:
+                self._refresh_ladder_component_template_list()
+            else:
+                QMessageBox.critical(self, tr("msg_error_title"), msg)
+
+    def _edit_ladder_component_template(self):
+        """Edit metadata for the selected ladder component template."""
+        sel = self._ladder_component_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_validation"), "Please select a ladder component template to edit.")
+            return
+        name = sel.text()
+        
+        # Create and show the metadata dialog
+        dlg = TemplateMetadataDialog(self, template_name=name, data=None)
+        if dlg.exec() == QDialog.Accepted and dlg.result_template:
+            # You can use the result_template here if needed
+            pass
+
+    def _on_ladder_component_template_selected(self, current, previous):
+        """Update the Template tab when a ladder component template is selected."""
+        if current is None:
+            return
+        # Deselect the other template lists without triggering their signals
+        self._tmpl_list.blockSignals(True)
+        self._tmpl_list.clearSelection()
+        self._tmpl_list.setCurrentRow(-1)
+        self._tmpl_list.blockSignals(False)
+        self._ctrl_tmpl_list.blockSignals(True)
+        self._ctrl_tmpl_list.clearSelection()
+        self._ctrl_tmpl_list.setCurrentRow(-1)
+        self._ctrl_tmpl_list.blockSignals(False)
+        self._io_tmpl_list.blockSignals(True)
+        self._io_tmpl_list.clearSelection()
+        self._io_tmpl_list.setCurrentRow(-1)
+        self._io_tmpl_list.blockSignals(False)
+        self._ladder_tmpl_list.blockSignals(True)
+        self._ladder_tmpl_list.clearSelection()
+        self._ladder_tmpl_list.setCurrentRow(-1)
+        self._ladder_tmpl_list.blockSignals(False)
+        self._valves_tmpl_list.blockSignals(True)
+        self._valves_tmpl_list.clearSelection()
+        self._valves_tmpl_list.setCurrentRow(-1)
+        self._valves_tmpl_list.blockSignals(False)
+
+        self._tmpl_blocks = []
+        self._tmpl_attr_values = {}
+        self._tmpl_current_block = None
+        self._tmpl_current_name = None
+        self._tmpl_axis_bounds = None
+        self._tmpl_block_list.clear()
+        self._tmpl_attrib_table.blockSignals(True)
+        self._tmpl_attrib_table.setRowCount(0)
+        self._tmpl_attrib_table.blockSignals(False)
+        self._tmpl_ios = []
+        self._refresh_tmpl_io_table()
+
+        name = current.text()
+        self._tmpl_current_name = name
+        self._active_template_mgr = self._ladder_component_template_mgr
+        self._active_tmpl_type = "ladder_component"
+        self._update_tmpl_io_ui()
+
+        self._start_preview_render(name)
+
+        self._tmpl_blocks = self._ladder_component_template_mgr.get_template_blocks(name)
+        if self._tmpl_blocks:
+            for blk in self._tmpl_blocks:
+                self._tmpl_block_list.addItem(blk["name"])
+        self._tmpl_block_list.setCurrentRow(0 if self._tmpl_blocks else -1)
+
+    def _open_ladder_component_template_folder(self):
+        import subprocess
+        subprocess.Popen(["explorer", str(self._ladder_component_template_mgr.templates_dir)])
+
     def _refresh_valves_template_list(self):
         self._valves_tmpl_list.clear()
         for name in self._valves_template_mgr.list_templates():
@@ -2532,6 +2726,10 @@ class MainWindow(QMainWindow):
         self._ladder_tmpl_list.clearSelection()
         self._ladder_tmpl_list.setCurrentRow(-1)
         self._ladder_tmpl_list.blockSignals(False)
+        self._ladder_component_tmpl_list.blockSignals(True)
+        self._ladder_component_tmpl_list.clearSelection()
+        self._ladder_component_tmpl_list.setCurrentRow(-1)
+        self._ladder_component_tmpl_list.blockSignals(False)
 
         self._tmpl_blocks = []
         self._tmpl_attr_values = {}
@@ -3128,6 +3326,7 @@ class MainWindow(QMainWindow):
         self._tmpl_type_tabs.setTabText(2, tr("grp_io_templates"))
         self._tmpl_type_tabs.setTabText(3, tr("grp_ladder_templates"))
         self._tmpl_type_tabs.setTabText(4, tr("grp_valves_templates"))
+        self._tmpl_type_tabs.setTabText(5, tr("grp_ladder_component_templates"))
         self._btn_import_tmpl.setText(tr("btn_import"))
         self._btn_delete_tmpl.setText(tr("btn_delete"))
         self._btn_open_tmpl_folder.setText(tr("btn_open_folder"))
