@@ -59,11 +59,14 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM Change to app directory to ensure correct working directory for file paths
+cd /d "%APP_DIR%"
+
 REM Run the application
 echo.
 echo Launching QuantumB...
 echo.
-python "%APP_DIR%app.py"
+python app.py
 
 REM Pause if there's an error
 if errorlevel 1 (

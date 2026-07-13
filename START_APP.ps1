@@ -53,11 +53,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# Change to app directory to ensure correct working directory for file paths
+Set-Location $APP_DIR
+
 # Run the application
 Write-Host ""
 Write-Host "Launching QuantumB..." -ForegroundColor Green
 Write-Host ""
-python "$APP_DIR\app.py"
+python app.py
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host ""
