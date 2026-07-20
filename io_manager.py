@@ -18,6 +18,7 @@ class IOItem:
     description: str = ""
     panel: str = ""
     signal_type: str = ""   # e.g. "24VDC", "4-20mA"
+    signal_category: str = ""  # "Analog" or "Digital"
     io_type_name: str = ""  # named IO type from io_types_library (e.g. "Status")
     terminal: str = ""
     cable: str = ""

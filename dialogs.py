@@ -387,11 +387,15 @@ def _io_fields_def() -> list[tuple[str, str]]:
 class IODialog(QDialog):
     """Add / edit a single I/O list item."""
 
-    def __init__(self, parent=None, data: dict | None = None):
+    # Common signal types that can be used
+    _COMMON_SIGNAL_TYPES = ["24VDC", "24VAC", "4-20mA", "0-10V", "Analog", "Digital"]
+
+    def __init__(self, parent=None, data: dict | None = None, io_types: list[dict] | None = None):
         super().__init__(parent)
         self.setWindowTitle(tr("dlg_io_title"))
         self.setMinimumWidth(380)
         self.result_data: dict | None = None
+        self._io_types = io_types or []
         self._build(data)
 
     def _build(self, data: dict | None):
@@ -403,21 +407,79 @@ class IODialog(QDialog):
         self._type_cb.addItems(IO_TYPES)
         form.addRow(tr("col_type") + ":", self._type_cb)
 
+        # Add IO Type Name dropdown (override) - will be filtered based on io_type and signal_category
+        self._io_type_name_cb = QComboBox()
+        self._io_type_name_cb.addItem("")  # Allow empty selection
+        form.addRow(tr("col_io_type") + ":", self._io_type_name_cb)
+
         self._entries: dict[str, QLineEdit] = {}
+        # Signal type is handled separately as a dropdown
+        self._signal_type_cb = QComboBox()
+        self._signal_type_cb.setEditable(True)
+        self._signal_type_cb.addItems(self._COMMON_SIGNAL_TYPES)
+        
         for label, key in _io_fields_def():
-            edit = QLineEdit()
-            form.addRow(label, edit)
-            self._entries[key] = edit
+            if key == "signal_type":
+                # Use dropdown for signal_type instead of text field
+                form.addRow(label, self._signal_type_cb)
+            else:
+                edit = QLineEdit()
+                form.addRow(label, edit)
+                self._entries[key] = edit
 
         if data:
             self._type_cb.setCurrentText(data.get("io_type", "Input"))
+            self._signal_type_cb.setCurrentText(data.get("signal_type", ""))
             for key, edit in self._entries.items():
                 edit.setText(data.get(key, ""))
+            # Filter and set IO type name after loading other data
+            self._update_io_type_dropdown(data.get("signal_category", ""))
+            self._io_type_name_cb.setCurrentText(data.get("io_type_name", ""))
+        else:
+            # For new IOs, populate with all types
+            for io_type in self._io_types:
+                self._io_type_name_cb.addItem(io_type.get("name", ""))
+
+        self._type_cb.currentTextChanged.connect(lambda: self._update_io_type_dropdown(
+            data.get("signal_category", "") if data else ""
+        ))
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self._ok)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+
+    def _update_io_type_dropdown(self, signal_category: str):
+        """Update the IO type dropdown based on current io_type and signal_category."""
+        io_direction = self._type_cb.currentText()
+        current_selection = self._io_type_name_cb.currentText()
+        
+        self._io_type_name_cb.blockSignals(True)
+        self._io_type_name_cb.clear()
+        self._io_type_name_cb.addItem("")  # Always include empty option
+        
+        # Filter IO types by direction and signal_category
+        if signal_category:
+            matches = [
+                t["name"] for t in self._io_types
+                if t.get("direction", "") == io_direction and 
+                   t.get("signal_category", "") == signal_category
+            ]
+        else:
+            # If no signal_category is available, show all types for this direction
+            matches = [
+                t["name"] for t in self._io_types
+                if t.get("direction", "") == io_direction
+            ]
+        
+        self._io_type_name_cb.addItems(matches)
+        
+        # Try to restore previous selection
+        idx = self._io_type_name_cb.findText(current_selection)
+        if idx >= 0:
+            self._io_type_name_cb.setCurrentIndex(idx)
+        
+        self._io_type_name_cb.blockSignals(False)
 
     def _ok(self):
         tag = self._entries["tag"].text().strip()
@@ -426,6 +488,8 @@ class IODialog(QDialog):
             return
         self.result_data = {
             "io_type": self._type_cb.currentText(),
+            "signal_type": self._signal_type_cb.currentText(),
+            "io_type_name": self._io_type_name_cb.currentText(),
             **{k: e.text().strip() for k, e in self._entries.items()},
         }
         self.accept()
