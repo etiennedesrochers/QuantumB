@@ -71,5 +71,50 @@
     ],
     "valves": [],
     "circuit_ios": []
+  },
+  {
+    "name": "TestFile",
+    "circuit_number": "#",
+    "description": "",
+    "templates": [
+      {
+        "name": "1 EXD-SH2-1-TRANS",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      },
+      {
+        "name": "1 EXD-SH2",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      },
+      {
+        "name": "CD-FAN fans-tech",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      },
+      {
+        "name": "CD-FAN1-C fans-tech",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      },
+      {
+        "name": "SUPPLY DAMPERS",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      },
+      {
+        "name": "VFD-l MS",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      }
+    ],
+    "valves": [],
+    "circuit_ios": []
   }
 ]

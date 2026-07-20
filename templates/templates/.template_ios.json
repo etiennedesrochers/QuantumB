@@ -275,5 +275,117 @@
       "direction": "Output",
       "io_type": "Modulation"
     }
+  ],
+  "1 EXD-SH2": [
+    {
+      "name": "Eev-C/H_En#",
+      "description": "",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": "Enable",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    }
+  ],
+  "1 EXD-SH2-1-TRANS": [
+    {
+      "name": "Eev-C/H_En#",
+      "description": "",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": "Enable",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    }
+  ],
+  "CD-FAN fans-tech": [
+    {
+      "name": "Cd-F_Mod#",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    }
+  ],
+  "CD-FAN1-C fans-tech": [
+    {
+      "name": "Cd-F_Mod#",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    }
+  ],
+  "SUPPLY DAMPERS": [
+    {
+      "name": "OADamper",
+      "description": "",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": "Enable",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "OADamperSts",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "Status",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "SaDamperSts",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "Status",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    }
+  ],
+  "VFD-l MS": [
+    {
+      "name": "Cp_En#-A",
+      "description": "",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": "Enable",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "Cp-Mod#-A",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "Cp_Sts#-A",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "Status",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    }
   ]
 }

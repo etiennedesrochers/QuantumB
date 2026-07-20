@@ -113,7 +113,7 @@ class DrawingGenerator:
             #if the controller number i =0 then not a controller
             #we need to replace some text in it
             if controller_number ==0:
-                self.replace_value_dwg(doc,io_items)
+                self.replace_value_dwg(doc, io_items)
             # Only draw our own border/title block when no template is used;
             # templates already contain their own title block and border.
             if template_doc is None:
@@ -151,8 +151,11 @@ class DrawingGenerator:
                             doc_base = self.replace_fuse(attrib, doc_base)
                             self.replace_tagstrip(item,entity,attrib)
                             as_replace_link_page = self.replace_link_page( attrib,as_replace_link_page)
-                             
-        
+                            
+                            #If the attribute contains the # then we need to replace it with the circuit number
+                            if item.circuit_no!='N' and (attrib.dxf.get("text", "").find("#") != -1):
+                                attrib.dxf.text = attrib.dxf.get("text", "").replace("#", str(controller_number+1))
+
         # Sync to class variable so next instance picks it up
         DrawingGenerator._biggest_fuse_number = self.biggest_fuse_number
         return self.biggest_fuse_number
@@ -203,10 +206,10 @@ class DrawingGenerator:
         
         
     def replace_name(self,attrib, item: IOItem):
-        if attrib.dxf.get("text", "") == item.old_name:
-            attrib.dxf.text = item.tag
-        if attrib.dxf.get("text", "") == "COM_" + item.old_name:
-            attrib.dxf.text = "COM_" + item.tag
+        if attrib.dxf.get("text", "").upper() == item.old_name.upper():
+            attrib.dxf.text = item.tag.upper()
+        if attrib.dxf.get("text", "").upper() == "COM_" + item.old_name.upper():
+            attrib.dxf.text = "COM_" + item.tag.upper()
         
 
     def replace_fuse(self, attrib, doc_base):
@@ -235,14 +238,14 @@ class DrawingGenerator:
 
     def replace_tagstrip(self,item,entity,attrib):
         #We need for %tagstrip% and %tagstrip_com% to be replaced with the controller number
-        if attrib.dxf.get("text", "") == "%"+item.old_name+"%":
+        if attrib.dxf.get("text", "").upper() == "%"+item.old_name.upper()+"%":
             attrib.dxf.text = item.address
             #For this entity if it has the TERM01 Attribute then we change the value of that attribute
             if entity.has_attrib("TERM01"):
                 term_attrib = entity.get_attrib("TERM01")
                 term_attrib.dxf.text = item.number
             
-        if attrib.dxf.get("text", "") == "%COM_"+item.old_name+"%":
+        if attrib.dxf.get("text", "").upper() == "%COM_"+item.old_name.upper()+"%":
             attrib.dxf.text = "COM_" + item.address
             if entity.has_attrib("TERM01"):
                 term_attrib = entity.get_attrib("TERM01")
@@ -272,15 +275,16 @@ class DrawingGenerator:
 
 
         substitutions = {
-            "IO_CODE":     io_item.tag,
-            "COM_IO_CODE": "COM_" + io_item.tag,
-            "num": io_item.address,
-            "num_com":     "COM_" + io_item.address,
-            "%tagstrip%": "CTL" + i + "_" + str(controller_number),
-            "%tagstrip_com%": "COM_" + i + "_" + str(controller_number),
-            "POS": io_item.number,
+            "IO_CODE":     io_item.tag.upper(),
+            "COM_IO_CODE": "COM_" + io_item.tag.upper(),
+            "num": io_item.address.upper(),
+            "num_com":     "COM_" + io_item.address.upper(),
+            "%tagstrip%": "CTL" + i + "_" + str(controller_number).upper(),
+            "%tagstrip_com%": "COM_" + i + "_" + str(controller_number).upper(),
+            "POS": io_item.number.upper(),
          }
 
+        print(f"Preparing I/O template for '{io_item.tag}' with substitutions: {substitutions}")
         for entity in copy.modelspace():
             if entity.dxftype() != "INSERT":
                 continue
@@ -288,7 +292,7 @@ class DrawingGenerator:
                 for attrib in entity.attribs:
                     text = attrib.dxf.get("text", "")
                     if text in substitutions:
-                        attrib.dxf.text = substitutions[text]
+                        attrib.dxf.text = substitutions[text].upper()
             except Exception as exc:
                 print(f"Warning: failed to substitute attributes for IO '{io_item.tag}': {exc}")
             

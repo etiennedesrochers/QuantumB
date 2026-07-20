@@ -2027,6 +2027,7 @@ def execute_post_controller_generation(circuit_data: dict | None = None, output_
         if io.description.strip().lower() != "reserved"]
     
     for io in io_list:
+        io.tag = io.tag.upper()
         # Example: You can add custom processing for each I/O entry here
         # For instance, you might want to log, modify, or generate additional files
         print(f"Processing I/O: {io.tag}, Type: {io.io_type}, Signal: {io.signal_type}")

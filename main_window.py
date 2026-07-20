@@ -1805,6 +1805,12 @@ class MainWindow(QMainWindow):
                                 io_type_name=("non connecter" if io_type.lower() == "input" else "non connecterO"),
                                 old_name=tag,
                                 old_description="Reserved",
+                                circuit_no=str(circuit_no),
+                                circuit_name=(
+                                    self._project_circuit_refs[lst_circuit_numbers.index(str(circuit_no))]
+                                    if str(circuit_no) in lst_circuit_numbers
+                                    else "N/A"
+                                ),
                             )
                         )
 
@@ -3249,8 +3255,9 @@ class MainWindow(QMainWindow):
 
         # Build address like "II101" (Input, module 1, slot 01) or "OA201"
         type_prefix = io_type[0].upper()  # "I" or "O"
-        sig_prefix = (io_item.signal_type[0].upper() if io_item.signal_type else "D")
-        copy.address = f"{sig_prefix}{type_prefix}{ctrl_idx}{slot_idx + 1:02d}"
+        sig_prefix = (io_item.signal_type[0].upper() if io_item.signal_type else "D").upper()  # "D", "A", "R", etc.
+        copy.address = f"{sig_prefix}{type_prefix}{ctrl_idx}{slot_idx + 1:02d}".upper()
+        copy.description = copy.description.upper()
         return copy
 
     def _generate(self):
@@ -3281,8 +3288,14 @@ class MainWindow(QMainWindow):
         circuit_data = []
         all_ios = self._io_items
         
+        for item in all_ios:
+            item.tag = item.tag.upper()
+            item.description = item.description.upper()
 
         execute_post_controller_generation(circuit_data=circuit_data, output_path=str(output_dir), ios=all_ios)
+
+
+
 
         # Determine if DWG conversion is available
         oda = _find_oda_converter()
@@ -3341,7 +3354,7 @@ class MainWindow(QMainWindow):
                     gen = DrawingGenerator(page_config)
                     
                     progress_dlg.update_progress(current_page, total_pages, f"Generating circuit page {page_str}", f"Template: {tmpl_name}")
-                    
+            
                     ok, msg = gen.generate(rungs, str(dxf_path), template_doc, io_items=io_items, controller_number=0)
                     if ok:
                         generated_dxf.append(dxf_path)
@@ -3359,6 +3372,7 @@ class MainWindow(QMainWindow):
                 # module's IO capacity and the total IOs in the project.
                 module_name = self._module_cb.currentText()
                 module_def = next((m for m in self._modules if m.get("name") == module_name), None)
+                print(f"[DEBUG] module_name: {module_name}, module_def: {module_def is not None}, io_items: {len(self._io_items)}")
                 if module_def and self._io_items:
                     mod_inputs  = len(module_def.get("inputs", []))
                     mod_outputs = len(module_def.get("outputs", []))
@@ -3453,6 +3467,7 @@ class MainWindow(QMainWindow):
                             [], str(dxf_path), ctrl_tmpl_doc,
                             io_items=io_items,
                             io_template_placements=io_template_placements or None,
+                            controller_number=ctrl_idx,
                         )
                         if ok:
                             generated_dxf.append(dxf_path)
