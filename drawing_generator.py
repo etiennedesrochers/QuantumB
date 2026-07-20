@@ -284,7 +284,7 @@ class DrawingGenerator:
             "POS": io_item.number.upper(),
          }
 
-        print(f"Preparing I/O template for '{io_item.tag}' with substitutions: {substitutions}")
+        #print(f"Preparing I/O template for '{io_item.tag}' with substitutions: {substitutions}")
         for entity in copy.modelspace():
             if entity.dxftype() != "INSERT":
                 continue

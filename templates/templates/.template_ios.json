@@ -387,5 +387,17 @@
       "ladder_template": "",
       "ladder_component_template": ""
     }
+  ],
+  "IB-G": [
+    {
+      "name": "RHT-VLV_MOD#C",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    }
   ]
 }
