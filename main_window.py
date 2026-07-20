@@ -1798,13 +1798,26 @@ class MainWindow(QMainWindow):
                             or str(circuit_no) == "N"
                         )
                     ):
+                        # Get IOTYPE value from the order file, default to None if not present
+                        iotype_value = None
+                        try:
+                            iotype_value = str(row.iloc[3]).strip() if pd.notna(row.iloc[3]) else None
+                        except (IndexError, TypeError):
+                            iotype_value = None
+                        
+                        # Use IOTYPE if provided and not empty, otherwise use default logic
+                        if iotype_value and iotype_value.lower() != "nan":
+                            io_type_name = iotype_value
+                        else:
+                            io_type_name = "non connecter" if io_type.lower() == "input" else "non connecterO"
+                        
                         items.append(
                             IOItem(
                                 tag=tag,
                                 io_type=io_type,
                                 description="Reserved",
                                 signal_type="Analog",
-                                io_type_name=("non connecter" if io_type.lower() == "input" else "non connecterO"),
+                                io_type_name=io_type_name,
                                 old_name=tag,
                                 old_description="Reserved",
                                 circuit_no=str(circuit_no),

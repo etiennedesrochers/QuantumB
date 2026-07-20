@@ -55,19 +55,7 @@
         "part_of_ladder": "",
         "height": 0.0
       },
-      "1 EXD-SH2-1-TRANS",
-      {
-        "name": "VFD-L",
-        "ladder_type": "",
-        "part_of_ladder": "",
-        "height": 0.0
-      },
-      {
-        "name": "VFD-L",
-        "ladder_type": "",
-        "part_of_ladder": "",
-        "height": 0.0
-      }
+      "1 EXD-SH2-1-TRANS"
     ],
     "valves": [],
     "circuit_ios": []
