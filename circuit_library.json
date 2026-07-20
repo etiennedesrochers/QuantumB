@@ -129,5 +129,50 @@
     ],
     "valves": [],
     "circuit_ios": []
+  },
+  {
+    "name": "Circuit duo wshp",
+    "circuit_number": "#",
+    "description": "circuit duo 1015",
+    "templates": [
+      {
+        "name": "VFD-l MS",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      },
+      {
+        "name": "VFD-l MS",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      },
+      {
+        "name": "2_Condenser_Fan",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      },
+      {
+        "name": "IB-G",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      },
+      {
+        "name": "1 EXD-SH2-1-TRANS",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      },
+      {
+        "name": "1 EXD-SH2",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      }
+    ],
+    "valves": [],
+    "circuit_ios": []
   }
 ]
