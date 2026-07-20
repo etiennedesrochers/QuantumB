@@ -100,3 +100,5 @@ docs/_build/
 # PyInstaller
 *.manifest
 *.spec
+# Added by code-review-graph
+.code-review-graph/

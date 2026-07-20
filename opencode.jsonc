@@ -1,0 +1,15 @@
+{
+  "mcp": {
+    "code-review-graph": {
+      "type": "local",
+      "command": [
+        "C:\\Users\\Etienne Desrochers\\OneDrive - XNNOV\\Documents\\GitHub\\Nouveau dossier (2)\\QuantumB\\venv\\Scripts\\python.exe",
+        "-m",
+        "code_review_graph",
+        "serve",
+        "--repo",
+        "C:\\Users\\Etienne Desrochers\\OneDrive - XNNOV\\Documents\\GitHub\\Nouveau dossier (2)\\QuantumB"
+      ]
+    }
+  }
+}

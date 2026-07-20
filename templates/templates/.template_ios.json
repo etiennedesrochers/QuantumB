@@ -119,22 +119,6 @@
       "io_type": "Status"
     }
   ],
-  "AHU_HEAT_COIL": [
-    {
-      "name": "ELEC_HEAT_EN",
-      "description": "Electrical Heat Enable",
-      "signal_type": "Digital",
-      "direction": "Output",
-      "io_type": "Fan Enable"
-    },
-    {
-      "name": "ELEC_HEAT_MOD",
-      "description": "Electrical Heat Modulation",
-      "signal_type": "Analog",
-      "direction": "Output",
-      "io_type": "Modulation"
-    }
-  ],
   "ENTH-WHEEL": [
     {
       "name": "ENT_WH_EN",
@@ -256,7 +240,7 @@
       "io_type": "Status"
     }
   ],
-  "2_Condeser_Fan": [
+  "2_Condenser_Fan": [
     {
       "name": "CD-F_EN#",
       "description": "Condenser Enable #",
@@ -274,6 +258,22 @@
       "io_type": "Modulation",
       "ladder_type": "",
       "ladder_template": ""
+    }
+  ],
+  "AHU_HEAT_COILee": [
+    {
+      "name": "ELEC_HEAT_EN",
+      "description": "Electrical Heat Enable",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": "Fan Enable"
+    },
+    {
+      "name": "ELEC_HEAT_MOD",
+      "description": "Electrical Heat Modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": "Modulation"
     }
   ]
 }

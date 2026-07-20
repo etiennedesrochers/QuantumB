@@ -22,7 +22,7 @@ import circuit_library as cl
 import module_manager as mm
 from drawing_generator import DrawingGenerator, LadderConfig, Rung, Component
 from io_manager import IOItem
-from models import Circuit, Valve
+from models import Circuit, Valve, Template
 from template_manager import (
     TemplateManager,
     CTRL_TEMPLATES_DIR,
@@ -281,7 +281,8 @@ class CLIGenerator:
                     continue
                 
                 templates = circuit.templates if circuit.templates else []
-                for tmpl_name in templates:
+                for t in templates:
+                    tmpl_name = t.name if isinstance(t, Template) else t
                     page_str = f"E{page:03d}"
                     dxf_path = self.output_dir / f"{page_str}.dxf"
                     

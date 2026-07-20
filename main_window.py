@@ -47,8 +47,9 @@ import project_manager as pm
 import circuit_library as cl
 import rules_manager as rl
 import module_manager as mm
+from dialogs import execute_post_controller_generation
 
-from models import Circuit, Valve
+from models import Circuit, Valve, Template
 from preview_widget import PreviewWorker, ZoomablePreview
 from dialogs import (
     _make_toolbar_row,
@@ -342,11 +343,14 @@ class MainWindow(QMainWindow):
         t0_btn_lay.setContentsMargins(0, 0, 0, 0)
         self._btn_import_tmpl = QPushButton()
         self._btn_import_tmpl.clicked.connect(self._import_template)
+        self._btn_rename_tmpl = QPushButton()
+        self._btn_rename_tmpl.clicked.connect(self._rename_template)
         self._btn_delete_tmpl = QPushButton()
         self._btn_delete_tmpl.clicked.connect(self._delete_template)
         self._btn_open_tmpl_folder = QPushButton()
         self._btn_open_tmpl_folder.clicked.connect(self._open_template_folder)
         t0_btn_lay.addWidget(self._btn_import_tmpl)
+        t0_btn_lay.addWidget(self._btn_rename_tmpl)
         t0_btn_lay.addWidget(self._btn_delete_tmpl)
         t0_btn_lay.addWidget(self._btn_open_tmpl_folder)
         t0_btn_lay.addStretch()
@@ -365,11 +369,14 @@ class MainWindow(QMainWindow):
         t1_btn_lay.setContentsMargins(0, 0, 0, 0)
         self._btn_import_ctrl_tmpl = QPushButton()
         self._btn_import_ctrl_tmpl.clicked.connect(self._import_ctrl_template)
+        self._btn_rename_ctrl_tmpl = QPushButton()
+        self._btn_rename_ctrl_tmpl.clicked.connect(self._rename_ctrl_template)
         self._btn_delete_ctrl_tmpl = QPushButton()
         self._btn_delete_ctrl_tmpl.clicked.connect(self._delete_ctrl_template)
         self._btn_open_ctrl_tmpl_folder = QPushButton()
         self._btn_open_ctrl_tmpl_folder.clicked.connect(self._open_ctrl_template_folder)
         t1_btn_lay.addWidget(self._btn_import_ctrl_tmpl)
+        t1_btn_lay.addWidget(self._btn_rename_ctrl_tmpl)
         t1_btn_lay.addWidget(self._btn_delete_ctrl_tmpl)
         t1_btn_lay.addWidget(self._btn_open_ctrl_tmpl_folder)
         t1_btn_lay.addStretch()
@@ -389,11 +396,14 @@ class MainWindow(QMainWindow):
         t2_btn_lay.setContentsMargins(0, 0, 0, 0)
         self._btn_import_io_tmpl = QPushButton()
         self._btn_import_io_tmpl.clicked.connect(self._import_io_template)
+        self._btn_rename_io_tmpl = QPushButton()
+        self._btn_rename_io_tmpl.clicked.connect(self._rename_io_template)
         self._btn_delete_io_tmpl = QPushButton()
         self._btn_delete_io_tmpl.clicked.connect(self._delete_io_template)
         self._btn_open_io_tmpl_folder = QPushButton()
         self._btn_open_io_tmpl_folder.clicked.connect(self._open_io_template_folder)
         t2_btn_lay.addWidget(self._btn_import_io_tmpl)
+        t2_btn_lay.addWidget(self._btn_rename_io_tmpl)
         t2_btn_lay.addWidget(self._btn_delete_io_tmpl)
         t2_btn_lay.addWidget(self._btn_open_io_tmpl_folder)
         t2_btn_lay.addStretch()
@@ -426,6 +436,8 @@ class MainWindow(QMainWindow):
         t3_btn_lay.setContentsMargins(0, 0, 0, 0)
         self._btn_import_ladder_tmpl = QPushButton()
         self._btn_import_ladder_tmpl.clicked.connect(self._import_ladder_template)
+        self._btn_rename_ladder_tmpl = QPushButton()
+        self._btn_rename_ladder_tmpl.clicked.connect(self._rename_ladder_template)
         self._btn_delete_ladder_tmpl = QPushButton()
         self._btn_delete_ladder_tmpl.clicked.connect(self._delete_ladder_template)
         self._btn_edit_ladder_tmpl = QPushButton()
@@ -433,6 +445,7 @@ class MainWindow(QMainWindow):
         self._btn_open_ladder_tmpl_folder = QPushButton()
         self._btn_open_ladder_tmpl_folder.clicked.connect(self._open_ladder_template_folder)
         t3_btn_lay.addWidget(self._btn_import_ladder_tmpl)
+        t3_btn_lay.addWidget(self._btn_rename_ladder_tmpl)
         t3_btn_lay.addWidget(self._btn_delete_ladder_tmpl)
         t3_btn_lay.addWidget(self._btn_edit_ladder_tmpl)
         t3_btn_lay.addWidget(self._btn_open_ladder_tmpl_folder)
@@ -452,6 +465,8 @@ class MainWindow(QMainWindow):
         t4_btn_lay.setContentsMargins(0, 0, 0, 0)
         self._btn_import_valves_tmpl = QPushButton()
         self._btn_import_valves_tmpl.clicked.connect(self._import_valves_template)
+        self._btn_rename_valves_tmpl = QPushButton()
+        self._btn_rename_valves_tmpl.clicked.connect(self._rename_valves_template)
         self._btn_delete_valves_tmpl = QPushButton()
         self._btn_delete_valves_tmpl.clicked.connect(self._delete_valves_template)
         self._btn_edit_valves_tmpl = QPushButton()
@@ -459,6 +474,7 @@ class MainWindow(QMainWindow):
         self._btn_open_valves_tmpl_folder = QPushButton()
         self._btn_open_valves_tmpl_folder.clicked.connect(self._open_valves_template_folder)
         t4_btn_lay.addWidget(self._btn_import_valves_tmpl)
+        t4_btn_lay.addWidget(self._btn_rename_valves_tmpl)
         t4_btn_lay.addWidget(self._btn_delete_valves_tmpl)
         t4_btn_lay.addWidget(self._btn_edit_valves_tmpl)
         t4_btn_lay.addWidget(self._btn_open_valves_tmpl_folder)
@@ -478,6 +494,8 @@ class MainWindow(QMainWindow):
         t5_btn_lay.setContentsMargins(0, 0, 0, 0)
         self._btn_import_ladder_component_tmpl = QPushButton()
         self._btn_import_ladder_component_tmpl.clicked.connect(self._import_ladder_component_template)
+        self._btn_rename_ladder_component_tmpl = QPushButton()
+        self._btn_rename_ladder_component_tmpl.clicked.connect(self._rename_ladder_component_template)
         self._btn_delete_ladder_component_tmpl = QPushButton()
         self._btn_delete_ladder_component_tmpl.clicked.connect(self._delete_ladder_component_template)
         self._btn_edit_ladder_component_tmpl = QPushButton()
@@ -485,6 +503,7 @@ class MainWindow(QMainWindow):
         self._btn_open_ladder_component_tmpl_folder = QPushButton()
         self._btn_open_ladder_component_tmpl_folder.clicked.connect(self._open_ladder_component_template_folder)
         t5_btn_lay.addWidget(self._btn_import_ladder_component_tmpl)
+        t5_btn_lay.addWidget(self._btn_rename_ladder_component_tmpl)
         t5_btn_lay.addWidget(self._btn_delete_ladder_component_tmpl)
         t5_btn_lay.addWidget(self._btn_edit_ladder_component_tmpl)
         t5_btn_lay.addWidget(self._btn_open_ladder_component_tmpl_folder)
@@ -803,7 +822,8 @@ class MainWindow(QMainWindow):
         return self._io_template_mgr.list_templates()
 
     def _add_io_type(self):
-        dlg = IOTypeDialog(self, io_templates=self._io_template_names())
+        dlg = IOTypeDialog(self, io_templates=self._io_template_names(),
+                           available_ladder_templates=self._ladder_template_mgr.list_templates())
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._io_types.append(dlg.result_data)
             self._refresh_io_types_table()
@@ -814,7 +834,8 @@ class MainWindow(QMainWindow):
         if idx < 0:
             return
         dlg = IOTypeDialog(self, data=self._io_types[idx],
-                           io_templates=self._io_template_names())
+                           io_templates=self._io_template_names(),
+                           available_ladder_templates=self._ladder_template_mgr.list_templates())
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._io_types[idx] = dlg.result_data
             self._refresh_io_types_table()
@@ -1437,17 +1458,51 @@ class MainWindow(QMainWindow):
                 return c
         return None
 
+    def _update_circuit_template_references(self, old_template_name: str, new_template_name: str) -> None:
+        """Update all circuits that reference old_template_name to use new_template_name.
+        
+        This is called after a template is renamed to keep circuit references in sync.
+        """
+        from models import Template
+        
+        for circuit in self._library_circuits:
+            if circuit.templates:
+                updated = []
+                for tmpl in circuit.templates:
+                    if isinstance(tmpl, Template):
+                        # Template object: update the name attribute
+                        if tmpl.name == old_template_name:
+                            tmpl.name = new_template_name
+                        updated.append(tmpl)
+                    elif isinstance(tmpl, str):
+                        # String template name: update if it matches
+                        if tmpl == old_template_name:
+                            updated.append(new_template_name)
+                        else:
+                            updated.append(tmpl)
+                    else:
+                        # Keep as-is
+                        updated.append(tmpl)
+                circuit.templates = updated
+        
+        # Persist the updated circuits to disk
+        self._save_library()
+        # Refresh both library and project circuit tables to display the updated references
+        self._refresh_library_table()
+        self._refresh_project_circuits_table()
+
     def _refresh_library_table(self):
         self._library_circuit_table.setRowCount(0)
         for i, circuit in enumerate(self._library_circuits):
             row = self._library_circuit_table.rowCount()
             self._library_circuit_table.insertRow(row)
+            template_names = [t.name if isinstance(t, Template) else t for t in circuit.templates] if circuit.templates else []
             for col, val in enumerate([
                 str(i + 1),
                 circuit.name,
                 circuit.circuit_number,
                 circuit.description,
-                ", ".join(circuit.templates) if circuit.templates else "\u2014",
+                ", ".join(template_names) if template_names else "\u2014",
             ]):
                 self._library_circuit_table.setItem(row, col, QTableWidgetItem(val))
 
@@ -1519,12 +1574,13 @@ class MainWindow(QMainWindow):
             circuit = self._lookup_circuit(name)
             row = self._project_circuit_table.rowCount()
             self._project_circuit_table.insertRow(row)
+            template_names = [t.name if isinstance(t, Template) else t for t in circuit.templates] if circuit and circuit.templates else []
             for col, val in enumerate([
                 str(i + 1),
                 name,
                 resolved_numbers[i],
                 circuit.description    if circuit else "",
-                (", ".join(circuit.templates) if circuit and circuit.templates else "\u2014"),
+                (", ".join(template_names) if template_names else "\u2014"),
             ]):
                 item = QTableWidgetItem(val)
                 if circuit is None:
@@ -1659,7 +1715,8 @@ class MainWindow(QMainWindow):
                 ))
             
             # Then add template-based IOs
-            for tmpl_name in circuit.templates:
+            for t in circuit.templates:
+                tmpl_name = t.name if isinstance(t, Template) else t
                 ios = self._template_mgr.get_template_ios(tmpl_name)
                 for io in ios:
                     io_old_name = io.get("name", "")
@@ -2151,6 +2208,30 @@ class MainWindow(QMainWindow):
             else:
                 QMessageBox.critical(self, tr("msg_error_title"), msg)
 
+    def _rename_ctrl_template(self):
+        sel = self._ctrl_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_validation"), "Please select a controller template to rename.")
+            return
+        old_name = sel.text()
+        new_name, ok = QInputDialog.getText(
+            self, tr("msg_template_name_title"), "Enter new template name:",
+            text=old_name,
+        )
+        if not ok or not new_name.strip():
+            return
+        new_name = new_name.strip()
+        success, msg = self._ctrl_template_mgr.rename_template(old_name, new_name)
+        if success:
+            QMessageBox.information(self, tr("msg_success_title"), msg)
+            self._refresh_ctrl_template_list()
+            self._update_circuit_template_references(old_name, new_name)
+            items = self._ctrl_tmpl_list.findItems(new_name, Qt.MatchExactly)
+            if items:
+                self._ctrl_tmpl_list.setCurrentItem(items[0])
+        else:
+            QMessageBox.critical(self, tr("msg_error_title"), msg)
+
     def _on_ctrl_template_selected(self, current, previous):
         """Update the Template tab when a controller template is selected."""
         if current is None:
@@ -2254,6 +2335,30 @@ class MainWindow(QMainWindow):
                 self._refresh_io_template_list()
             else:
                 QMessageBox.critical(self, tr("msg_error_title"), msg)
+
+    def _rename_io_template(self):
+        sel = self._io_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_validation"), "Please select an IO template to rename.")
+            return
+        old_name = sel.text()
+        new_name, ok = QInputDialog.getText(
+            self, tr("msg_template_name_title"), "Enter new template name:",
+            text=old_name,
+        )
+        if not ok or not new_name.strip():
+            return
+        new_name = new_name.strip()
+        success, msg = self._io_template_mgr.rename_template(old_name, new_name)
+        if success:
+            QMessageBox.information(self, tr("msg_success_title"), msg)
+            self._refresh_io_template_list()
+            self._update_circuit_template_references(old_name, new_name)
+            items = self._io_tmpl_list.findItems(new_name, Qt.MatchExactly)
+            if items:
+                self._io_tmpl_list.setCurrentItem(items[0])
+        else:
+            QMessageBox.critical(self, tr("msg_error_title"), msg)
 
     def _on_io_template_selected(self, current, previous):
         """Update the Template tab when an IO template is selected."""
@@ -2415,6 +2520,30 @@ class MainWindow(QMainWindow):
             else:
                 QMessageBox.critical(self, tr("msg_error_title"), msg)
 
+    def _rename_ladder_template(self):
+        sel = self._ladder_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_validation"), "Please select a ladder template to rename.")
+            return
+        old_name = sel.text()
+        new_name, ok = QInputDialog.getText(
+            self, tr("msg_template_name_title"), "Enter new template name:",
+            text=old_name,
+        )
+        if not ok or not new_name.strip():
+            return
+        new_name = new_name.strip()
+        success, msg = self._ladder_template_mgr.rename_template(old_name, new_name)
+        if success:
+            QMessageBox.information(self, tr("msg_success_title"), msg)
+            self._refresh_ladder_template_list()
+            self._update_circuit_template_references(old_name, new_name)
+            items = self._ladder_tmpl_list.findItems(new_name, Qt.MatchExactly)
+            if items:
+                self._ladder_tmpl_list.setCurrentItem(items[0])
+        else:
+            QMessageBox.critical(self, tr("msg_error_title"), msg)
+
     def _edit_ladder_template(self):
         """Edit metadata for the selected ladder template."""
         sel = self._ladder_tmpl_list.currentItem()
@@ -2523,6 +2652,30 @@ class MainWindow(QMainWindow):
             else:
                 QMessageBox.critical(self, tr("msg_error_title"), msg)
 
+    def _rename_template(self):
+        sel = self._tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_validation"), "Please select a template to rename.")
+            return
+        old_name = sel.text()
+        new_name, ok = QInputDialog.getText(
+            self, tr("msg_template_name_title"), "Enter new template name:",
+            text=old_name,
+        )
+        if not ok or not new_name.strip():
+            return
+        new_name = new_name.strip()
+        success, msg = self._template_mgr.rename_template(old_name, new_name)
+        if success:
+            QMessageBox.information(self, tr("msg_success_title"), msg)
+            self._refresh_template_list()
+            self._update_circuit_template_references(old_name, new_name)
+            items = self._tmpl_list.findItems(new_name, Qt.MatchExactly)
+            if items:
+                self._tmpl_list.setCurrentItem(items[0])
+        else:
+            QMessageBox.critical(self, tr("msg_error_title"), msg)
+
     def _open_template_folder(self):
         import subprocess
         subprocess.Popen(["explorer", str(self._template_mgr.templates_dir)])
@@ -2579,6 +2732,30 @@ class MainWindow(QMainWindow):
                 self._refresh_ladder_component_template_list()
             else:
                 QMessageBox.critical(self, tr("msg_error_title"), msg)
+
+    def _rename_ladder_component_template(self):
+        sel = self._ladder_component_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_validation"), "Please select a ladder component template to rename.")
+            return
+        old_name = sel.text()
+        new_name, ok = QInputDialog.getText(
+            self, tr("msg_template_name_title"), "Enter new template name:",
+            text=old_name,
+        )
+        if not ok or not new_name.strip():
+            return
+        new_name = new_name.strip()
+        success, msg = self._ladder_component_template_mgr.rename_template(old_name, new_name)
+        if success:
+            QMessageBox.information(self, tr("msg_success_title"), msg)
+            self._refresh_ladder_component_template_list()
+            self._update_circuit_template_references(old_name, new_name)
+            items = self._ladder_component_tmpl_list.findItems(new_name, Qt.MatchExactly)
+            if items:
+                self._ladder_component_tmpl_list.setCurrentItem(items[0])
+        else:
+            QMessageBox.critical(self, tr("msg_error_title"), msg)
 
     def _edit_ladder_component_template(self):
         """Edit metadata for the selected ladder component template."""
@@ -2690,6 +2867,30 @@ class MainWindow(QMainWindow):
                 self._refresh_valves_template_list()
             else:
                 QMessageBox.critical(self, tr("msg_error_title"), msg)
+
+    def _rename_valves_template(self):
+        sel = self._valves_tmpl_list.currentItem()
+        if not sel:
+            QMessageBox.warning(self, tr("msg_validation"), "Please select a valves template to rename.")
+            return
+        old_name = sel.text()
+        new_name, ok = QInputDialog.getText(
+            self, tr("msg_template_name_title"), "Enter new template name:",
+            text=old_name,
+        )
+        if not ok or not new_name.strip():
+            return
+        new_name = new_name.strip()
+        success, msg = self._valves_template_mgr.rename_template(old_name, new_name)
+        if success:
+            QMessageBox.information(self, tr("msg_success_title"), msg)
+            self._refresh_valves_template_list()
+            self._update_circuit_template_references(old_name, new_name)
+            items = self._valves_tmpl_list.findItems(new_name, Qt.MatchExactly)
+            if items:
+                self._valves_tmpl_list.setCurrentItem(items[0])
+        else:
+            QMessageBox.critical(self, tr("msg_error_title"), msg)
 
     def _edit_valves_template(self):
         """Edit metadata for the selected valves template."""
@@ -3075,6 +3276,14 @@ class MainWindow(QMainWindow):
             self._rungs, self._io_items, config
         )
 
+        # Execute post-controller generation hook before starting generation
+        #Get a list of all the circuit data for the project
+        circuit_data = []
+        all_ios = self._io_items
+        
+
+        execute_post_controller_generation(circuit_data=circuit_data, output_path=str(output_dir), ios=all_ios)
+
         # Determine if DWG conversion is available
         oda = _find_oda_converter()
         use_dwg = oda is not None
@@ -3117,7 +3326,8 @@ class MainWindow(QMainWindow):
                 circuit = self._lookup_circuit(circuit_name)
                 if circuit is None:
                     continue
-                templates = circuit.templates if circuit.templates else []
+                # Extract template names, handling both string and Template object types
+                templates = [t.name if isinstance(t, Template) else t for t in (circuit.templates or [])]
                 for tmpl_name in templates:
                     if progress_dlg.cancelled:
                         break
@@ -3328,22 +3538,32 @@ class MainWindow(QMainWindow):
         self._tmpl_type_tabs.setTabText(4, tr("grp_valves_templates"))
         self._tmpl_type_tabs.setTabText(5, tr("grp_ladder_component_templates"))
         self._btn_import_tmpl.setText(tr("btn_import"))
+        self._btn_rename_tmpl.setText(tr("btn_rename"))
         self._btn_delete_tmpl.setText(tr("btn_delete"))
         self._btn_open_tmpl_folder.setText(tr("btn_open_folder"))
         self._btn_import_ctrl_tmpl.setText(tr("btn_import"))
+        self._btn_rename_ctrl_tmpl.setText(tr("btn_rename"))
         self._btn_delete_ctrl_tmpl.setText(tr("btn_delete"))
         self._btn_open_ctrl_tmpl_folder.setText(tr("btn_open_folder"))
         self._btn_import_io_tmpl.setText(tr("btn_import"))
+        self._btn_rename_io_tmpl.setText(tr("btn_rename"))
         self._btn_delete_io_tmpl.setText(tr("btn_delete"))
         self._btn_open_io_tmpl_folder.setText(tr("btn_open_folder"))
         self._btn_import_ladder_tmpl.setText(tr("btn_import"))
+        self._btn_rename_ladder_tmpl.setText(tr("btn_rename"))
         self._btn_delete_ladder_tmpl.setText(tr("btn_delete"))
         self._btn_edit_ladder_tmpl.setText(tr("btn_edit"))
         self._btn_open_ladder_tmpl_folder.setText(tr("btn_open_folder"))
         self._btn_import_valves_tmpl.setText(tr("btn_import"))
+        self._btn_rename_valves_tmpl.setText(tr("btn_rename"))
         self._btn_delete_valves_tmpl.setText(tr("btn_delete"))
         self._btn_edit_valves_tmpl.setText(tr("btn_edit"))
         self._btn_open_valves_tmpl_folder.setText(tr("btn_open_folder"))
+        self._btn_import_ladder_component_tmpl.setText(tr("btn_import"))
+        self._btn_rename_ladder_component_tmpl.setText(tr("btn_rename"))
+        self._btn_delete_ladder_component_tmpl.setText(tr("btn_delete"))
+        self._btn_edit_ladder_component_tmpl.setText(tr("btn_edit"))
+        self._btn_open_ladder_component_tmpl_folder.setText(tr("btn_open_folder"))
         self._lbl_io_tmpl_ins_x.setText(tr("lbl_io_tmpl_ins_x"))
         self._lbl_io_tmpl_ins_y.setText(tr("lbl_io_tmpl_ins_y"))
         self._btn_generate.setText(tr("btn_generate"))

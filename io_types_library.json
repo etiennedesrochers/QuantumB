@@ -60,7 +60,9 @@
     "direction": "Output",
     "io_template": "out_fan_enable",
     "shared": false,
-    "shared_template": ""
+    "shared_template": "",
+    "ladder_type": "text_ladder",
+    "ladder_component_template": ""
   },
   {
     "name": "Modulation",

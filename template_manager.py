@@ -351,6 +351,51 @@ class TemplateManager:
             return True, f"Template '{template_name}' deleted."
         return False, "Template not found."
 
+    def rename_template(self, old_name: str, new_name: str) -> tuple[bool, str]:
+        """Rename a template from old_name to new_name.
+        
+        Handles file renaming and updates all associated metadata.
+        Returns (success, message).
+        """
+        old_path = self.templates_dir / f"{old_name}.dxf"
+        new_path = self.templates_dir / f"{new_name}.dxf"
+        
+        if not old_path.exists():
+            return False, f"Template '{old_name}' not found."
+        
+        if new_path.exists():
+            return False, f"Template '{new_name}' already exists."
+        
+        try:
+            # Rename the DXF file
+            old_path.rename(new_path)
+            
+            # Update IOs store
+            store = self._load_ios_store()
+            if old_name in store:
+                store[new_name] = store.pop(old_name)
+                self._save_ios_store(store)
+            
+            # Update insertion points
+            pts = self._load_insertion_points()
+            if old_name in pts:
+                pts[new_name] = pts.pop(old_name)
+                self._save_insertion_points(pts)
+            
+            # Update caches
+            if old_name in self._doc_cache:
+                self._doc_cache[new_name] = self._doc_cache.pop(old_name)
+            
+            # Update PNG cache
+            for key in list(self._png_cache.keys()):
+                if key[0] == old_name:
+                    new_key = (new_name, key[1])
+                    self._png_cache[new_key] = self._png_cache.pop(key)
+            
+            return True, f"Template renamed to '{new_name}'."
+        except Exception as e:
+            return False, f"Error renaming template: {str(e)}"
+
     # ── insertion point ─────────────────────────────────────────────────────
 
     def get_insertion_point(self, template_name: str) -> tuple[float, float]:

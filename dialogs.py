@@ -74,6 +74,22 @@ def _load_ladder_types() -> list[str]:
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
+
+def _load_ladder_component_templates() -> list[str]:
+    """Load ladder component template names from templates/ladder_components/ folder."""
+    try:
+        components_dir = Path(__file__).parent / "templates" / "ladder_components"
+        if components_dir.exists():
+            # Get all DXF files and return names without extensions
+            templates = sorted([
+                f.stem for f in components_dir.glob("*.dxf")
+            ])
+            return templates
+    except Exception:
+        pass
+    return []
+
+
 def _make_toolbar_row(*labels_callbacks: tuple[str, callable]) -> QWidget:
     """Return a widget containing a row of QPushButtons."""
     w = QWidget()
@@ -927,12 +943,13 @@ class TemplateIODialog(QDialog):
 
         self._ladder_template_cb = QComboBox()
         self._ladder_template_cb.addItem("")  # Allow empty selection
-        self._ladder_template_cb.addItems(self._available_templates)
+        self._ladder_template_cb.addItems(self._available_ladder_component_templates)
         form.addRow("Ladder Template:", self._ladder_template_cb)
 
         self._ladder_component_template_cb = QComboBox()
         self._ladder_component_template_cb.addItem("")  # Allow empty selection
-        self._ladder_component_template_cb.addItems(self._available_ladder_component_templates)
+        ladder_component_templates = _load_ladder_component_templates()
+        self._ladder_component_template_cb.addItems(ladder_component_templates)
         form.addRow("Ladder Component Template:", self._ladder_component_template_cb)
 
         self._signal_cb.currentTextChanged.connect(self._sync_io_type)
@@ -1017,7 +1034,8 @@ class IOTemplateConfigDialog(QDialog):
     def __init__(self, parent=None, template_name: str = "",
                  ios: list[dict] | None = None,
                  io_types: list[dict] | None = None,
-                 available_templates: list[str] | None = None):
+                 available_templates: list[str] | None = None,
+                 available_ladder_component_templates: list[str] | None = None):
         super().__init__(parent)
         self.setWindowTitle(tr("dlg_io_template_config_title", name=template_name))
         self.setMinimumWidth(580)
@@ -1026,6 +1044,7 @@ class IOTemplateConfigDialog(QDialog):
         self._ios: list[dict] = [dict(io) for io in (ios or [])]
         self._io_types = io_types or []
         self._available_templates = available_templates or []
+        self._available_ladder_component_templates = available_ladder_component_templates or []
         self._build()
 
     def _build(self):
@@ -1087,7 +1106,8 @@ class IOTemplateConfigDialog(QDialog):
         if idx < 0:
             return
         dlg = TemplateIODialog(self, self._ios[idx], io_types=self._io_types,
-                              available_templates=self._available_templates)
+                              available_templates=self._available_templates,
+                              available_ladder_component_templates=self._available_ladder_component_templates)
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._ios[idx] = dlg.result_data
             self._refresh_table()
@@ -1197,12 +1217,14 @@ class CircuitDialog(QDialog):
     """Create or edit a Circuit."""
 
     def __init__(self, parent=None, available_templates: list[str] | None = None,
-                 data: Circuit | None = None, io_types: list[dict] | None = None):
+                 data: Circuit | None = None, io_types: list[dict] | None = None,
+                 available_ladder_component_templates: list[str] | None = None):
         super().__init__(parent)
         self.setWindowTitle(tr("dlg_circuit_title"))
         self.setMinimumWidth(600)
         self.result_circuit: Circuit | None = None
         self._available = available_templates or []
+        self._available_ladder_component_templates = available_ladder_component_templates or []
         self._io_types = io_types or []
         self._templates: list[Template | str] = []  # Store template objects or strings
         self._circuit_ios: list[dict] = []  # Store circuit I/Os
@@ -1412,7 +1434,8 @@ class CircuitDialog(QDialog):
     def _add_circuit_io(self):
         """Add a new I/O entry to the circuit."""
         dlg = CircuitIODialog(self, io_types=self._io_types, 
-                             available_templates=self._available)
+                             available_templates=self._available,
+                             available_ladder_component_templates=self._available_ladder_component_templates)
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._circuit_ios.append(dlg.result_data)
             self._populate_ios_table()
@@ -1422,7 +1445,8 @@ class CircuitDialog(QDialog):
         row = self._ios_table.currentRow()
         if row >= 0:
             dlg = CircuitIODialog(self, data=self._circuit_ios[row], io_types=self._io_types,
-                                 available_templates=self._available)
+                                 available_templates=self._available,
+                                 available_ladder_component_templates=self._available_ladder_component_templates)
             if dlg.exec() == QDialog.Accepted and dlg.result_data:
                 self._circuit_ios[row] = dlg.result_data
                 self._populate_ios_table()
@@ -1458,13 +1482,14 @@ class CircuitIODialog(QDialog):
     """Add / edit a single I/O entry on a circuit."""
 
     def __init__(self, parent=None, data: dict | None = None, io_types: list[dict] | None = None,
-                 available_templates: list[str] | None = None):
+                 available_templates: list[str] | None = None, available_ladder_component_templates: list[str] | None = None):
         super().__init__(parent)
         self.setWindowTitle(tr("dlg_circuit_io_title"))
         self.setMinimumWidth(400)
         self.result_data: dict | None = None
         self._io_types = io_types or []
         self._available_templates = available_templates or []
+        self._available_ladder_component_templates = available_ladder_component_templates or []
         self._build(data)
 
     def _build(self, data: dict | None):
@@ -1498,7 +1523,7 @@ class CircuitIODialog(QDialog):
 
         self._ladder_template_cb = QComboBox()
         self._ladder_template_cb.addItem("")  # Allow empty selection
-        self._ladder_template_cb.addItems(self._available_templates)
+        self._ladder_template_cb.addItems(self._available_ladder_component_templates)
         form.addRow("Ladder Template:", self._ladder_template_cb)
 
         self._signal_cb.currentTextChanged.connect(self._sync_io_type)
@@ -1670,12 +1695,16 @@ class IOTypeDialog(QDialog):
     _DIRECTIONS        = ["Input", "Output"]
 
     def __init__(self, parent=None, data: dict | None = None,
-                 io_templates: list[str] | None = None):
+                 io_templates: list[str] | None = None,
+                 available_ladder_templates: list[str] | None = None,
+                 available_ladder_component_templates: list[str] | None = None):
         super().__init__(parent)
         self.setWindowTitle(tr("dlg_io_type_title"))
         self.setMinimumWidth(400)
         self.result_data: dict | None = None
         self._io_templates = io_templates or []
+        self._available_ladder_templates = available_ladder_templates or []
+        self._available_ladder_component_templates = available_ladder_component_templates or []
         self._build(data)
 
     def _build(self, data: dict | None):
@@ -1719,6 +1748,21 @@ class IOTypeDialog(QDialog):
         self._dir_cb.currentTextChanged.connect(self._sync_shared_visibility)
         self._shared_chk.toggled.connect(self._sync_shared_visibility)
 
+        # ── Ladder fields ─────────────────────────────────────────────────────
+        self._ladder_type_cb = QComboBox()
+        self._ladder_type_cb.addItem("")  # Allow empty selection
+        self._ladder_type_cb.addItems(self._available_ladder_templates)
+        form.addRow("Ladder Type:", self._ladder_type_cb)
+
+        self._ladder_component_template_cb = QComboBox()
+        self._ladder_component_template_cb.addItem("")  # Allow empty selection
+        ladder_component_templates = _load_ladder_component_templates()
+        self._ladder_component_template_cb.addItems(ladder_component_templates)
+        form.addRow("Ladder Component Template:", self._ladder_component_template_cb)
+
+        # Connect ladder type change to update available templates
+        self._ladder_type_cb.currentTextChanged.connect(self._sync_ladder_templates)
+
         if data:
             self._name_edit.setText(data.get("name", ""))
             self._desc_edit.setText(data.get("description", ""))
@@ -1737,8 +1781,17 @@ class IOTypeDialog(QDialog):
                 self._shared_tmpl_cb.setCurrentIndex(sidx)
             else:
                 self._shared_tmpl_cb.setCurrentText(shared_tmpl)
+            if data.get("ladder_type"):
+                idx = self._ladder_type_cb.findText(data["ladder_type"])
+                if idx >= 0:
+                    self._ladder_type_cb.setCurrentIndex(idx)
+            if data.get("ladder_component_template"):
+                idx = self._ladder_component_template_cb.findText(data["ladder_component_template"])
+                if idx >= 0:
+                    self._ladder_component_template_cb.setCurrentIndex(idx)
 
         self._sync_shared_visibility()
+        self._sync_ladder_templates()
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self._ok)
@@ -1755,6 +1808,34 @@ class IOTypeDialog(QDialog):
         if not is_input:
             self._shared_chk.setChecked(False)
 
+    def _sync_ladder_templates(self):
+        """Filter ladder component templates based on selected ladder type."""
+        ladder_type = self._ladder_type_cb.currentText()
+        current_selection = self._ladder_component_template_cb.currentText()
+        
+        self._ladder_component_template_cb.blockSignals(True)
+        self._ladder_component_template_cb.clear()
+        self._ladder_component_template_cb.addItem("")  # Always include empty option
+        
+        all_templates = _load_ladder_component_templates()
+        if ladder_type:
+            # Filter templates that match the selected ladder type
+            matching_templates = [
+                t for t in all_templates
+                if ladder_type.lower() in t.lower()
+            ]
+            self._ladder_component_template_cb.addItems(matching_templates)
+        else:
+            # If no ladder type selected, show all templates
+            self._ladder_component_template_cb.addItems(all_templates)
+        
+        # Try to restore previous selection
+        idx = self._ladder_component_template_cb.findText(current_selection)
+        if idx >= 0:
+            self._ladder_component_template_cb.setCurrentIndex(idx)
+        
+        self._ladder_component_template_cb.blockSignals(False)
+
     def _ok(self):
         name = self._name_edit.text().strip()
         if not name:
@@ -1770,6 +1851,8 @@ class IOTypeDialog(QDialog):
             "io_template":     self._tmpl_cb.currentText().strip(),
             "shared":          shared,
             "shared_template": self._shared_tmpl_cb.currentText().strip() if shared else "",
+            "ladder_type":     self._ladder_type_cb.currentText(),
+            "ladder_component_template": self._ladder_component_template_cb.currentText(),
         }
         self.accept()
 
@@ -1917,6 +2000,37 @@ class GenerationProgressDialog(QDialog):
         self._lbl_status.setText(message)
         if detail:
             self._lbl_detail.setText(detail)
-        from PySide6.QtWidgets import QApplication
-        QApplication.processEvents()
+
+
+# ---------------------------------------------------------------------------
+# Post-Controller Generation Hook
+# ---------------------------------------------------------------------------
+
+def execute_post_controller_generation(circuit_data: dict | None = None, output_path: str = "", ios: list[dict] | None = None) -> None:
+    """Execute custom logic after controller generation.
+    
+    This function is called automatically after the controller generation completes.
+    Add your custom post-processing or ladder generation code here.
+    
+    Args:
+        circuit_data: The generated circuit data dictionary or Circuit object
+        output_path: The path where controller generation output was saved
+        ios: List of I/O entries for the generation
+    """
+   
+    
+    # Use provided ios list, or extract from circuit_data if available
+    io_list = ios or []
+
+    io_list = [
+        io for io in io_list
+        if io.description.strip().lower() != "reserved"]
+    
+    for io in io_list:
+        # Example: You can add custom processing for each I/O entry here
+        # For instance, you might want to log, modify, or generate additional files
+        print(f"Processing I/O: {io.tag}, Type: {io.io_type}, Signal: {io.signal_type}")
+    
+
+
 

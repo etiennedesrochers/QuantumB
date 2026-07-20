@@ -48,7 +48,13 @@
     "templates": [
       "VFD-L",
       "VFD-L",
-      "VFD-CD"
+      "VFD-CD",
+      {
+        "name": "AHU_HEAT_COILee",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      }
     ],
     "valves": [],
     "circuit_ios": []
@@ -60,7 +66,7 @@
     "templates": [
       "3_Return_Fan",
       "3_Supply_Fan",
-      "AHU_HEAT_COIL",
+      "AHU_HEAT_COILee",
       "ENTH-WHEEL"
     ],
     "valves": [],
