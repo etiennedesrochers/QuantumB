@@ -1706,6 +1706,7 @@ class MainWindow(QMainWindow):
                     io_type=io.get("direction", "Input"),
                     description=io_desc,
                     signal_type=io.get("signal_type", ""),
+                    signal_category=io.get("signal_type", ""),  # signal_type is "Analog" or "Digital"
                     io_type_name=io.get("io_type", ""),
                     old_name=io_old_name,
                     old_description=io_old_desc,
@@ -1728,6 +1729,7 @@ class MainWindow(QMainWindow):
                         io_type=io.get("direction", "Input"),
                         description=io_desc,
                         signal_type=io.get("signal_type", ""),
+                        signal_category=io.get("signal_category", ""),
                         io_type_name=io.get("io_type", ""),
                         old_name=io_old_name,
                         old_description=io_old_desc,
@@ -1912,7 +1914,7 @@ class MainWindow(QMainWindow):
             btn.setFont(font)
 
     def _add_io(self):
-        dlg = IODialog(self)
+        dlg = IODialog(self, io_types=self._io_types)
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
             self._io_items.append(IOItem(**dlg.result_data))
             self._refresh_io_table()
@@ -1926,10 +1928,13 @@ class MainWindow(QMainWindow):
         dlg = IODialog(self, {
             "io_type": item.io_type, "tag": item.tag, "address": item.address,
             "description": item.description, "panel": item.panel,
-            "signal_type": item.signal_type, "terminal": item.terminal,
+            "signal_type": item.signal_type, "signal_category": item.signal_category,
+            "io_type_name": item.io_type_name, "terminal": item.terminal, 
             "cable": item.cable, "notes": item.notes,
-        })
+        }, io_types=self._io_types)
         if dlg.exec() == QDialog.Accepted and dlg.result_data:
+            # Preserve signal_category from the original item
+            dlg.result_data["signal_category"] = item.signal_category
             self._io_items[idx] = IOItem(**dlg.result_data)
             self._refresh_io_table()
             self._mark_dirty()
