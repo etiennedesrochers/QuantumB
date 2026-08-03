@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circuit Configuration</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <span>XNNOV Circuit Generator</span>
+            </div>
+            <div class="navbar-right">
+                <ul class="navbar-menu">
+                    <li class="navbar-item">
+                        <a href="base.html" class="navbar-link active">Generator</a>
+                    </li>
+                    <li class="navbar-item">
+                        <a href="config_compressor.html" class="navbar-link">Config Compressor</a>
+                    </li>
+                </ul>
+                <label class="dark-mode-toggle" title="Toggle Dark Mode">
+                    <input type="checkbox" id="darkModeCheckbox">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <form id="configurationForm">
+        <div id="formSection">
+            <h1>Circuit Configuration</h1>
+            <p class="subtitle">Enter the number of circuits you want to configure</p>
+
+            <div class="form-group">
+                <div class="form-field">
+                    <label for="circuitCount">Number of Circuits:</label>
+                    <input type="number" id="circuitCount" name="circuitCount" min="1" max="20"
+                        placeholder="Enter number (1-20)" value="1" oninput="generateCircuits()">
+                </div>
+                <div class="form-field">
+                    <label for="voltage">Voltage:</label>
+                    <select id="voltage" name="voltage">
+                        <option value="208">208 V</option>
+                        <option value="480">480 V</option>
+                        <option value="575">575 V</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-field">
+                    <label for="application">Application</label>
+                    <select id="application" name="application">
+                        <option value="ASHP-CU">ASHP-CU</option>
+                        <option value="WSHP-CU">WSHP-CU</option>
+                        <option value="AWHP-2P">AWHP-2P</option>
+                        <option value="AWHP-4P">AWHP-4P</option>
+                        <option value="WSBoiler">WSBoiler</option>
+                        <option value="ASBoiler">ASBoiler</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <div class="form-field">
+                    <label for="fanmanufacturer">Fan Manufacturer</label>
+                    <select id="fanmanufacturer" name="fanmanufacturer">
+                        <option value="EBM-PAPST">EBM-PAPST</option>
+                        <option value="Ziehl-Abegg">Ziehl-Abegg</option>
+                        <option value="Fans-Tech">Fans-Tech</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="vaporinject">Vapor Injecton</label>
+                    <select id="vaporinject" name="vaporinject">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+
+                    </select>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div id="circuitsContainer">
+            <div class="circuits-title">Your Circuits</div>
+            <div id="circuitsList"></div>
+        </div>
+
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="generateBtn" type="submit">Generate</button>
+        </div>
+        </form>
+    </div>
+
+
+
+    <script src="script.js"></script>
+    <script>generateCircuits()</script>
+</body>
+
+</html>

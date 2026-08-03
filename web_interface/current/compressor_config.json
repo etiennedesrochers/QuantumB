@@ -1,0 +1,71 @@
+{
+  "manufacturers": [
+    "Copeland",
+    "Mitsubishi",
+    "Schneider",
+    "Danfoss",
+    "Emerson"
+  ],
+  "applications": [
+    "ASHP-CU",
+    "WSHP-CU",
+    "AWHP-2P",
+    "AWHP-4P",
+    "Boiler"
+  ],
+  "fanManufacturers": [
+    "Ebm-papst",
+    "Nidec",
+    "Valeo",
+    "Spal"
+  ],
+  "templateTypes": {
+    "regular": [
+        "1 EXD-SH2",
+        "1 EXD-SH2-1-TRANS",
+        "1_Condenser_Fan",
+        "2_Condenser_Fan",
+        "2_Supply_Fan",
+        "3_Return_Fan",
+        "3_Supply_Fan",
+        "AHU_HEAT_COILee",
+        "C063",
+        "CD-FAN fans-tech",
+        "CD-FAN1-C fans-tech",
+        "ENTH-WHEEL",
+        "GAS SENSOR",
+        "Humidifier",
+        "IB-G",
+        "SUPPLY DAMPERS",
+        "VFD-CD",
+        "VFD-L",
+        "VFD-l MS"
+    ],
+    "controller": [
+      "Controller-A",
+      "Controller-B",
+      "Controller-C"
+    ],
+    "io": [
+      "IO-Input-1",
+      "IO-Input-2",
+      "IO-Output-1",
+      "IO-Output-2"
+    ],
+    "ladder": [
+      "Ladder-Basic",
+      "Ladder-Advanced",
+      "Ladder-Custom"
+    ],
+    "ladder_component": [
+      "Component-Relay",
+      "Component-Timer",
+      "Component-Counter"
+    ],
+    "valves": [
+      "Valve-Solenoid",
+      "Valve-Check",
+      "Valve-Relief"
+    ]
+  }
+}

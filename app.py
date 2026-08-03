@@ -23,13 +23,13 @@ if _PYSIDE6_PATH.exists() and str(_PYSIDE6_PATH) not in sys.path:
 
 def _has_cli_args() -> bool:
     """Check if CLI arguments are present."""
-    cli_indicators = {"--project", "--output", "--format", "--help", "-h"}
+    cli_indicators = {"--project", "--output", "--format", "--generate-from-selection", "--help", "-h"}
     return any(arg in sys.argv for arg in cli_indicators)
 
 
 def _run_cli():
     """Run in CLI mode."""
-    from cli import main as cli_main
+    from src.cli.cli import main as cli_main
     return cli_main()
 
 
@@ -43,7 +43,7 @@ def _run_gui():
     )
 
     from PySide6.QtWidgets import QApplication
-    from main_window import MainWindow
+    from src.gui.main_window import MainWindow
 
     app = QApplication(sys.argv)
     window = MainWindow()
