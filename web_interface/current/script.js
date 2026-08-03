@@ -1,66 +1,194 @@
-// Global configuration loaded from JSON
+// Global configuration loaded from JSON / API
 let compressorConfig = null;
 
-// Load configuration from JSON file
+// Compressor library, loaded from the server (/api/compressors)
+let compressorsCache = [];
+
+// Workbook selection rows, loaded from the Excel-backed API
+let workbookCompressorRows = [];
+
+// Generator workbook selection state
+let workbookGeneratorFilters = null;
+let workbookGeneratedCircuits = [];
+
+function getAllTemplateNames() {
+    // Only include "regular" templates (templates/templates folder).
+    const regularTemplates = (compressorConfig && compressorConfig.templateTypes && compressorConfig.templateTypes.regular) || [];
+    return Array.from(new Set(regularTemplates)).sort((a, b) => String(a).localeCompare(String(b)));
+}
+
+function populateTemplateSelect() {
+    const templateSelect = document.getElementById('templateName');
+    if (!templateSelect) return;
+
+    const templates = getAllTemplateNames();
+    templateSelect.innerHTML = '<option value="">-- Choose template --</option>';
+
+    templates.forEach(templateName => {
+        const option = document.createElement('option');
+        option.value = templateName;
+        option.textContent = templateName;
+        templateSelect.appendChild(option);
+    });
+}
+
+// Load configuration: manufacturers/applications from the static JSON file,
+// template lists live from disk via the API (source of truth for template pickers)
 async function loadConfiguration() {
     try {
         const response = await fetch('compressor_config.json');
         compressorConfig = await response.json();
-        console.log('Configuration loaded:', compressorConfig);
     } catch (error) {
         console.error('Error loading configuration:', error);
         // Use default config if file fails to load
         compressorConfig = {
             manufacturers: ["Copeland", "Mitsubishi", "Schneider"],
             applications: ["ASHP-CU", "WSHP-CU", "AWHP-2P", "AWHP-4P"],
-            templateTypes: {
-                regular: [
-        "1 EXD-SH2",
-        "1 EXD-SH2-1-TRANS",
-        "1_Condenser_Fan",
-        "2_Condenser_Fan",
-        "2_Supply_Fan",
-        "3_Return_Fan",
-        "3_Supply_Fan",
-        "AHU_HEAT_COILee",
-        "C063",
-        "CD-FAN fans-tech",
-        "CD-FAN1-C fans-tech",
-        "ENTH-WHEEL",
-        "GAS SENSOR",
-        "Humidifier",
-        "IB-G",
-        "SUPPLY DAMPERS",
-        "VFD-CD",
-        "VFD-L",
-        "VFD-l MS"],
-                controller: ["Controller-A", "Controller-B", "Controller-C"],
-                io: ["IO-Input-1", "IO-Input-2", "IO-Output-1", "IO-Output-2"],
-                ladder: ["Ladder-Basic", "Ladder-Advanced", "Ladder-Custom"],
-                ladder_component: ["Component-Relay", "Component-Timer", "Component-Counter"],
-                valves: ["Valve-Solenoid", "Valve-Check", "Valve-Relief"]
-            }
+            templateTypes: {}
         };
+    }
+
+    try {
+        const templatesResponse = await fetch('/api/templates');
+        compressorConfig.templateTypes = await templatesResponse.json();
+    } catch (error) {
+        console.error('Error loading templates from API:', error);
+    }
+
+    console.log('Configuration loaded:', compressorConfig);
+}
+
+// Fetch the compressor library from the server and refresh the local cache
+async function fetchCompressors() {
+    try {
+        const response = await fetch('/api/compressors');
+        compressorsCache = await response.json();
+    } catch (error) {
+        console.error('Error fetching compressors:', error);
+        compressorsCache = [];
+    }
+    return compressorsCache;
+}
+
+// Sync all compressors from workbook rows into the compressor library.
+async function syncCompressorsFromWorkbook() {
+    try {
+        const response = await fetch('/api/compressors/sync-workbook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || response.statusText);
+        }
+
+        const result = await response.json();
+        compressorsCache = result.compressors || [];
+        return result;
+    } catch (error) {
+        console.error('Error syncing compressors from workbook:', error);
+        await fetchCompressors();
+        return null;
     }
 }
 
-const compressorOptions = [
-    "Compressor A",
-    "Compressor B",
-    "Compressor C",
-    "Compressor D"
-];
+// Fetch workbook compressor rows from the Excel-backed API and refresh any
+// workbook-driven controls on the page.
+async function fetchWorkbookCompressors() {
+    try {
+        const response = await fetch('/api/workbook/compressors');
+        workbookCompressorRows = await response.json();
+    } catch (error) {
+        console.error('Error fetching workbook compressors:', error);
+        workbookCompressorRows = [];
+    }
+
+    populateWorkbookCompressorSelect();
+    displayWorkbookCompressors();
+    return workbookCompressorRows;
+}
+
+function populateWorkbookCompressorSelect() {
+    const select = document.getElementById('workbookCompressorRow');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">-- Choose workbook row --</option>';
+    workbookCompressorRows.forEach((row, index) => {
+        const labelParts = [
+            row.nominal_capacity != null ? `${row.nominal_capacity} kW` : 'Capacity N/A',
+            row.manufacturer || 'Manufacturer N/A',
+            row.skid_model_number || 'Model N/A'
+        ];
+        const option = document.createElement('option');
+        option.value = String(index);
+        option.textContent = labelParts.join(' | ');
+        select.appendChild(option);
+    });
+}
+
+function displayWorkbookCompressors() {
+    const container = document.getElementById('workbookRowsTable');
+    if (!container) return;
+
+    if (workbookCompressorRows.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center; padding: 12px; margin: 0;">No workbook rows loaded</p>';
+        return;
+    }
+
+    const rowsHtml = workbookCompressorRows.map((row, index) => `
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${index + 1}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${row.nominal_capacity ?? ''}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${row.manufacturer ?? ''}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${row.control ?? ''}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${row.skid_model_number ?? ''}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${row.models_by_voltage?.['400v'] ?? ''}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${row.compressor_qty ?? ''}</td>
+        </tr>
+    `).join('');
+
+    container.innerHTML = `
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                    <tr style="background: #f5f5f5; text-align: left;">
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd;">#</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd;">Capacity</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd;">Manufacturer</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd;">Control</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd;">Skid Model</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd;">400V Model</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #ddd;">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function loadWorkbookRowIntoForm() {
+    const select = document.getElementById('workbookCompressorRow');
+    if (!select) return;
+
+    const index = parseInt(select.value, 10);
+    if (Number.isNaN(index) || !workbookCompressorRows[index]) return;
+
+    const row = workbookCompressorRows[index];
+    const nameField = document.getElementById('compressorName');
+    const modelField = document.getElementById('compressorModel');
+    const manufacturerField = document.getElementById('compressorManufacturer');
+    const capacityField = document.getElementById('compressorCapacity');
+
+    if (nameField) nameField.value = row.skid_model_number || `${row.manufacturer || 'Compressor'} ${row.nominal_capacity || ''}`.trim();
+    if (modelField) modelField.value = row.models_by_voltage?.['400v'] || row.models_by_voltage?.['200v'] || row.skid_model_number || '';
+    if (manufacturerField) manufacturerField.value = row.manufacturer || '';
+    if (capacityField) capacityField.value = row.nominal_capacity ?? '';
+}
 
 function getCompressorOptions() {
-    // Try to get from localStorage first
-    const savedCompressors = JSON.parse(localStorage.getItem('compressors')) || [];
-    
-    if (savedCompressors.length > 0) {
-        return savedCompressors.map(c => c.name);
-    }
-    
-    // Fall back to default options
-    return compressorOptions;
+    return compressorsCache.map(c => c.name);
 }
 
 function generateCircuits() {
@@ -126,6 +254,141 @@ function generateCircuits() {
 }
 
 
+async function initGeneratorFromWorkbook() {
+    const capacitySelect = document.getElementById('workbookCapacity');
+    const manufacturerSelect = document.getElementById('workbookManufacturer');
+    if (!capacitySelect || !manufacturerSelect) return;
+
+    try {
+        const response = await fetch('/api/workbook/generator-filters');
+        workbookGeneratorFilters = await response.json();
+    } catch (error) {
+        console.error('Error loading generator workbook filters:', error);
+        workbookGeneratorFilters = { capacities: [], manufacturers: [], tensions: [] };
+    }
+
+    const manufacturers = (workbookGeneratorFilters && workbookGeneratorFilters.manufacturers) || [];
+
+    capacitySelect.innerHTML = '<option value="">Select a manufacturer first</option>';
+
+    manufacturerSelect.innerHTML = '<option value="">-- Choose manufacturer --</option>';
+    manufacturers.forEach(manufacturer => {
+        const option = document.createElement('option');
+        option.value = manufacturer;
+        option.textContent = manufacturer;
+        manufacturerSelect.appendChild(option);
+    });
+}
+
+
+async function refreshCapacitiesForManufacturer() {
+    const capacitySelect = document.getElementById('workbookCapacity');
+    const manufacturer = document.getElementById('workbookManufacturer')?.value;
+    if (!capacitySelect) return;
+
+    if (!manufacturer) {
+        capacitySelect.innerHTML = '<option value="">Select a manufacturer first</option>';
+        return;
+    }
+
+    try {
+        const query = new URLSearchParams({ manufacturer: manufacturer });
+        const response = await fetch(`/api/workbook/generator-filters?${query.toString()}`);
+        const data = await response.json();
+        const capacities = data.capacities || [];
+
+        capacitySelect.innerHTML = '<option value="">-- Choose nominal capacity (tons) --</option>';
+        capacities.forEach(capacity => {
+            const option = document.createElement('option');
+            option.value = String(capacity);
+            option.textContent = `${capacity} tons`;
+            capacitySelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading capacities for manufacturer:', error);
+        capacitySelect.innerHTML = '<option value="">Failed to load capacities</option>';
+    }
+}
+
+
+function renderWorkbookCircuits(circuits) {
+    const circuitsList = document.getElementById('circuitsList');
+    const container = document.getElementById('circuitsContainer');
+    if (!circuitsList || !container) return;
+
+    if (!circuits || circuits.length === 0) {
+        circuitsList.innerHTML = '<p style="color: #999; text-align: center; padding: 16px;">No circuits found for this selection.</p>';
+        container.classList.add('active');
+        return;
+    }
+
+    let html = '';
+    circuits.forEach((circuit, index) => {
+        const compressorRows = (circuit.compressors || []).map(comp => {
+            return `
+                <div style="padding: 8px 0; border-top: 1px solid #ececec;">
+                    <div style="font-weight: 600;">${comp.skid_model_number || comp.description || comp.model_number}</div>
+                    <div style="font-size: 13px; color: #666;">Model (${(document.getElementById('voltage')?.value || '')}V): ${comp.model_number || '-'}</div>
+                    <div style="font-size: 13px; color: #666;">Qty: ${comp.quantity || 1}</div>
+                </div>
+            `;
+        }).join('');
+
+        html += `
+            <div class="circuit-section">
+                <div class="circuit-header">
+                    <div class="circuit-number">${index + 1}</div>
+                    <div class="circuit-name">${circuit.name || `Circuit ${index + 1}`}</div>
+                </div>
+                <div class="circuit-content" style="padding: 12px;">
+                    <div style="margin-bottom: 8px; color: #444;">${circuit.description || ''}</div>
+                    ${compressorRows}
+                </div>
+            </div>
+        `;
+    });
+
+    circuitsList.innerHTML = html;
+    container.classList.add('active');
+}
+
+
+async function loadCircuitsFromWorkbookSelection() {
+    const capacity = document.getElementById('workbookCapacity')?.value;
+    const manufacturer = document.getElementById('workbookManufacturer')?.value;
+    const tension = document.getElementById('voltage')?.value;
+
+    if (!capacity || !manufacturer || !tension) {
+        alert('Please select manufacturer, nominal capacity (tons), and tension.');
+        return;
+    }
+
+    const query = new URLSearchParams({
+        capacity: String(capacity),
+        manufacturer: String(manufacturer),
+        tension: String(tension),
+    });
+
+    try {
+        const response = await fetch(`/api/workbook/circuits?${query.toString()}`);
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            alert('Error loading circuits: ' + (err.error || response.statusText));
+            return;
+        }
+
+        const payload = await response.json();
+        workbookGeneratedCircuits = payload.circuits || [];
+        renderWorkbookCircuits(workbookGeneratedCircuits);
+    } catch (error) {
+        alert('Error loading circuits: ' + error.message);
+        console.error('Workbook circuit load error:', error);
+    }
+}
+
+window.loadCircuitsFromWorkbookSelection = loadCircuitsFromWorkbookSelection;
+
+
 // Handle Fan Manufacturer enable/disable based on Application selection
 function updateFanManufacturerState() {
     const application = document.getElementById('application').value;
@@ -167,9 +430,13 @@ function toggleDarkMode(event) {
 }
 
 // Add event listener to form submission
-document.addEventListener('DOMContentLoaded', function() {
-    // Load configuration from JSON
-    loadConfiguration();
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load configuration (manufacturers/applications + live template lists)
+    // and the shared compressor library before rendering anything that
+    // depends on them.
+    await loadConfiguration();
+    await fetchCompressors();
+    await fetchWorkbookCompressors();
     
     // Initialize dark mode
     initDarkMode();
@@ -196,16 +463,34 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initialize state on page load
         updateFanManufacturerState();
     }
+
+    const workbookSelect = document.getElementById('workbookCompressorRow');
+    if (workbookSelect) {
+        workbookSelect.addEventListener('change', loadWorkbookRowIntoForm);
+    }
+
+    const workbookManufacturer = document.getElementById('workbookManufacturer');
+    if (workbookManufacturer) {
+        workbookManufacturer.addEventListener('change', refreshCapacitiesForManufacturer);
+    }
+    
+    // Initialize workbook-driven generator page controls
+    if (document.getElementById('workbookCapacity') && document.getElementById('workbookManufacturer')) {
+        await initGeneratorFromWorkbook();
+    }
     
     // Display compressors if on config page
     const compressorsList = document.getElementById('compressorsList');
     if (compressorsList) {
+        await syncCompressorsFromWorkbook();
+        populateTemplateSelect();
         displayCompressors();
     }
 });
 
-// Handle form submission - generate JSON and download locally
-function handleFormSubmit(event) {
+// Handle form submission - build the selection schema and generate drawings
+// directly via the server's /api/generate endpoint.
+async function handleFormSubmit(event) {
     event.preventDefault();
     
     // Collect form data
@@ -215,20 +500,73 @@ function handleFormSubmit(event) {
     const fanManufacturer = document.getElementById('fanmanufacturer').value;
     const vaporInject = document.getElementById('vaporinject').value;
     
-    // Collect circuit data
+    // Build circuits from workbook-driven selection when available.
     const circuits = [];
-    for (let i = 1; i <= circuitCount; i++) {
-        const compressor = document.getElementById(`compressorchoice${i}`).value;
-        const quantity = parseInt(document.getElementById(`quantity${i}`).value);
-        const manufacturer = document.getElementById(`manu${i}`).value;
-        
-        if (compressor) {
+    if (workbookGeneratedCircuits.length > 0) {
+        workbookGeneratedCircuits.forEach((circuit, circuitIndex) => {
+            const compressors = (circuit.compressors || []).map(comp => {
+                const libraryMatch = compressorsCache.find(item => {
+                    const model = String(item.model || '').toLowerCase();
+                    const name = String(item.name || '').toLowerCase();
+                    const targetModel = String(comp.model_number || '').toLowerCase();
+                    const targetSkid = String(comp.skid_model_number || '').toLowerCase();
+                    return model === targetModel || name === targetSkid || model === targetSkid;
+                });
+
+                const qty = parseInt(comp.quantity, 10) || 1;
+                const templates = ((libraryMatch && libraryMatch.templates) || []).map(t => ({
+                    name: t.name,
+                    quantity: t.scope === 'shared' ? 1 : qty
+                }));
+
+                return {
+                    model_number: comp.model_number,
+                    description: comp.description || comp.skid_model_number || comp.model_number,
+                    templates: templates
+                };
+            });
+
             circuits.push({
-                circuit_id: `CU${String(i).padStart(3, '0')}`,
-                compressor_model: compressor,
-                compressor_description: compressor,
-                quantity: quantity,
-                manufacturer: manufacturer
+                name: circuit.name || `CU${String(circuitIndex + 1).padStart(3, '0')}`,
+                description: circuit.description || '',
+                compressors: compressors
+            });
+        });
+    } else {
+        // Fallback to existing manual mode if workbook circuits were not loaded.
+        for (let i = 1; i <= circuitCount; i++) {
+            const compressorNameEl = document.getElementById(`compressorchoice${i}`);
+            const quantityEl = document.getElementById(`quantity${i}`);
+            const manufacturerEl = document.getElementById(`manu${i}`);
+
+            if (!compressorNameEl || !quantityEl || !manufacturerEl) {
+                continue;
+            }
+
+            const compressorName = compressorNameEl.value;
+            const quantity = parseInt(quantityEl.value) || 1;
+            const manufacturer = manufacturerEl.value;
+
+            if (!compressorName) continue;
+
+            const compressor = compressorsCache.find(c => c.name === compressorName);
+            const compressorTemplates = (compressor && compressor.templates) || [];
+
+            const templates = compressorTemplates.map(t => ({
+                name: t.name,
+                quantity: t.scope === 'shared' ? 1 : quantity
+            }));
+
+            circuits.push({
+                name: `CU${String(i).padStart(3, '0')}`,
+                description: `${compressorName} (${manufacturer})`,
+                compressors: [
+                    {
+                        model_number: (compressor && compressor.model) || compressorName,
+                        description: (compressor && compressor.name) || compressorName,
+                        templates: templates
+                    }
+                ]
             });
         }
     }
@@ -239,7 +577,7 @@ function handleFormSubmit(event) {
         return;
     }
     
-    // Create the JSON object for CLI
+    // Create the selection data expected by the CLI's selection adapter
     const selectionData = {
         project_name: "XNNOV Circuit Selection",
         project_number: "PRJ-001",
@@ -252,39 +590,57 @@ function handleFormSubmit(event) {
         circuits: circuits
     };
     
-    // Generate and download JSON file
-    downloadJSON(selectionData);
+    await generateAndDownload(selectionData);
 }
 
-// Download JSON file locally
-function downloadJSON(data) {
-    const timestamp = new Date().toISOString().slice(0, 10);
-    const filename = `selection_${timestamp}.json`;
+// POST the selection data to /api/generate and download the returned ZIP
+async function generateAndDownload(selectionData) {
+    const generateBtn = document.getElementById('generateBtn');
+    const originalLabel = generateBtn ? generateBtn.textContent : '';
+    if (generateBtn) {
+        generateBtn.disabled = true;
+        generateBtn.textContent = 'Generating...';
+    }
     
-    // Create blob from JSON data
-    const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    
-    // Create download link
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    
-    // Trigger download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // Clean up
-    URL.revokeObjectURL(url);
-    
-    // Show instructions
-    alert(`Selection data saved as: ${filename}\n\nTo generate drawings, run:\npython app.py --generate-from-selection ${filename} --output ./output`);
+    try {
+        const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(selectionData)
+        });
+        
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            alert('Generation failed: ' + (err.error || response.statusText));
+            return;
+        }
+        
+        const blob = await response.blob();
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const match = disposition.match(/filename="?([^"]+)"?/);
+        const filename = match ? match[1] : `drawings_${new Date().toISOString().slice(0, 10)}.zip`;
+        
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        alert('Error generating drawings: ' + error.message);
+        console.error('Generate error:', error);
+    } finally {
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.textContent = originalLabel;
+        }
+    }
 }
 
 // Handle saving compressor configuration
-function handleSaveCompressor() {
+async function handleSaveCompressor() {
     const name = document.getElementById('compressorName').value;
     const model = document.getElementById('compressorModel').value;
     const manufacturer = document.getElementById('compressorManufacturer').value;
@@ -296,39 +652,45 @@ function handleSaveCompressor() {
         return;
     }
     
-    // Get existing compressors from localStorage
-    let compressors = JSON.parse(localStorage.getItem('compressors')) || [];
-    
-    // Add new compressor with empty templates array
-    compressors.push({
-        id: Date.now(),
-        name: name,
-        model: model,
-        manufacturer: manufacturer,
-        capacity: parseFloat(capacity),
-        templates: []  // Add templates array
-    });
-    
-    // Save to localStorage
-    localStorage.setItem('compressors', JSON.stringify(compressors));
-    
-    // Clear form
-    document.getElementById('compressorName').value = '';
-    document.getElementById('compressorModel').value = '';
-    document.getElementById('compressorManufacturer').value = '';
-    document.getElementById('compressorCapacity').value = '';
-    
-    // Refresh displays
-    displayCompressors();
-    populateCompressorSelect();
-    
-    alert('Compressor saved successfully!');
+    try {
+        const response = await fetch('/api/compressors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: name,
+                model: model,
+                manufacturer: manufacturer,
+                capacity: parseFloat(capacity),
+                templates: []
+            })
+        });
+        
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            alert('Error saving compressor: ' + (err.error || response.statusText));
+            return;
+        }
+        
+        // Clear form
+        document.getElementById('compressorName').value = '';
+        document.getElementById('compressorModel').value = '';
+        document.getElementById('compressorManufacturer').value = '';
+        document.getElementById('compressorCapacity').value = '';
+        
+        // Refresh displays
+        await fetchCompressors();
+        displayCompressors();
+        
+        alert('Compressor saved successfully!');
+    } catch (error) {
+        alert('Error saving compressor: ' + error.message);
+        console.error('Save compressor error:', error);
+    }
 }
 
 // Handle compressor selection from the middle column
 function selectCompressor(compressorId) {
-    const compressors = JSON.parse(localStorage.getItem('compressors')) || [];
-    const compressor = compressors.find(c => c.id == compressorId);
+    const compressor = compressorsCache.find(c => c.id == compressorId);
     
     if (!compressor) return;
     
@@ -343,246 +705,354 @@ function selectCompressor(compressorId) {
     // Display compressor details
     const detailsContent = document.getElementById('detailsContent');
     detailsContent.innerHTML = `
-        <div style="margin-bottom: 12px;">
-            <strong style="color: #667eea;">Name:</strong><br>${compressor.name}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+            <div style="padding: 10px; border: 1px solid #ececec; border-radius: 4px;">
+                <strong style="color: #667eea; font-size: 12px;">Name</strong>
+                <div style="margin-top: 4px; color: #333;">${compressor.name}</div>
+            </div>
+            <div style="padding: 10px; border: 1px solid #ececec; border-radius: 4px;">
+                <strong style="color: #667eea; font-size: 12px;">Model</strong>
+                <div style="margin-top: 4px; color: #333;">${compressor.model}</div>
+            </div>
+            <div style="padding: 10px; border: 1px solid #ececec; border-radius: 4px;">
+                <strong style="color: #667eea; font-size: 12px;">Manufacturer</strong>
+                <div style="margin-top: 4px; color: #333;">${compressor.manufacturer}</div>
+            </div>
+            <div style="padding: 10px; border: 1px solid #ececec; border-radius: 4px;">
+                <strong style="color: #667eea; font-size: 12px;">Capacity</strong>
+                <div style="margin-top: 4px; color: #333;">${compressor.capacity} kW</div>
+            </div>
+            <div style="padding: 10px; border: 1px solid #ececec; border-radius: 4px;">
+                <strong style="color: #667eea; font-size: 12px;">Templates</strong>
+                <div style="margin-top: 4px; color: #333;">${(compressor.templates || []).length}</div>
+            </div>
         </div>
-        <div style="margin-bottom: 12px;">
-            <strong style="color: #667eea;">Model:</strong><br>${compressor.model}
-        </div>
-        <div style="margin-bottom: 12px;">
-            <strong style="color: #667eea;">Manufacturer:</strong><br>${compressor.manufacturer}
-        </div>
-        <div style="margin-bottom: 12px;">
-            <strong style="color: #667eea;">Capacity:</strong><br>${compressor.capacity} kW
-        </div>
-        <button type="button" onclick="deleteCompressor(${compressorId})" style="width: 100%; padding: 8px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
-            Delete Compressor
-        </button>
     `;
     
-    // Reset template selectors
-    document.getElementById('templateType').value = '';
-    document.getElementById('templateName').innerHTML = '<option value="">-- Choose template --</option>';
+    // Reset template selector
+    const templateNameSelect = document.getElementById('templateName');
+    if (templateNameSelect) templateNameSelect.value = '';
     
     // Display templates
     displaySelectedTemplates(compressorId);
     
     // Highlight selected compressor in list
-    document.querySelectorAll('[data-compressor-item]').forEach(item => {
-        item.style.borderLeft = '4px solid transparent';
-        item.style.background = '#ffffff';
+    document.querySelectorAll('[data-compressor-row]').forEach(row => {
+        row.style.background = '#ffffff';
     });
-    document.querySelector(`[data-compressor-id="${compressorId}"]`).style.borderLeft = '4px solid #667eea';
-    document.querySelector(`[data-compressor-id="${compressorId}"]`).style.background = '#f0f7ff';
+    const selectedRow = document.querySelector(`[data-compressor-id="${compressorId}"]`);
+    if (selectedRow) {
+        selectedRow.style.background = '#f0f7ff';
+    }
 }
 
-// Handle template type selection
-function onTemplateTypeSelected() {
-    const templateType = document.getElementById('templateType').value;
-    const templateNameSelect = document.getElementById('templateName');
-    
-    if (!templateType) {
-        templateNameSelect.innerHTML = '<option value="">-- Choose a template --</option>';
-        return;
-    }
-    
-    // Get templates from loaded configuration
-    const templates = (compressorConfig && compressorConfig.templateTypes && compressorConfig.templateTypes[templateType]) || [];
-    
-    // Clear and populate template name select
-    templateNameSelect.innerHTML = '<option value="">-- Choose a template --</option>';
-    
-    templates.forEach(template => {
-        const option = document.createElement('option');
-        option.value = template;
-        option.textContent = template;
-        templateNameSelect.appendChild(option);
+// Persist a compressor's full template list to the server
+async function updateCompressorTemplates(compressorId, templates) {
+    return fetch(`/api/compressors/${compressorId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templates: templates })
     });
 }
 
 // Handle adding template to compressor
-function handleAddTemplate() {
+async function handleAddTemplate() {
     const compressorId = window.selectedCompressorId;
-    const templateType = document.getElementById('templateType').value;
     const templateName = document.getElementById('templateName').value;
     
-    if (!compressorId || !templateType || !templateName) {
-        alert('Please select a template type and template.');
+    if (!compressorId || !templateName) {
+        alert('Please choose a template.');
         return;
     }
     
-    // Get compressors
-    let compressors = JSON.parse(localStorage.getItem('compressors')) || [];
-    const compressor = compressors.find(c => c.id == compressorId);
+    const compressor = compressorsCache.find(c => c.id == compressorId);
     
     if (!compressor) {
         alert('Compressor not found.');
         return;
     }
     
-    // Initialize templates array if it doesn't exist
-    if (!compressor.templates) {
-        compressor.templates = [];
-    }
+    const templates = compressor.templates || [];
     
     // Check if template already exists
-    const templateExists = compressor.templates.some(t => 
-        t.type === templateType && t.name === templateName
-    );
+    const templateExists = templates.some(t => t.name === templateName);
     
     if (templateExists) {
         alert('This template is already added to this compressor.');
         return;
     }
     
-    // Add template
-    compressor.templates.push({
-        id: Date.now(),
-        type: templateType,
-        name: templateName
-    });
+    const updatedTemplates = [
+        ...templates,
+        {
+            id: Date.now(),
+            name: templateName
+        }
+    ];
     
-    // Save back to localStorage
-    localStorage.setItem('compressors', JSON.stringify(compressors));
-    
-    // Reset selectors
-    document.getElementById('templateType').value = '';
-    document.getElementById('templateName').innerHTML = '<option value="">-- Choose template --</option>';
-    
-    // Refresh display
-    displaySelectedTemplates(compressorId);
-    displayCompressors();
-    
-    alert('Template added successfully!');
+    try {
+        const response = await updateCompressorTemplates(compressorId, updatedTemplates);
+        
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            alert('Error adding template: ' + (err.error || response.statusText));
+            return;
+        }
+        
+        // Reset selector
+        const templateNameSelect = document.getElementById('templateName');
+        if (templateNameSelect) templateNameSelect.value = '';
+        
+        // Refresh display
+        await fetchCompressors();
+        displaySelectedTemplates(compressorId);
+        displayCompressors();
+        
+        alert('Template added successfully!');
+    } catch (error) {
+        alert('Error adding template: ' + error.message);
+        console.error('Add template error:', error);
+    }
 }
 
 // Display templates for selected compressor
 function displaySelectedTemplates(compressorId) {
-    const compressors = JSON.parse(localStorage.getItem('compressors')) || [];
-    const compressor = compressors.find(c => c.id == compressorId);
+    const compressor = compressorsCache.find(c => c.id == compressorId);
     const selectedTemplatesList = document.getElementById('selectedTemplatesList');
+    const bulkActions = document.getElementById('templateBulkActions');
+    const selectAll = document.getElementById('selectAllTemplates');
+    const removeSelectedBtn = document.getElementById('removeSelectedTemplatesBtn');
     
     if (!compressor || !selectedTemplatesList) return;
     
     const templates = compressor.templates || [];
+
+    if (bulkActions) bulkActions.style.display = templates.length > 0 ? 'block' : 'none';
+    if (selectAll) selectAll.checked = false;
+    if (removeSelectedBtn) removeSelectedBtn.disabled = true;
     
-    if (templates.length === 0) {
-        selectedTemplatesList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No templates added yet</p>';
+    const rowsHtml = templates.length > 0
+        ? templates
+            .map(template => {
+                const templateId = Number(template.id);
+                const safeTemplateId = Number.isFinite(templateId) ? templateId : Date.now();
+                return `
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #555;">
+                                <input type="checkbox" class="template-select" data-template-id="${safeTemplateId}" onchange="onTemplateSelectionChanged()">
+                                Select
+                            </label>
+                        </td>
+                        <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600; color: #333;">${template.name || ''}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
+                            <button onclick="handleRemoveTemplate(${compressorId}, ${safeTemplateId})" style="padding: 6px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            })
+            .join('')
+        : `
+            <tr>
+                <td colspan="3" style="padding: 14px; color: #999; text-align: center;">No templates added yet</td>
+            </tr>
+        `;
+
+    selectedTemplatesList.innerHTML = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden;">
+            <thead>
+                <tr style="background: #f2f4f8; text-align: left;">
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd; width: 120px;">Select</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">Template</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right; width: 120px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+        </table>
+    `;
+}
+
+function getSelectedTemplateIds() {
+    return Array.from(document.querySelectorAll('.template-select:checked'))
+        .map(item => Number(item.getAttribute('data-template-id')))
+        .filter(item => Number.isFinite(item));
+}
+
+function onTemplateSelectionChanged() {
+    const allCheckboxes = Array.from(document.querySelectorAll('.template-select'));
+    const selectedCount = getSelectedTemplateIds().length;
+    const selectAll = document.getElementById('selectAllTemplates');
+    const removeSelectedBtn = document.getElementById('removeSelectedTemplatesBtn');
+
+    if (removeSelectedBtn) {
+        removeSelectedBtn.disabled = selectedCount === 0;
+        removeSelectedBtn.textContent = selectedCount > 0 ? `Remove Selected (${selectedCount})` : 'Remove Selected';
+    }
+
+    if (selectAll) {
+        selectAll.checked = allCheckboxes.length > 0 && selectedCount === allCheckboxes.length;
+    }
+}
+
+function toggleSelectAllTemplates() {
+    const selectAll = document.getElementById('selectAllTemplates');
+    const shouldSelect = !!(selectAll && selectAll.checked);
+
+    document.querySelectorAll('.template-select').forEach(item => {
+        item.checked = shouldSelect;
+    });
+
+    onTemplateSelectionChanged();
+}
+
+async function handleRemoveSelectedTemplates() {
+    const compressorId = window.selectedCompressorId;
+    const selectedIds = getSelectedTemplateIds();
+
+    if (!compressorId) {
+        alert('Please select a compressor first.');
         return;
     }
-    
-    let html = '';
-    templates.forEach(template => {
-        html += `
-            <div style="
-                padding: 12px;
-                margin-bottom: 10px;
-                background: white;
-                border-radius: 4px;
-                border-left: 4px solid #667eea;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border: 1px solid #e0e0e0;
-            ">
-                <div>
-                    <div style="font-weight: 600; color: #333; margin-bottom: 4px;">${template.name}</div>
-                    <div style="font-size: 12px; color: #666;">${capitalizeTemplateType(template.type)}</div>
-                </div>
-                <button onclick="handleRemoveTemplate(${compressorId}, ${template.id})" style="padding: 6px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
-                    Remove
-                </button>
-            </div>
-        `;
-    });
-    
-    selectedTemplatesList.innerHTML = html;
+
+    if (selectedIds.length === 0) {
+        alert('Select at least one template to remove.');
+        return;
+    }
+
+    if (!confirm(`Remove ${selectedIds.length} selected template(s)?`)) {
+        return;
+    }
+
+    const compressor = compressorsCache.find(c => c.id == compressorId);
+    if (!compressor || !compressor.templates) return;
+
+    const selectedSet = new Set(selectedIds);
+    const updatedTemplates = compressor.templates.filter(t => !selectedSet.has(Number(t.id)));
+
+    try {
+        const response = await updateCompressorTemplates(compressorId, updatedTemplates);
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            alert('Error removing templates: ' + (err.error || response.statusText));
+            return;
+        }
+
+        await fetchCompressors();
+        displaySelectedTemplates(compressorId);
+        displayCompressors();
+    } catch (error) {
+        alert('Error removing templates: ' + error.message);
+        console.error('Remove selected templates error:', error);
+    }
 }
 
 // Remove template from compressor
-function handleRemoveTemplate(compressorId, templateId) {
-    if (confirm('Are you sure you want to remove this template?')) {
-        let compressors = JSON.parse(localStorage.getItem('compressors')) || [];
-        const compressor = compressors.find(c => c.id == compressorId);
+async function handleRemoveTemplate(compressorId, templateId) {
+    if (!confirm('Are you sure you want to remove this template?')) return;
+    
+    const compressor = compressorsCache.find(c => c.id == compressorId);
+    if (!compressor || !compressor.templates) return;
+    
+    const updatedTemplates = compressor.templates.filter(t => t.id !== templateId);
+    
+    try {
+        const response = await updateCompressorTemplates(compressorId, updatedTemplates);
         
-        if (compressor && compressor.templates) {
-            compressor.templates = compressor.templates.filter(t => t.id !== templateId);
-            localStorage.setItem('compressors', JSON.stringify(compressors));
-            displaySelectedTemplates(compressorId);
-            displayCompressors();
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            alert('Error removing template: ' + (err.error || response.statusText));
+            return;
         }
+        
+        await fetchCompressors();
+        displaySelectedTemplates(compressorId);
+        displayCompressors();
+    } catch (error) {
+        alert('Error removing template: ' + error.message);
+        console.error('Remove template error:', error);
     }
-}
-
-// Helper function to capitalize template type
-function capitalizeTemplateType(type) {
-    const names = {
-        'regular': 'Regular Template',
-        'controller': 'Controller',
-        'io': 'IO',
-        'ladder': 'Ladder',
-        'ladder_component': 'Ladder Component',
-        'valves': 'Valve'
-    };
-    return names[type] || type;
 }
 
 // Display saved compressors
 function displayCompressors() {
-    const compressors = JSON.parse(localStorage.getItem('compressors')) || [];
+    const compressors = [...compressorsCache].sort((a, b) => {
+        const manufacturerA = String(a.manufacturer || '').toLowerCase();
+        const manufacturerB = String(b.manufacturer || '').toLowerCase();
+        const manufacturerCompare = manufacturerA.localeCompare(manufacturerB);
+        if (manufacturerCompare !== 0) {
+            return manufacturerCompare;
+        }
+
+        const capacityA = Number(a.capacity) || 0;
+        const capacityB = Number(b.capacity) || 0;
+        if (capacityA !== capacityB) {
+            return capacityA - capacityB;
+        }
+
+        return String(a.name || '').localeCompare(String(b.name || ''));
+    });
     const table = document.getElementById('compressorsTable');
     
     if (!table) return;
     
     if (compressors.length === 0) {
-        table.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No compressors yet</p>';
+        table.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No compressors found</p>';
         return;
     }
-    
-    let html = '';
-    compressors.forEach(comp => {
-        const templateCount = (comp.templates || []).length;
-        html += `
-            <div 
-                data-compressor-item 
-                data-compressor-id="${comp.id}" 
-                onclick="selectCompressor(${comp.id})" 
-                style="
-                    padding: 12px;
-                    margin-bottom: 10px;
-                    background: #ffffff;
-                    border-radius: 4px;
-                    border-left: 4px solid transparent;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    border: 1px solid #e0e0e0;
-                "
-                onmouseover="this.style.background='#f5f5f5'"
-                onmouseout="this.style.background='#ffffff'"
-            >
-                <div style="font-weight: 600; color: #333; margin-bottom: 4px;">${comp.name}</div>
-                <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
-                    <strong>Model:</strong> ${comp.model}
-                </div>
-                <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
-                    <strong>Capacity:</strong> ${comp.capacity} kW
-                </div>
-                <div style="font-size: 12px; color: #667eea;">
-                    <strong>Templates:</strong> <span style="background: #667eea; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">${templateCount}</span>
-                </div>
-            </div>
-        `;
-    });
-    
-    table.innerHTML = html;
+
+    const rowsHtml = compressors
+        .map(comp => {
+            const templateCount = (comp.templates || []).length;
+            return `
+                <tr data-compressor-row data-compressor-id="${comp.id}" onclick="selectCompressor(${comp.id})" style="cursor: pointer; background: #ffffff;">
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600;">${comp.name || ''}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${comp.model || ''}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${comp.manufacturer || ''}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${comp.capacity || ''}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${templateCount}</td>
+                </tr>
+            `;
+        })
+        .join('');
+
+    table.innerHTML = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden;">
+            <thead>
+                <tr style="background: #f2f4f8; text-align: left;">
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">Name</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">Model</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">Manufacturer</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">Capacity (T)</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">Templates</th>
+                </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+        </table>
+    `;
+
+    if (window.selectedCompressorId != null) {
+        const selectedRow = document.querySelector(`[data-compressor-id="${window.selectedCompressorId}"]`);
+        if (selectedRow) {
+            selectedRow.style.background = '#f0f7ff';
+        }
+    }
 }
 
 // Delete compressor
-function deleteCompressor(id) {
-    if (confirm('Are you sure you want to delete this compressor?')) {
-        let compressors = JSON.parse(localStorage.getItem('compressors')) || [];
-        compressors = compressors.filter(c => c.id !== id);
-        localStorage.setItem('compressors', JSON.stringify(compressors));
+async function deleteCompressor(id) {
+    if (!confirm('Are you sure you want to delete this compressor?')) return;
+    
+    try {
+        const response = await fetch(`/api/compressors/${id}`, { method: 'DELETE' });
+        
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            alert('Error deleting compressor: ' + (err.error || response.statusText));
+            return;
+        }
         
         // Clear the right column if the deleted compressor was selected
         if (window.selectedCompressorId == id) {
@@ -592,29 +1062,22 @@ function deleteCompressor(id) {
             window.selectedCompressorId = null;
         }
         
+        await fetchCompressors();
         displayCompressors();
+    } catch (error) {
+        alert('Error deleting compressor: ' + error.message);
+        console.error('Delete compressor error:', error);
     }
 }
 
-// Export compressors to JSON file
+// Export compressors to JSON file (server-generated)
 function handleExportCompressors() {
-    const compressors = JSON.parse(localStorage.getItem('compressors')) || [];
-    
-    if (compressors.length === 0) {
+    if (compressorsCache.length === 0) {
         alert('No compressors to export. Please create at least one compressor first.');
         return;
     }
     
-    const exportData = {
-        version: '1.0',
-        exportDate: new Date().toISOString(),
-        compressors: compressors
-    };
-    
-    const filename = `compressors_${new Date().toISOString().split('T')[0]}.json`;
-    downloadJSON(exportData, filename);
-    
-    alert(`Compressor configuration exported successfully as: ${filename}`);
+    window.location.href = '/api/compressors/export';
 }
 
 // Import compressors from JSON file
@@ -627,7 +1090,7 @@ function handleImportCompressors(event) {
     
     const reader = new FileReader();
     
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const data = JSON.parse(e.target.result);
             
@@ -644,25 +1107,28 @@ function handleImportCompressors(event) {
                 'Cancel: Replace all existing compressors'
             );
             
-            let compressors;
-            if (choice) {
-                // Merge: get existing and add new ones
-                const existing = JSON.parse(localStorage.getItem('compressors')) || [];
-                compressors = [...existing, ...data.compressors];
-            } else {
-                // Replace: use only imported data
-                compressors = data.compressors;
+            const response = await fetch('/api/compressors/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    compressors: data.compressors,
+                    mode: choice ? 'merge' : 'replace'
+                })
+            });
+            
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                alert('Error importing compressors: ' + (err.error || response.statusText));
+                return;
             }
             
-            // Save to localStorage
-            localStorage.setItem('compressors', JSON.stringify(compressors));
+            const result = await response.json();
             
             // Refresh the display
+            await fetchCompressors();
             displayCompressors();
-            populateCompressorSelect();
             
-            const count = data.compressors.length;
-            alert(`Successfully imported ${count} compressor(s)!`);
+            alert(`Successfully imported ${result.imported} compressor(s)!`);
         } catch (error) {
             alert('Error reading file: ' + error.message);
             console.error('Import error:', error);
@@ -673,22 +1139,5 @@ function handleImportCompressors(event) {
     
     // Reset the file input so the same file can be imported again
     event.target.value = '';
-}
-
-// Helper function to download JSON (reused from other parts of the app)
-function downloadJSON(data, filename) {
-    const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    URL.revokeObjectURL(url);
 }
 

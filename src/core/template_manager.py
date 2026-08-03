@@ -500,3 +500,29 @@ class TemplateManager:
                 result.append({"name": block_name, "handle": handle, "insert_pt": insert_pt, "attributes": attrs})
 
         return result
+
+
+# ── module-level helpers ─────────────────────────────────────────────────────
+
+# Template category -> directory, used to build a combined listing for
+# frontends (e.g. the web interface's compressor/template pickers).
+_TEMPLATE_TYPE_DIRS: dict[str, Path] = {
+    "regular": TEMPLATES_DIR,
+    "controller": CTRL_TEMPLATES_DIR,
+    "io": IO_TEMPLATES_DIR,
+    "ladder": LADDER_TEMPLATES_DIR,
+    "ladder_component": LADDER_COMPONENT_TEMPLATES_DIR,
+    "valves": VALVES_TEMPLATES_DIR,
+}
+
+
+def list_templates() -> dict[str, list[str]]:
+    """Return all templates on disk, grouped by category.
+
+    Reuses the ``*_TEMPLATES_DIR`` constants so results always reflect the
+    actual files present under ``templates/`` rather than any hardcoded list.
+    """
+    return {
+        category: TemplateManager(directory).list_templates()
+        for category, directory in _TEMPLATE_TYPE_DIRS.items()
+    }
