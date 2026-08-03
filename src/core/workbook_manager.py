@@ -315,6 +315,7 @@ def load_circuits_for_selection(
                             "model_number": model,
                             "description": skid_id,
                             "skid_model_number": skid_id,
+                            "manufacturer": skid.get("manufacturer"),
                             "quantity": max(1, _to_int(skid.get("compressor_qty"), default=1)),
                             "templates": [],
                         }
@@ -348,6 +349,7 @@ def load_circuits_for_selection(
                         "model_number": model,
                         "description": row.get("skid_model_number"),
                         "skid_model_number": row.get("skid_model_number"),
+                        "manufacturer": row.get("manufacturer"),
                         "quantity": max(1, _to_int(row.get("compressor_qty"), default=1)),
                         "templates": [],
                     }

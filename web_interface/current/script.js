@@ -191,6 +191,23 @@ function getCompressorOptions() {
     return compressorsCache.map(c => c.name);
 }
 
+function inferTemplateType(templateName) {
+    const templateTypes = (compressorConfig && compressorConfig.templateTypes) || {};
+    for (const [category, names] of Object.entries(templateTypes)) {
+        if (Array.isArray(names) && names.includes(templateName)) {
+            return category;
+        }
+    }
+    return 'regular';
+}
+
+function createTemplateId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        return window.crypto.randomUUID();
+    }
+    return `tpl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 function generateCircuits() {
     const count = parseInt(document.getElementById('circuitCount').value);
     
@@ -494,11 +511,17 @@ async function handleFormSubmit(event) {
     event.preventDefault();
     
     // Collect form data
-    const circuitCount = parseInt(document.getElementById('circuitCount').value);
-    const voltage = document.getElementById('voltage').value;
-    const application = document.getElementById('application').value;
-    const fanManufacturer = document.getElementById('fanmanufacturer').value;
-    const vaporInject = document.getElementById('vaporinject').value;
+    const circuitCountEl = document.getElementById('circuitCount');
+    const voltageEl = document.getElementById('voltage');
+    const applicationEl = document.getElementById('application');
+    const fanManufacturerEl = document.getElementById('fanmanufacturer');
+    const vaporInjectEl = document.getElementById('vaporinject');
+
+    const circuitCount = parseInt((circuitCountEl && circuitCountEl.value) || '0', 10) || 0;
+    const voltage = (voltageEl && voltageEl.value) || '';
+    const application = (applicationEl && applicationEl.value) || '';
+    const fanManufacturer = (fanManufacturerEl && fanManufacturerEl.value) || '';
+    const vaporInject = (vaporInjectEl && vaporInjectEl.value) || '';
     
     // Build circuits from workbook-driven selection when available.
     const circuits = [];
@@ -514,7 +537,10 @@ async function handleFormSubmit(event) {
                 });
 
                 const qty = parseInt(comp.quantity, 10) || 1;
-                const templates = ((libraryMatch && libraryMatch.templates) || []).map(t => ({
+                const sourceTemplates = (Array.isArray(comp.templates) && comp.templates.length > 0)
+                    ? comp.templates
+                    : ((libraryMatch && libraryMatch.templates) || []);
+                const templates = sourceTemplates.map(t => ({
                     name: t.name,
                     quantity: t.scope === 'shared' ? 1 : qty
                 }));
@@ -593,7 +619,8 @@ async function handleFormSubmit(event) {
     await generateAndDownload(selectionData);
 }
 
-// POST the selection data to /api/generate and download the returned ZIP
+// POST selection data to /api/generate in preview mode.
+// For now, backend logs what would be sent to the CLI.
 async function generateAndDownload(selectionData) {
     const generateBtn = document.getElementById('generateBtn');
     const originalLabel = generateBtn ? generateBtn.textContent : '';
@@ -603,6 +630,8 @@ async function generateAndDownload(selectionData) {
     }
     
     try {
+        console.log('[Generate Preview] Payload that will be sent to CLI:', selectionData);
+
         const response = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -615,19 +644,9 @@ async function generateAndDownload(selectionData) {
             return;
         }
         
-        const blob = await response.blob();
-        const disposition = response.headers.get('Content-Disposition') || '';
-        const match = disposition.match(/filename="?([^"]+)"?/);
-        const filename = match ? match[1] : `drawings_${new Date().toISOString().slice(0, 10)}.zip`;
-        
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        const payload = await response.json().catch(() => ({}));
+        console.log('[Generate Preview] Server response:', payload);
+        alert(payload.message || 'Generation preview logged to server console.');
     } catch (error) {
         alert('Error generating drawings: ' + error.message);
         console.error('Generate error:', error);
@@ -765,6 +784,7 @@ async function handleAddTemplate() {
         return;
     }
     
+    await fetchCompressors();
     const compressor = compressorsCache.find(c => c.id == compressorId);
     
     if (!compressor) {
@@ -785,8 +805,10 @@ async function handleAddTemplate() {
     const updatedTemplates = [
         ...templates,
         {
-            id: Date.now(),
-            name: templateName
+            id: createTemplateId(),
+            name: templateName,
+            scope: 'per_unit',
+            type: inferTemplateType(templateName)
         }
     ];
     
@@ -834,19 +856,19 @@ function displaySelectedTemplates(compressorId) {
     const rowsHtml = templates.length > 0
         ? templates
             .map(template => {
-                const templateId = Number(template.id);
-                const safeTemplateId = Number.isFinite(templateId) ? templateId : Date.now();
+                const templateId = String(template.id ?? createTemplateId());
+                const encodedTemplateId = encodeURIComponent(templateId);
                 return `
                     <tr>
                         <td style="padding: 10px; border-bottom: 1px solid #eee;">
                             <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #555;">
-                                <input type="checkbox" class="template-select" data-template-id="${safeTemplateId}" onchange="onTemplateSelectionChanged()">
+                                <input type="checkbox" class="template-select" data-template-id="${encodedTemplateId}" onchange="onTemplateSelectionChanged()">
                                 Select
                             </label>
                         </td>
                         <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 600; color: #333;">${template.name || ''}</td>
                         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
-                            <button onclick="handleRemoveTemplate(${compressorId}, ${safeTemplateId})" style="padding: 6px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                            <button onclick="handleRemoveTemplate(${compressorId}, '${encodedTemplateId}')" style="padding: 6px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
                                 Remove
                             </button>
                         </td>
@@ -876,8 +898,8 @@ function displaySelectedTemplates(compressorId) {
 
 function getSelectedTemplateIds() {
     return Array.from(document.querySelectorAll('.template-select:checked'))
-        .map(item => Number(item.getAttribute('data-template-id')))
-        .filter(item => Number.isFinite(item));
+    .map(item => decodeURIComponent(item.getAttribute('data-template-id') || ''))
+    .filter(item => item !== '');
 }
 
 function onTemplateSelectionChanged() {
@@ -925,11 +947,12 @@ async function handleRemoveSelectedTemplates() {
         return;
     }
 
+    await fetchCompressors();
     const compressor = compressorsCache.find(c => c.id == compressorId);
     if (!compressor || !compressor.templates) return;
 
     const selectedSet = new Set(selectedIds);
-    const updatedTemplates = compressor.templates.filter(t => !selectedSet.has(Number(t.id)));
+    const updatedTemplates = compressor.templates.filter(t => !selectedSet.has(String(t.id ?? '')));
 
     try {
         const response = await updateCompressorTemplates(compressorId, updatedTemplates);
@@ -953,10 +976,13 @@ async function handleRemoveSelectedTemplates() {
 async function handleRemoveTemplate(compressorId, templateId) {
     if (!confirm('Are you sure you want to remove this template?')) return;
     
+    await fetchCompressors();
     const compressor = compressorsCache.find(c => c.id == compressorId);
     if (!compressor || !compressor.templates) return;
+
+    const decodedTemplateId = decodeURIComponent(String(templateId || ''));
     
-    const updatedTemplates = compressor.templates.filter(t => t.id !== templateId);
+    const updatedTemplates = compressor.templates.filter(t => String(t.id ?? '') !== decodedTemplateId);
     
     try {
         const response = await updateCompressorTemplates(compressorId, updatedTemplates);

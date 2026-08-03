@@ -234,5 +234,20 @@
     ],
     "valves": [],
     "circuit_ios": []
+  },
+  {
+    "name": "aaa",
+    "circuit_number": "#",
+    "description": "",
+    "templates": [
+      {
+        "name": "1 EXD-SH2",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      }
+    ],
+    "valves": [],
+    "circuit_ios": []
   }
 ]

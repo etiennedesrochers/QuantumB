@@ -179,7 +179,7 @@ def generate_drawings():
     }
     
     Returns:
-        ZIP file download on success, error JSON on failure
+        JSON preview response (temporary mode) with the payload that would be sent to CLI
     """
     try:
         # Get JSON data from request
@@ -194,73 +194,29 @@ def generate_drawings():
             logger.warning("No circuits in selection data")
             return jsonify({"error": "No circuits defined in selection data"}), 400
         
-        # Create temporary directories
-        temp_dir = tempfile.mkdtemp(prefix="xnnov_gen_")
-        output_dir = Path(temp_dir) / "output"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        logger.info(f"Created temporary work directory: {temp_dir}")
-        
-        try:
-            # Run the CLI generator
-            success, message = run_cli_generator(selection_data, str(output_dir))
-            
-            if not success:
-                logger.error(f"Generation failed: {message}")
-                return jsonify({"error": message}), 500
-            
-            # Save selection arguments for traceability and reproducibility
-            args_filename = "selection_arguments.json"
-            args_file_path = os.path.join(str(output_dir), args_filename)
-            
-            try:
-                with open(args_file_path, 'w', encoding='utf-8') as f:
-                    json.dump(selection_data, f, indent=2)
-                logger.info(f"Saved selection arguments to: {args_file_path}")
-                if os.path.exists(args_file_path):
-                    file_size = os.path.getsize(args_file_path)
-                    logger.info(f"Arguments file created successfully, size: {file_size} bytes")
-                else:
-                    logger.warning(f"Arguments file was not created at {args_file_path}")
-            except Exception as e:
-                logger.warning(f"Failed to save selection arguments: {e}")
-                import traceback
-                logger.warning(traceback.format_exc())
-            
-            # Check if output directory has files
-            output_files = list(output_dir.glob("*"))
-            if not output_files:
-                logger.warning("No files were generated")
-                return jsonify({"error": "No files were generated"}), 500
-            
-            logger.info(f"Generated {len(output_files)} file(s)")
-            
-            # Create zip file
-            project_name = (selection_data.get('project_name', 'project')
-                           .replace(' ', '_')
-                           .replace('/', '_'))
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            zip_filename = f"{project_name}_{timestamp}.zip"
-            zip_path = Path(temp_dir) / zip_filename
-            
-            if not zip_directory(str(output_dir), str(zip_path)):
-                return jsonify({"error": "Failed to create zip file"}), 500
-            
-            # Send the zip file
-            logger.info(f"Sending zip file: {zip_path}")
-            return send_file(
-                str(zip_path),
-                mimetype='application/zip',
-                as_attachment=True,
-                download_name=zip_filename
-            )
-        
-        finally:
-            # Note: We don't delete the temp directory immediately because
-            # the file is still being served. Flask will handle cleanup after
-            # the response is sent. In production, consider implementing a
-            # cleanup task that removes old temp directories.
-            pass
+        # Temporary preview mode for web integration:
+        # log the exact payload and CLI command that would be used.
+        preview_output_dir = str(OUTPUT_DIR)
+        preview_cli_cmd = [
+            sys.executable,
+            str(PROJECT_ROOT / "app.py"),
+            "--generate-from-selection",
+            "<temp-selection-json>",
+            "--output",
+            preview_output_dir,
+        ]
+
+        logger.info("[WEB GENERATE PREVIEW] Payload that would be sent to CLI:")
+        logger.info(json.dumps(selection_data, indent=2, ensure_ascii=False))
+        logger.info("[WEB GENERATE PREVIEW] CLI command that would run:")
+        logger.info(" ".join(preview_cli_cmd))
+
+        return jsonify({
+            "status": "preview",
+            "message": "Generation preview logged to server console",
+            "cli_command": preview_cli_cmd,
+            "payload": selection_data,
+        }), 200
     
     except Exception as e:
         logger.error(f"Unexpected error in /api/generate: {e}\n{traceback.format_exc()}")
@@ -273,13 +229,137 @@ def generate_drawings():
 
 def _next_id(items: list[dict]) -> int:
     """Return an id one greater than the highest existing id (min 1)."""
-    existing = [int(item.get("id", 0)) for item in items if isinstance(item.get("id"), (int, float))]
+    existing: list[int] = []
+    for item in items:
+        value = item.get("id")
+        try:
+            existing.append(int(value))
+        except (TypeError, ValueError):
+            continue
     return (max(existing) + 1) if existing else 1
+
+
+def _same_numeric_id(value: object, target: int) -> bool:
+    """Return True when *value* can be parsed and matches *target*."""
+    try:
+        return int(value) == int(target)
+    except (TypeError, ValueError):
+        return False
+
+
+def _normalize_templates(raw_templates: object) -> list[dict]:
+    """Normalize incoming template payloads to a safe canonical list."""
+    if not isinstance(raw_templates, list):
+        return []
+
+    normalized: list[dict] = []
+    for index, item in enumerate(raw_templates):
+        if not isinstance(item, dict):
+            continue
+
+        name = str(item.get("name") or "").strip()
+        if not name:
+            continue
+
+        template_id = item.get("id")
+        if template_id in (None, ""):
+            template_id = f"tpl-{int(datetime.now().timestamp() * 1000)}-{index}"
+
+        scope = str(item.get("scope") or "per_unit").strip().lower()
+        if scope not in {"shared", "per_unit"}:
+            scope = "per_unit"
+
+        template_type = str(item.get("type") or "regular").strip().lower()
+
+        normalized.append(
+            {
+                "id": template_id,
+                "name": name,
+                "scope": scope,
+                "type": template_type,
+            }
+        )
+
+    return normalized
 
 
 def _norm_text(value: object) -> str:
     """Return a normalized lowercase string for loose matching."""
     return str(value or "").strip().lower()
+
+
+def _match_library_compressor(
+    workbook_comp: dict,
+    compressors: list[dict],
+    preferred_manufacturer: str = "",
+) -> dict | None:
+    """Find the best compressor-library match for a workbook compressor row."""
+    model_key = _norm_text(workbook_comp.get("model_number"))
+    skid_key = _norm_text(workbook_comp.get("skid_model_number"))
+    desc_key = _norm_text(workbook_comp.get("description"))
+    manufacturer_key = _norm_text(workbook_comp.get("manufacturer")) or _norm_text(preferred_manufacturer)
+
+    for library_comp in compressors:
+        library_manufacturer = _norm_text(library_comp.get("manufacturer"))
+        if manufacturer_key and library_manufacturer and manufacturer_key != library_manufacturer:
+            continue
+        library_name = _norm_text(library_comp.get("name"))
+        if skid_key and library_name and skid_key == library_name:
+            return library_comp
+        if desc_key and library_name and desc_key == library_name:
+            return library_comp
+
+    for library_comp in compressors:
+        library_manufacturer = _norm_text(library_comp.get("manufacturer"))
+        if manufacturer_key and library_manufacturer and manufacturer_key != library_manufacturer:
+            continue
+
+        library_model = _norm_text(library_comp.get("model"))
+        if model_key and library_model and model_key == library_model:
+            return library_comp
+
+    for library_comp in compressors:
+        library_name = _norm_text(library_comp.get("name"))
+        if skid_key and library_name and skid_key == library_name:
+            return library_comp
+        if desc_key and library_name and desc_key == library_name:
+            return library_comp
+
+    for library_comp in compressors:
+        library_model = _norm_text(library_comp.get("model"))
+        if model_key and library_model and model_key == library_model:
+            return library_comp
+
+    return None
+
+
+def _attach_library_templates(payload: dict) -> dict:
+    """Return payload with compressor templates resolved from shared library."""
+    compressors = compressor_manager.load_compressors()
+    circuits = payload.get("circuits") if isinstance(payload, dict) else None
+    if not isinstance(circuits, list) or not compressors:
+        return payload
+
+    for circuit in circuits:
+        if not isinstance(circuit, dict):
+            continue
+        preferred_manufacturer = _norm_text(circuit.get("description"))
+        circuit_compressors = circuit.get("compressors")
+        if not isinstance(circuit_compressors, list):
+            continue
+
+        for comp in circuit_compressors:
+            if not isinstance(comp, dict):
+                continue
+            match = _match_library_compressor(
+                comp,
+                compressors,
+                preferred_manufacturer=preferred_manufacturer,
+            )
+            source_templates = match.get("templates") if match else []
+            comp["templates"] = _normalize_templates(source_templates)
+
+    return payload
 
 
 def _to_float(value: object, default: float = 0.0) -> float:
@@ -362,6 +442,7 @@ def get_workbook_circuits():
             manufacturer=manufacturer,
             tension=tension,
         )
+        payload = _attach_library_templates(payload)
         return jsonify(payload)
     except Exception as e:
         logger.error(f"Error loading workbook circuits: {e}\n{traceback.format_exc()}")
@@ -574,10 +655,13 @@ def update_compressor(compressor_id):
         compressors = compressor_manager.load_compressors()
 
         for compressor in compressors:
-            if int(compressor.get("id", -1)) == compressor_id:
+            if _same_numeric_id(compressor.get("id"), compressor_id):
                 for field in ("name", "model", "manufacturer", "capacity", "templates"):
                     if field in data:
-                        compressor[field] = data[field]
+                        if field == "templates":
+                            compressor[field] = _normalize_templates(data[field])
+                        else:
+                            compressor[field] = data[field]
 
                 success, message = compressor_manager.save_compressors(compressors)
                 if not success:
@@ -595,7 +679,7 @@ def delete_compressor(compressor_id):
     """Delete a compressor from the shared library."""
     try:
         compressors = compressor_manager.load_compressors()
-        remaining = [c for c in compressors if int(c.get("id", -1)) != compressor_id]
+        remaining = [c for c in compressors if not _same_numeric_id(c.get("id"), compressor_id)]
 
         if len(remaining) == len(compressors):
             return jsonify({"error": f"Compressor {compressor_id} not found"}), 404

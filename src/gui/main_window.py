@@ -42,6 +42,7 @@ from PySide6.QtWidgets import (
 from src.core.template_manager import TemplateManager, CTRL_TEMPLATES_DIR, IO_TEMPLATES_DIR, LADDER_TEMPLATES_DIR, LADDER_COMPONENT_TEMPLATES_DIR, VALVES_TEMPLATES_DIR, _find_oda_converter, convert_dxf_to_dwg, convert_folder_dxf_to_dwg
 from src.core.drawing_generator import DrawingGenerator, LadderConfig, Rung, Component
 from src.core.io_manager import IOItem
+from src.cli.cli import _get_io_template_name, _get_output_slots, _resolve_io_type_def
 from .i18n import tr, set_language, available_languages
 import src.core.project_manager as pm
 import src.core.circuit_library as cl
@@ -1700,7 +1701,7 @@ class MainWindow(QMainWindow):
     def _refresh_io_table(self):
         """Refresh the IO table from project circuits and manually added IOs."""
         self._io_table.setRowCount(0)
-        #manual_ios = list(self._io_items)  # Save manually added IOs
+        manual_ios = list(self._io_items)
         self._io_items_full.clear()
         self._io_items.clear()
         self._io_table_row_mapping.clear()
@@ -1756,10 +1757,23 @@ class MainWindow(QMainWindow):
                         template_name=tmpl_name,
                     ))
         
-        # Add back manually added IOs
-        #for manual_io in manual_ios:
-        #    if not any(item.tag == manual_io.tag for item in self._io_items_full):
-        #        self._io_items_full.append(manual_io)
+        # Add back manually added or project-loaded IOs that are not already
+        # represented by circuit/template-derived entries.
+        existing_keys = {
+            (item.tag, item.io_type, item.circuit_name, item.circuit_no, item.template_name)
+            for item in self._io_items_full
+        }
+        for manual_io in manual_ios:
+            key = (
+                manual_io.tag,
+                manual_io.io_type,
+                manual_io.circuit_name,
+                manual_io.circuit_no,
+                manual_io.template_name,
+            )
+            if key not in existing_keys:
+                self._io_items_full.append(manual_io)
+                existing_keys.add(key)
         
         # Apply the current filter
         self._apply_io_filter(self._io_filter_type)
@@ -3378,6 +3392,22 @@ class MainWindow(QMainWindow):
         copy.description = copy.description.upper()
         return copy
 
+    def _get_generation_io_items(self) -> list["IOItem"]:
+        """Build the full IO list used by generation (independent of table filter)."""
+        import dataclasses as _dc
+
+        all_inputs = [
+            _dc.replace(item)
+            for item in self._io_items_full
+            if item.io_type == "Input"
+        ]
+        all_outputs = [
+            _dc.replace(item)
+            for item in self._io_items_full
+            if item.io_type == "Output"
+        ]
+        return self._sort_io_items(all_inputs, "Input") + self._sort_io_items(all_outputs, "Output")
+
     def _generate(self):
         if not self._project_circuit_refs:
             QMessageBox.warning(self, tr("msg_generate_title"), tr("msg_generate_no_circuits"))
@@ -3397,14 +3427,18 @@ class MainWindow(QMainWindow):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         config = self._build_config()
+
+        # Always generate from the complete IO set, not only visible rows.
+        generation_io_items = self._get_generation_io_items()
+
         rungs, io_items, config = self._apply_generation_substitutions(
-            self._rungs, self._io_items, config
+            self._rungs, generation_io_items, config
         )
 
         # Execute post-controller generation hook before starting generation
         #Get a list of all the circuit data for the project
         circuit_data = []
-        all_ios = self._io_items
+        all_ios = generation_io_items
         
         for item in all_ios:
             item.tag = item.tag.upper()
@@ -3437,11 +3471,11 @@ class MainWindow(QMainWindow):
         module_name = self._module_cb.currentText()
         module_def = next((m for m in self._modules if m.get("name") == module_name), None)
         total_controller_pages = 0
-        if module_def and self._io_items:
+        if module_def and generation_io_items:
             mod_inputs  = len(module_def.get("inputs", []))
             mod_outputs = len(module_def.get("outputs", []))
-            total_inputs  = sum(1 for io in self._io_items if io.io_type == "Input")
-            total_outputs = sum(1 for io in self._io_items if io.io_type == "Output")
+            total_inputs  = sum(1 for io in generation_io_items if io.io_type == "Input")
+            total_outputs = sum(1 for io in generation_io_items if io.io_type == "Output")
 
             total_controller_pages = 1
             if mod_inputs > 0 and total_inputs > 0:
@@ -3491,11 +3525,11 @@ class MainWindow(QMainWindow):
                 module_name = self._module_cb.currentText()
                 module_def = next((m for m in self._modules if m.get("name") == module_name), None)
                 #print(f"[DEBUG] module_name: {module_name}, module_def: {module_def is not None}, io_items: {len(self._io_items)}")
-                if module_def and self._io_items:
+                if module_def and generation_io_items:
                     mod_inputs  = len(module_def.get("inputs", []))
                     mod_outputs = len(module_def.get("outputs", []))
-                    total_inputs  = sum(1 for io in self._io_items if io.io_type == "Input")
-                    total_outputs = sum(1 for io in self._io_items if io.io_type == "Output")
+                    total_inputs  = sum(1 for io in generation_io_items if io.io_type == "Input")
+                    total_outputs = sum(1 for io in generation_io_items if io.io_type == "Output")
 
                     num_ctrl = 1  # at least one if a module is selected
                     if mod_inputs > 0 and total_inputs > 0:
@@ -3512,7 +3546,7 @@ class MainWindow(QMainWindow):
                     input_ios  = [io for io in io_items if io.io_type == "Input"]
                     output_ios = [io for io in io_items if io.io_type == "Output"]
                     mod_input_slots  = module_def.get("inputs", [])
-                    mod_output_slots = module_def.get("outputs", [])
+                    mod_output_slots = _get_output_slots(module_def)
 
                     for ctrl_idx in range(1, num_ctrl + 1):
                         if progress_dlg.cancelled:
@@ -3533,19 +3567,17 @@ class MainWindow(QMainWindow):
                         start_in = (ctrl_idx - 1) * mod_inputs
                         page_inputs = input_ios[start_in : start_in + mod_inputs]
                         input_common_shared = module_def.get("input_common_shared", False)
+                        shared_input_index = 0
                         for slot_idx, io_item in enumerate(page_inputs):
-                            io_type_def = io_type_map.get(io_item.io_type_name, {})
-                            # Use shared_template for the second input in each pair (odd slot)
-                            # when the module supports shared commons and the IO type is shared.
-                            is_shared_slot = (
-                                input_common_shared
-                                and io_type_def.get("shared", False)
-                                and slot_idx % 2 == 1
+                            io_type_def = _resolve_io_type_def(io_item, io_type_map, "Input")
+                            tmpl_name = _get_io_template_name(
+                                io_item,
+                                io_type_map,
+                                slot_idx,
+                                "Input",
+                                input_common_shared=input_common_shared,
+                                shared_input_index=shared_input_index,
                             )
-                            if is_shared_slot:
-                                tmpl_name = io_type_def.get("shared_template", "") or io_type_def.get("io_template", "")
-                            else:
-                                tmpl_name = io_type_def.get("io_template", "")
                             if not tmpl_name or slot_idx >= len(mod_input_slots):
                                 continue
                             tmpl_doc = self._io_template_mgr.load_template(tmpl_name)
@@ -3557,13 +3589,20 @@ class MainWindow(QMainWindow):
                             io_template_placements.append(
                                 (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y, enriched)
                             )
+                            if input_common_shared and io_type_def.get("shared", False):
+                                shared_input_index += 1
 
                         # Outputs slice for this page
                         start_out = (ctrl_idx - 1) * mod_outputs
                         page_outputs = output_ios[start_out : start_out + mod_outputs]
                         for slot_idx, io_item in enumerate(page_outputs):
-                            io_type_def = io_type_map.get(io_item.io_type_name, {})
-                            tmpl_name = io_type_def.get("io_template", "")
+                            tmpl_name = _get_io_template_name(
+                                io_item,
+                                io_type_map,
+                                slot_idx,
+                                "Output",
+                                input_common_shared=False,
+                            )
                             if not tmpl_name or slot_idx >= len(mod_output_slots):
                                 continue
                             tmpl_doc = self._io_template_mgr.load_template(tmpl_name)

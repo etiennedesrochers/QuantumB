@@ -21,7 +21,20 @@
     "model": "ARK87FAEMT",
     "manufacturer": "Mitsubishi",
     "capacity": 50.0,
-    "templates": []
+    "templates": [
+      {
+        "id": "c02707af-70b8-447b-8bc5-dbc2c005849f",
+        "name": "1 EXD-SH2",
+        "scope": "per_unit",
+        "type": "regular"
+      },
+      {
+        "id": "aa67fde1-d647-4f84-8fa7-78676869fe55",
+        "name": "1 EXD-SH2-1-TRANS",
+        "scope": "per_unit",
+        "type": "regular"
+      }
+    ]
   },
   {
     "id": 4,
@@ -61,7 +74,14 @@
     "model": "ARK87FAEMT",
     "manufacturer": "Mitsubishi",
     "capacity": 17.0,
-    "templates": []
+    "templates": [
+      {
+        "scope": "per_unit",
+        "name": "1 EXD-SH2-1-TRANS",
+        "id": "1785773323746",
+        "type": "regular"
+      }
+    ]
   },
   {
     "id": 9,
@@ -85,7 +105,20 @@
     "model": "ARK87FAEMT",
     "manufacturer": "Mitsubishi",
     "capacity": 35.0,
-    "templates": []
+    "templates": [
+      {
+        "id": "145383c9-b891-4b38-97b9-f788dcf3bda5",
+        "name": "1 EXD-SH2",
+        "scope": "per_unit",
+        "type": "regular"
+      },
+      {
+        "id": "2005f16d-6dc5-4a9e-9892-a1a615a1c64c",
+        "name": "1 EXD-SH2-1-TRANS",
+        "scope": "per_unit",
+        "type": "regular"
+      }
+    ]
   },
   {
     "id": 12,

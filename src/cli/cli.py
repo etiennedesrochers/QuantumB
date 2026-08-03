@@ -14,6 +14,7 @@ import argparse
 import sys
 import math
 import dataclasses
+import re
 from pathlib import Path
 from typing import Optional
 
@@ -119,6 +120,75 @@ def _convert_rungs(rungs_data: list) -> list[Rung]:
             # Skip invalid entries
             pass
     return result
+
+
+def _normalize_io_type_name(value: str) -> str:
+    """Normalize IO type names for robust matching across formats."""
+    if not value:
+        return ""
+    text = value.strip().lower()
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _resolve_io_type_def(io_item: IOItem, io_type_map: dict, fallback_direction: str) -> dict:
+    """Resolve an IO type definition using exact name, normalized alias, or direction fallback."""
+    if not io_item:
+        return {}
+
+    exact = io_type_map.get(io_item.io_type_name, {})
+    if exact:
+        return exact
+
+    normalized_name = _normalize_io_type_name(io_item.io_type_name)
+    if normalized_name:
+        for defn in io_type_map.values():
+            if _normalize_io_type_name(defn.get("name", "")) == normalized_name:
+                return defn
+
+    direction = (io_item.io_type or fallback_direction or "").strip().lower()
+    if direction == "output":
+        for defn in io_type_map.values():
+            if (defn.get("direction") or "").strip().lower() == "output":
+                return defn
+    elif direction == "input":
+        for defn in io_type_map.values():
+            if (defn.get("direction") or "").strip().lower() == "input":
+                return defn
+
+    return {}
+
+
+def _get_io_template_name(
+    io_item: IOItem,
+    io_type_map: dict,
+    slot_idx: int,
+    fallback_direction: str,
+    input_common_shared: bool = False,
+    shared_input_index: int | None = None,
+) -> str:
+    """Return the correct template name for an IO slot, including shared-common pairs."""
+    io_type_def = _resolve_io_type_def(io_item, io_type_map, fallback_direction)
+    shared_slot_index = shared_input_index if shared_input_index is not None else slot_idx
+    if (
+        input_common_shared
+        and (fallback_direction or "").strip().lower() == "input"
+        and io_type_def.get("shared", False)
+        and ((shared_slot_index + 1) % 2 == 0)
+    ):
+        return io_type_def.get("shared_template", "") or io_type_def.get("io_template", "")
+    return io_type_def.get("io_template", "")
+
+
+def _get_output_slots(module_def: dict) -> list[dict]:
+    """Return controller output slot coordinates, preferring output_commons when present."""
+    if not module_def:
+        return []
+    output_commons = module_def.get("output_commons", [])
+    if output_commons:
+        return output_commons
+    return module_def.get("outputs", [])
 
 
 class CLIGenerator:
@@ -337,7 +407,7 @@ class CLIGenerator:
                     input_ios = [io for io in io_items if io.io_type == "Input"]
                     output_ios = [io for io in io_items if io.io_type == "Output"]
                     mod_input_slots = module_def.get("inputs", [])
-                    mod_output_slots = module_def.get("outputs", [])
+                    mod_output_slots = _get_output_slots(module_def)
                     
                     for ctrl_idx in range(1, num_ctrl + 1):
                         page_str = f"C{ctrl_idx:03d}"
@@ -357,17 +427,17 @@ class CLIGenerator:
                         start_in = (ctrl_idx - 1) * mod_inputs
                         page_inputs = input_ios[start_in : start_in + mod_inputs]
                         input_common_shared = module_def.get("input_common_shared", False)
+                        shared_input_index = 0
                         for slot_idx, io_item in enumerate(page_inputs):
-                            io_type_def = io_type_map.get(io_item.io_type_name, {})
-                            is_shared_slot = (
-                                input_common_shared
-                                and io_type_def.get("shared", False)
-                                and slot_idx % 2 == 1
+                            io_type_def = _resolve_io_type_def(io_item, io_type_map, "Input")
+                            tmpl_name = _get_io_template_name(
+                                io_item,
+                                io_type_map,
+                                slot_idx,
+                                "Input",
+                                input_common_shared=input_common_shared,
+                                shared_input_index=shared_input_index,
                             )
-                            if is_shared_slot:
-                                tmpl_name = io_type_def.get("shared_template", "") or io_type_def.get("io_template", "")
-                            else:
-                                tmpl_name = io_type_def.get("io_template", "")
                             if not tmpl_name or slot_idx >= len(mod_input_slots):
                                 continue
                             tmpl_doc = self.io_template_mgr.load_template(tmpl_name)
@@ -379,12 +449,14 @@ class CLIGenerator:
                             io_template_placements.append(
                                 (tmpl_doc, slot["x"] - ip_x, slot["y"] - ip_y, enriched)
                             )
+                            if input_common_shared and io_type_def.get("shared", False):
+                                shared_input_index += 1
                         
                         # Outputs for this page
                         start_out = (ctrl_idx - 1) * mod_outputs
                         page_outputs = output_ios[start_out : start_out + mod_outputs]
                         for slot_idx, io_item in enumerate(page_outputs):
-                            io_type_def = io_type_map.get(io_item.io_type_name, {})
+                            io_type_def = _resolve_io_type_def(io_item, io_type_map, "Output")
                             tmpl_name = io_type_def.get("io_template", "")
                             if not tmpl_name or slot_idx >= len(mod_output_slots):
                                 continue
