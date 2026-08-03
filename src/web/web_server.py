@@ -96,7 +96,9 @@ def run_cli_generator(selection_json: dict, output_dir: str) -> tuple[bool, str]
             "--generate-from-selection",
             tmp_json_path,
             "--output",
-            output_dir
+            output_dir,
+            "--format",
+            "both",
         ]
         
         logger.info(f"Running CLI command: {' '.join(cmd)}")
@@ -168,7 +170,7 @@ def zip_directory(source_dir: str, zip_path: str) -> bool:
 def generate_drawings():
     """
     API endpoint to generate AutoCAD drawings from selection data.
-    
+
     Expected POST body:
     {
         "project_name": "Project Name",
@@ -177,47 +179,55 @@ def generate_drawings():
         "drawn_by": "Name",
         "circuits": [...]
     }
-    
+
     Returns:
-        JSON preview response (temporary mode) with the payload that would be sent to CLI
+        ZIP file download containing the generated drawings.
     """
     try:
-        # Get JSON data from request
         if not request.is_json:
             logger.warning("Request is not JSON")
             return jsonify({"error": "Request must be JSON"}), 400
-        
+
         selection_data = request.get_json()
-        
-        # Validate required fields
+
         if not selection_data.get('circuits'):
             logger.warning("No circuits in selection data")
             return jsonify({"error": "No circuits defined in selection data"}), 400
-        
-        # Temporary preview mode for web integration:
-        # log the exact payload and CLI command that would be used.
-        preview_output_dir = str(OUTPUT_DIR)
-        preview_cli_cmd = [
-            sys.executable,
-            str(PROJECT_ROOT / "app.py"),
-            "--generate-from-selection",
-            "<temp-selection-json>",
-            "--output",
-            preview_output_dir,
-        ]
 
-        logger.info("[WEB GENERATE PREVIEW] Payload that would be sent to CLI:")
+        output_dir = str(OUTPUT_DIR)
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        logger.info("[WEB GENERATE] Payload sent to CLI:")
         logger.info(json.dumps(selection_data, indent=2, ensure_ascii=False))
-        logger.info("[WEB GENERATE PREVIEW] CLI command that would run:")
-        logger.info(" ".join(preview_cli_cmd))
 
-        return jsonify({
-            "status": "preview",
-            "message": "Generation preview logged to server console",
-            "cli_command": preview_cli_cmd,
-            "payload": selection_data,
-        }), 200
-    
+        success, message = run_cli_generator(selection_data, output_dir)
+        if not success:
+            return jsonify({"error": message}), 500
+
+        archive_path = output_path / "generated_drawings.zip"
+        if archive_path.exists():
+            archive_path.unlink()
+
+        zip_ok = zip_directory(str(output_path), str(archive_path))
+        if not zip_ok:
+            return jsonify({"error": "Generation completed but ZIP packaging failed"}), 500
+
+        generated_files = []
+        if output_path.exists():
+            generated_files = sorted(
+                str(path.relative_to(output_path))
+                for path in output_path.rglob('*')
+                if path.is_file() and path.name != "generated_drawings.zip"
+            )
+
+        return send_file(
+            str(archive_path),
+            as_attachment=True,
+            download_name="generated_drawings.zip",
+            mimetype="application/zip",
+        )
+
     except Exception as e:
         logger.error(f"Unexpected error in /api/generate: {e}\n{traceback.format_exc()}")
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500

@@ -619,8 +619,7 @@ async function handleFormSubmit(event) {
     await generateAndDownload(selectionData);
 }
 
-// POST selection data to /api/generate in preview mode.
-// For now, backend logs what would be sent to the CLI.
+// POST selection data to /api/generate and let the backend run the CLI.
 async function generateAndDownload(selectionData) {
     const generateBtn = document.getElementById('generateBtn');
     const originalLabel = generateBtn ? generateBtn.textContent : '';
@@ -644,9 +643,24 @@ async function generateAndDownload(selectionData) {
             return;
         }
         
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/zip')) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'generated_drawings.zip';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            alert('Generation completed successfully. The ZIP download has started.');
+            return;
+        }
+
         const payload = await response.json().catch(() => ({}));
         console.log('[Generate Preview] Server response:', payload);
-        alert(payload.message || 'Generation preview logged to server console.');
+        alert(payload.message || 'Generation completed successfully.');
     } catch (error) {
         alert('Error generating drawings: ' + error.message);
         console.error('Generate error:', error);

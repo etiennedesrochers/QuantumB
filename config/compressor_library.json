@@ -58,7 +58,14 @@
     "model": "ARK66FAEMT",
     "manufacturer": "Mitsubishi",
     "capacity": 13.0,
-    "templates": []
+    "templates": [
+      {
+        "id": "98f41f2c-6e37-4904-8ed3-d53e8c61712d",
+        "name": "1 EXD-SH2",
+        "scope": "per_unit",
+        "type": "regular"
+      }
+    ]
   },
   {
     "id": 7,
@@ -97,7 +104,14 @@
     "model": "ARK78FAEMT",
     "manufacturer": "Mitsubishi",
     "capacity": 30.0,
-    "templates": []
+    "templates": [
+      {
+        "id": "83bbc6d8-70f9-4873-923b-c3e03982b6d8",
+        "name": "1 EXD-SH2",
+        "scope": "per_unit",
+        "type": "regular"
+      }
+    ]
   },
   {
     "id": 11,
@@ -150,6 +164,14 @@
     "model": "YAW0961E-7X9-ECH",
     "manufacturer": "Copeland",
     "capacity": 35.0,
+    "templates": []
+  },
+  {
+    "id": 16,
+    "name": "#1",
+    "model": "YAW0961E-7X9-ECH",
+    "manufacturer": "Copeland",
+    "capacity": 50.0,
     "templates": []
   }
 ]

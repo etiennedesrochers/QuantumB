@@ -290,6 +290,95 @@ class CLIGenerator:
         # For now, return as-is
         return rungs, io_items, config
 
+    def _build_generation_io_items(
+        self,
+        project_circuits: list[str],
+        manual_io_items: list[IOItem] | None = None,
+    ) -> list[IOItem]:
+        """Build the IO list used for generation from circuits and templates.
+
+        This mirrors the GUI workflow: circuit-level I/O definitions are added
+        first, then template-derived I/O from each circuit template is appended.
+        Manual IO items are added last if they are not already represented.
+        """
+        manual_ios = list(manual_io_items or [])
+        built_items: list[IOItem] = []
+
+        for circuit_name in project_circuits:
+            circuit = self._lookup_circuit(circuit_name)
+            if circuit is None:
+                continue
+
+            circuit_no = circuit.circuit_number or circuit_name
+
+            for io_entry in circuit.circuit_ios:
+                if not isinstance(io_entry, dict):
+                    continue
+                io_old_name = io_entry.get("name", "")
+                io_old_desc = io_entry.get("description", "")
+                io_name = str(io_entry.get("name", "")).replace("#", circuit_no)
+                io_desc = str(io_entry.get("description", "")).replace("#", circuit_no)
+                built_items.append(
+                    IOItem(
+                        tag=io_name,
+                        io_type=io_entry.get("direction", "Input"),
+                        description=io_desc,
+                        signal_type=io_entry.get("signal_type", ""),
+                        signal_category=io_entry.get("signal_type", ""),
+                        io_type_name=io_entry.get("io_type", ""),
+                        old_name=io_old_name,
+                        old_description=io_old_desc,
+                        circuit_name=circuit_name,
+                        circuit_no=circuit_no,
+                        template_name="",
+                    )
+                )
+
+            for template_entry in circuit.templates:
+                tmpl_name = template_entry.name if isinstance(template_entry, Template) else str(template_entry)
+                if not tmpl_name:
+                    continue
+                for io_entry in self.template_mgr.get_template_ios(tmpl_name):
+                    if not isinstance(io_entry, dict):
+                        continue
+                    io_old_name = io_entry.get("name", "")
+                    io_old_desc = io_entry.get("description", "")
+                    io_name = str(io_entry.get("name", "")).replace("#", circuit_no)
+                    io_desc = str(io_entry.get("description", "")).replace("#", circuit_no)
+                    built_items.append(
+                        IOItem(
+                            tag=io_name,
+                            io_type=io_entry.get("direction", "Input"),
+                            description=io_desc,
+                            signal_type=io_entry.get("signal_type", ""),
+                            signal_category=io_entry.get("signal_category", ""),
+                            io_type_name=io_entry.get("io_type", ""),
+                            old_name=io_old_name,
+                            old_description=io_old_desc,
+                            circuit_name=circuit_name,
+                            circuit_no=circuit_no,
+                            template_name=tmpl_name,
+                        )
+                    )
+
+        existing_keys = {
+            (item.tag, item.io_type, item.circuit_name, item.circuit_no, item.template_name)
+            for item in built_items
+        }
+        for manual_io in manual_ios:
+            key = (
+                manual_io.tag,
+                manual_io.io_type,
+                manual_io.circuit_name,
+                manual_io.circuit_no,
+                manual_io.template_name,
+            )
+            if key not in existing_keys:
+                built_items.append(manual_io)
+                existing_keys.add(key)
+
+        return built_items
+
     def _enrich_io_item(
         self,
         io_item: IOItem,
@@ -327,6 +416,11 @@ class CLIGenerator:
             # Convert dictionaries to dataclass instances
             io_items = _convert_io_items(io_items_raw)
             rungs = _convert_rungs(rungs_raw)
+
+            # Build generation IO items from project circuits/templates, mirroring the GUI.
+            generated_io_items = self._build_generation_io_items(project_circuits, io_items)
+            if generated_io_items:
+                io_items = generated_io_items
             
             # Validate project has circuits
             if not project_circuits:
