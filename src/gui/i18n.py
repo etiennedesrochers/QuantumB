@@ -70,6 +70,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         # I/O tab
         "lbl_io_header": "I/O List",
         "btn_refresh_io": "Refresh",
+        "btn_export_io": "Export",
         "btn_io_filter_all": "All",
         "btn_io_filter_inputs": "Inputs",
         "btn_io_filter_outputs": "Outputs",
@@ -398,6 +399,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         # I/O tab
         "lbl_io_header": "Liste E/S",
         "btn_refresh_io": "Actualiser",
+        "btn_export_io": "Exporter",
         "btn_io_filter_all": "Tous",
         "btn_io_filter_inputs": "Entrées",
         "btn_io_filter_outputs": "Sorties",

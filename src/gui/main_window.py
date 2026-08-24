@@ -7,6 +7,7 @@ import dataclasses
 import json
 import math
 import os
+import re
 import sys
 from pathlib import Path
 import pandas as pd
@@ -318,6 +319,9 @@ class MainWindow(QMainWindow):
         self._btn_refresh_io = QPushButton()
         self._btn_refresh_io.clicked.connect(self._refresh_io_table)
         h_lay.addWidget(self._btn_refresh_io)
+        self._btn_export_io = QPushButton()
+        self._btn_export_io.clicked.connect(self._export_io_list)
+        h_lay.addWidget(self._btn_export_io)
         layout.addWidget(header)
 
         self._io_table = QTableWidget(0, len(_IO_COLS))
@@ -1939,9 +1943,9 @@ class MainWindow(QMainWindow):
 
         for item in items:
             if item.circuit_name and item.circuit_no:
-                base_tag = item.tag.rstrip("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-                if base_tag.endswith("-"):
-                    base_tag = base_tag[:-1]
+                # Only strip an existing single-letter dedup suffix (e.g. "-A"),
+                # not arbitrary trailing uppercase letters that are part of the tag itself.
+                base_tag = re.sub(r"-[A-Z]$", "", item.tag)
 
                 key = (item.circuit_name, item.circuit_no, base_tag)
 
@@ -2010,6 +2014,41 @@ class MainWindow(QMainWindow):
             font = btn.font()
             font.setBold(is_active)
             btn.setFont(font)
+
+    def _export_io_list(self):
+        """Export the currently displayed I/O list (respecting the active filter) to Excel."""
+        if not self._io_items:
+            QMessageBox.warning(self, tr("msg_validation"), "No I/O items to export.")
+            return
+
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, tr("btn_export_io"), "IO_List.xlsx",
+            "Excel Files (*.xlsx);;All Files (*.*)"
+        )
+        if not file_path:
+            return
+
+        try:
+            df = pd.DataFrame([
+                {
+                    "Circuit": item.circuit_name,
+                    "Circuit No": item.circuit_no,
+                    "Template": item.template_name,
+                    "Name": item.tag,
+                    "Description": item.description,
+                    "Signal Type": item.signal_type,
+                    "Direction": item.io_type,
+                    "IO Type": item.io_type_name,
+                }
+                for item in self._io_items
+            ])
+            df.to_excel(file_path, sheet_name="IO List", index=False)
+            QMessageBox.information(
+                self, tr("msg_success_title"),
+                f"I/O list exported successfully to:\n{file_path}\n\n{len(self._io_items)} items exported."
+            )
+        except Exception as e:
+            QMessageBox.critical(self, tr("msg_error_title"), f"Error exporting I/O list:\n{str(e)}")
 
     def _add_io(self):
         dlg = IODialog(self, io_types=self._io_types)
@@ -4121,6 +4160,7 @@ class MainWindow(QMainWindow):
         self._btn_io_filter_inputs.setText(tr("btn_io_filter_inputs"))
         self._btn_io_filter_outputs.setText(tr("btn_io_filter_outputs"))
         self._btn_refresh_io.setText(tr("btn_refresh_io"))
+        self._btn_export_io.setText(tr("btn_export_io"))
         self._io_table.setHorizontalHeaderLabels([
             tr("col_circuit"), tr("col_circuit_number"), tr("col_template"),
             tr("col_io_name"), tr("col_description"),

@@ -58,9 +58,7 @@
     "description": "",
     "templates": [
       "3_Return_Fan",
-      "3_Supply_Fan",
-      "AHU_HEAT_COILee",
-      "ENTH-WHEEL"
+      "3_Supply_Fan"
     ],
     "valves": [],
     "circuit_ios": []
@@ -74,37 +72,49 @@
         "name": "1 EXD-SH2-1-TRANS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "1 EXD-SH2",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "CD-FAN fans-tech",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "CD-FAN1-C fans-tech",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "SUPPLY DAMPERS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "VFD-l MS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       }
     ],
     "valves": [],
@@ -119,37 +129,49 @@
         "name": "VFD-l MS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "VFD-l MS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "2_Condenser_Fan",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "IB-G",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "1 EXD-SH2-1-TRANS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "1 EXD-SH2",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       }
     ],
     "valves": [],
@@ -164,7 +186,9 @@
         "name": "VFD-L",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       }
     ],
     "valves": [],
@@ -179,49 +203,65 @@
         "name": "VFD-l MS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "VFD-l MS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "VFD-l MS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "2_Condenser_Fan",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "1_Condenser_Fan",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "1 EXD-SH2-1-TRANS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "1 EXD-SH2",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       },
       {
         "name": "1 EXD-SH2-1-TRANS",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       }
     ],
     "valves": [],
@@ -236,7 +276,9 @@
         "name": "1 EXD-SH2",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       }
     ],
     "valves": [],
@@ -251,7 +293,9 @@
         "name": "C063",
         "ladder_type": "",
         "part_of_ladder": "",
-        "height": 0.0
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
       }
     ],
     "valves": [],
