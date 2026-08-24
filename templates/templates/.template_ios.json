@@ -484,5 +484,27 @@
       "ladder_template": "",
       "ladder_component_template": ""
     }
+  ],
+  "GAS_BURN": [
+    {
+      "name": "GAS_HEAT_EN",
+      "description": "Gas Burner Enable",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": "Enable",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "GAS_HEAT_MOD",
+      "description": "Gas burner modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    }
   ]
 }

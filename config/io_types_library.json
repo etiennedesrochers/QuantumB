@@ -65,8 +65,8 @@
     "io_template": "out_fan_enable",
     "shared": false,
     "shared_template": "",
-    "ladder_type": "text_ladder",
-    "ladder_component_template": ""
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_SUPP-F_EN"
   },
   {
     "name": "Modulation",
