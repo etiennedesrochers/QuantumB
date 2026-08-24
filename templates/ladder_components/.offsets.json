@@ -1,0 +1,38 @@
+{
+  "LADDER_COMP_GAS_SNS": [
+    2.9818,
+    0.0
+  ],
+  "LADDER_COMP_HP_SW": [
+    2.9818,
+    0.0
+  ],
+  "LADDER_COMP_LP_SW": [
+    2.9818,
+    0.0
+  ],
+  "LADDER_COMP_OIL_EN": [
+    2.9818,
+    0.0
+  ],
+  "LADDER_COMP_PRESS_LIM_HIGH": [
+    11.9522,
+    0.0
+  ],
+  "LADDER_COMP_PRESS_LIM_LOW": [
+    2.9818,
+    0.0
+  ],
+  "LADDER_COMP_SMOKEDETEC": [
+    2.9818,
+    0.0
+  ],
+  "LADDER_COMP_SUPP-F_EN": [
+    2.9818,
+    0.0
+  ],
+  "LADDER_COMP_STS": [
+    12.9917,
+    0.0
+  ]
+}

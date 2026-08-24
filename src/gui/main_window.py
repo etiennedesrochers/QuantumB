@@ -93,6 +93,9 @@ _IO_WIDTHS = (120, 80, 110, 110, 180, 90, 80, 130)
 _TMPL_IO_COLS   = ("Name", "Description", "Signal Type", "Direction", "IO Type", "Ladder Type", "Ladder Template", "Ladder Component Template")
 _TMPL_IO_WIDTHS = (120, 200, 90, 80, 130, 100, 140, 180)
 
+_MACHINE_TYPE_REGULAR = "Regular"
+_MACHINE_TYPE_AHU = "AHU"
+
 
 
 
@@ -242,7 +245,11 @@ class MainWindow(QMainWindow):
         self._lbl_drawn_by_w   = QLabel()
         self._lbl_paper_size_w = QLabel()
         self._lbl_module_w = QLabel()
+        self._lbl_machine_type_w = QLabel()
         self._module_cb = QComboBox()
+        self._machine_type_cb = QComboBox()
+        self._machine_type_cb.addItems([_MACHINE_TYPE_REGULAR, _MACHINE_TYPE_AHU])
+        self._machine_type_cb.currentIndexChanged.connect(self._refresh_io_summary)
         form.addRow(self._lbl_title_w,      self._e_title)
         form.addRow(self._lbl_project_w,    self._e_project)
         form.addRow(self._lbl_drawing_no_w, self._e_dwgno)
@@ -250,6 +257,7 @@ class MainWindow(QMainWindow):
         form.addRow(self._lbl_drawn_by_w,   self._e_drawnby)
         form.addRow(self._lbl_paper_size_w, self._paper_cb)
         form.addRow(self._lbl_module_w,     self._module_cb)
+        form.addRow(self._lbl_machine_type_w, self._machine_type_cb)
         layout.addWidget(self._grp_settings)
 
         self._lbl_io_summary = QLabel()
@@ -464,6 +472,21 @@ class MainWindow(QMainWindow):
         t3_btn_lay.addWidget(self._btn_export_ladder_tmpl)
         t3_btn_lay.addStretch()
         t3_lay.addWidget(t3_btn)
+        self._grp_ladder_template_config = QGroupBox("Configure Ladder")
+        ladder_tmpl_cfg_lay = QHBoxLayout(self._grp_ladder_template_config)
+        ladder_tmpl_cfg_lay.setContentsMargins(8, 8, 8, 8)
+        self._lbl_ladder_tmpl_ins_x = QLabel("Component Offset X:")
+        self._ladder_tmpl_ins_x = CoordSpinBox()
+        self._lbl_ladder_tmpl_ins_y = QLabel("Component Offset Y:")
+        self._ladder_tmpl_ins_y = CoordSpinBox()
+        ladder_tmpl_cfg_lay.addWidget(self._lbl_ladder_tmpl_ins_x)
+        ladder_tmpl_cfg_lay.addWidget(self._ladder_tmpl_ins_x)
+        ladder_tmpl_cfg_lay.addWidget(self._lbl_ladder_tmpl_ins_y)
+        ladder_tmpl_cfg_lay.addWidget(self._ladder_tmpl_ins_y)
+        ladder_tmpl_cfg_lay.addStretch()
+        t3_lay.addWidget(self._grp_ladder_template_config)
+        self._ladder_tmpl_ins_x.valueChanged.connect(self._on_ladder_tmpl_ins_changed)
+        self._ladder_tmpl_ins_y.valueChanged.connect(self._on_ladder_tmpl_ins_changed)
         self._tmpl_type_tabs.addTab(tab3, "")
 
         # Tab 4: Valves templates
@@ -528,6 +551,30 @@ class MainWindow(QMainWindow):
         t5_btn_lay.addWidget(self._btn_export_ladder_component_tmpl)
         t5_btn_lay.addStretch()
         t5_lay.addWidget(t5_btn)
+        # Offset controls
+        t5_offset = QWidget()
+        t5_offset_lay = QHBoxLayout(t5_offset)
+        t5_offset_lay.setContentsMargins(0, 0, 0, 0)
+        self._lbl_ladder_component_offset_x = QLabel("Offset X:")
+        self._lbl_ladder_component_offset_y = QLabel("Offset Y:")
+        self._ladder_component_offset_x = QDoubleSpinBox()
+        self._ladder_component_offset_x.setRange(-9999.99, 9999.99)
+        self._ladder_component_offset_x.setDecimals(5)
+        self._ladder_component_offset_x.setSuffix(" units")
+        self._ladder_component_offset_x.setEnabled(False)
+        self._ladder_component_offset_y = QDoubleSpinBox()
+        self._ladder_component_offset_y.setRange(-9999.99, 9999.99)
+        self._ladder_component_offset_y.setDecimals(5)
+        self._ladder_component_offset_y.setSuffix(" units")
+        self._ladder_component_offset_y.setEnabled(False)
+        self._ladder_component_offset_x.valueChanged.connect(self._on_ladder_component_offset_changed)
+        self._ladder_component_offset_y.valueChanged.connect(self._on_ladder_component_offset_changed)
+        t5_offset_lay.addWidget(self._lbl_ladder_component_offset_x)
+        t5_offset_lay.addWidget(self._ladder_component_offset_x)
+        t5_offset_lay.addWidget(self._lbl_ladder_component_offset_y)
+        t5_offset_lay.addWidget(self._ladder_component_offset_y)
+        t5_offset_lay.addStretch()
+        t5_lay.addWidget(t5_offset)
         self._tmpl_type_tabs.addTab(tab5, "")
 
         layout.addWidget(self._tmpl_type_tabs, 1)
@@ -1673,6 +1720,7 @@ class MainWindow(QMainWindow):
         output_count=0
         input_index = 0
         output_index = 0
+        machine_prefix = self._machine_prefix()
 
         #For each io, we will assign a module number on the address
         #CTL(I for Input and O for output)_(controller number)
@@ -1685,18 +1733,23 @@ class MainWindow(QMainWindow):
                 analog = "D"
             #if item is input
             if item.io_type == "Input":
-                item.address = f"CTL{(input_index // len(self._modules[0].get("inputs"))) + 1}-I"
+                item.address = f"{machine_prefix}{(input_index // len(self._modules[0].get("inputs"))) + 1}-I"
                 input_count += 1
-                zero = "0" if input_count < 10 else ""
-                item.number = f"{analog}I{(input_index // len(self._modules[0].get("inputs"))) + 1}{zero}{input_count}"
+                zero = "0" if input_count%8 < 10 else ""
+                item.number = f"{analog}I{(input_index // len(self._modules[0].get("inputs"))) + 1}{zero}{input_count%8}"
                 input_index += 1
                 
             else:
-                item.address = f"CTL{(output_index // len(self._modules[0].get("outputs"))) + 1}-O"
+                item.address = f"{machine_prefix}{(output_index // len(self._modules[0].get("outputs"))) + 1}-O"
                 output_count += 1
-                zero = "0" if output_count < 10 else ""
-                item.number = f"{analog}O{(output_index // len(self._modules[0].get("outputs"))) + 1}{zero}{output_count}"
+                zero = "0" if output_count%6 < 10 else ""
+                item.number = f"{analog}O{(output_index // len(self._modules[0].get("outputs"))) + 1}{zero}{output_count%6}"
                 output_index += 1
+
+    def _machine_prefix(self) -> str:
+        """Return machine prefix used in generated controller tags and addresses."""
+        machine_type = str(self._machine_type_cb.currentData() or self._machine_type_cb.currentText()).strip()
+        return "AHU" if machine_type == _MACHINE_TYPE_AHU else "CU"
 
     def _refresh_io_table(self):
         """Refresh the IO table from project circuits and manually added IOs."""
@@ -2535,6 +2588,17 @@ class MainWindow(QMainWindow):
             self._io_tmpl_ins_y.value(),
         )
 
+    def _on_ladder_tmpl_ins_changed(self):
+        """Save the insertion point for the currently selected ladder template."""
+        sel = self._ladder_tmpl_list.currentItem()
+        if sel is None:
+            return
+        self._ladder_template_mgr.set_insertion_point(
+            sel.text(),
+            self._ladder_tmpl_ins_x.value(),
+            self._ladder_tmpl_ins_y.value(),
+        )
+
     def _refresh_ladder_template_list(self):
         self._ladder_tmpl_list.clear()
         for name in self._ladder_template_mgr.list_templates():
@@ -2617,6 +2681,12 @@ class MainWindow(QMainWindow):
     def _on_ladder_template_selected(self, current, previous):
         """Update the Template tab when a ladder template is selected."""
         if current is None:
+            self._ladder_tmpl_ins_x.blockSignals(True)
+            self._ladder_tmpl_ins_y.blockSignals(True)
+            self._ladder_tmpl_ins_x.setValue(0.0)
+            self._ladder_tmpl_ins_y.setValue(0.0)
+            self._ladder_tmpl_ins_x.blockSignals(False)
+            self._ladder_tmpl_ins_y.blockSignals(False)
             return
         # Deselect the other template lists without triggering their signals
         self._tmpl_list.blockSignals(True)
@@ -2665,6 +2735,14 @@ class MainWindow(QMainWindow):
             for blk in self._tmpl_blocks:
                 self._tmpl_block_list.addItem(blk["name"])
         self._tmpl_block_list.setCurrentRow(0 if self._tmpl_blocks else -1)
+
+        x, y = self._ladder_template_mgr.get_insertion_point(name)
+        self._ladder_tmpl_ins_x.blockSignals(True)
+        self._ladder_tmpl_ins_y.blockSignals(True)
+        self._ladder_tmpl_ins_x.setValue(x)
+        self._ladder_tmpl_ins_y.setValue(y)
+        self._ladder_tmpl_ins_x.blockSignals(False)
+        self._ladder_tmpl_ins_y.blockSignals(False)
 
     def _refresh_template_list(self):
         self._tmpl_list.clear()
@@ -2827,9 +2905,22 @@ class MainWindow(QMainWindow):
             # You can use the result_template here if needed
             pass
 
+    def _on_ladder_component_offset_changed(self):
+        """Persist offset spinbox values for the currently selected ladder component template."""
+        sel = self._ladder_component_tmpl_list.currentItem()
+        if not sel:
+            return
+        self._ladder_component_template_mgr.set_offset(
+            sel.text(),
+            self._ladder_component_offset_x.value(),
+            self._ladder_component_offset_y.value(),
+        )
+
     def _on_ladder_component_template_selected(self, current, previous):
         """Update the Template tab when a ladder component template is selected."""
         if current is None:
+            self._ladder_component_offset_x.setEnabled(False)
+            self._ladder_component_offset_y.setEnabled(False)
             return
         # Deselect the other template lists without triggering their signals
         self._tmpl_list.blockSignals(True)
@@ -2870,6 +2961,17 @@ class MainWindow(QMainWindow):
         self._active_template_mgr = self._ladder_component_template_mgr
         self._active_tmpl_type = "ladder_component"
         self._update_tmpl_io_ui()
+
+        # Load saved offsets into the spinboxes
+        ox, oy = self._ladder_component_template_mgr.get_offset(name)
+        self._ladder_component_offset_x.blockSignals(True)
+        self._ladder_component_offset_y.blockSignals(True)
+        self._ladder_component_offset_x.setValue(ox)
+        self._ladder_component_offset_y.setValue(oy)
+        self._ladder_component_offset_x.blockSignals(False)
+        self._ladder_component_offset_y.blockSignals(False)
+        self._ladder_component_offset_x.setEnabled(True)
+        self._ladder_component_offset_y.setEnabled(True)
 
         self._start_preview_render(name)
 
@@ -3225,6 +3327,8 @@ class MainWindow(QMainWindow):
         self._e_rev.setText("A")
         self._e_drawnby.setText("")
         self._paper_cb.setCurrentText("A3 Landscape")
+        machine_idx = self._machine_type_cb.findData(_MACHINE_TYPE_REGULAR)
+        self._machine_type_cb.setCurrentIndex(machine_idx if machine_idx >= 0 else 0)
         self._refresh_io_table()
         self._refresh_project_circuits_table()
 
@@ -3247,6 +3351,7 @@ class MainWindow(QMainWindow):
             "drawn_by":       self._e_drawnby.text().strip(),
             "paper_size":     self._paper_cb.currentText(),
             "module":         self._module_cb.currentText(),
+            "machine_type":   str(self._machine_type_cb.currentData() or _MACHINE_TYPE_REGULAR),
         }
 
     def _apply_settings(self, s: dict):
@@ -3261,6 +3366,9 @@ class MainWindow(QMainWindow):
         module = s.get("module", "")
         idx = self._module_cb.findText(module)
         self._module_cb.setCurrentIndex(idx if idx >= 0 else 0)
+        machine_type = s.get("machine_type", _MACHINE_TYPE_REGULAR)
+        machine_idx = self._machine_type_cb.findData(machine_type)
+        self._machine_type_cb.setCurrentIndex(machine_idx if machine_idx >= 0 else 0)
 
     def _open_project(self):
         if not self._confirm_discard():
@@ -3408,6 +3516,187 @@ class MainWindow(QMainWindow):
         ]
         return self._sort_io_items(all_inputs, "Input") + self._sort_io_items(all_outputs, "Output")
 
+    # ladder gen here 
+    def _generate_ladder_pages(
+        self,
+        progress_dlg: "GenerationProgressDialog",
+        output_dir: Path,
+        config: "LadderConfig",
+        io_items: list["IOItem"],
+        generated_dxf: list[Path],
+        errors: list[str],
+    ) -> None:
+        """Generate one or more ladder diagram pages per ladder type."""
+        # Fallback start position when no insertion point is configured on the template.
+        # Derived from the example ladder DXF where the first rung appears at y≈14.5.
+        _DEFAULT_START_X = 0.0
+        _DEFAULT_START_Y = 14.5
+        # Vertical distance between successive rungs (downward).
+        _COMPONENT_Y_STEP = 2
+        # Margin above the lowest non-frame INSERT in the template (keeps components off the busbar).
+        _BOTTOM_MARGIN = 0.5
+
+        io_type_ladder_map = self._ladder_type_ladder_map()
+        io_type_ladder_template_map = self._ladder_type_ladder_component_template_map()
+        ladder_component_dict = self._ladder_comp_dict(io_items, io_type_ladder_map)
+
+        available_ladder_tmpls = self._ladder_template_mgr.list_templates()
+        ladder_page = 1
+
+        for ladder_type, components in ladder_component_dict.items():
+            if ladder_type not in available_ladder_tmpls:
+                errors.append(f"Ladder template '{ladder_type}' not found; skipping.")
+                continue
+
+            start_x, start_y = self._ladder_template_mgr.get_insertion_point(ladder_type)
+            if start_x == 0.0 and start_y == 0.0:
+                start_x, start_y = _DEFAULT_START_X, _DEFAULT_START_Y
+
+            # Determine max components per page from the template's usable vertical space.
+            # Find the lowest INSERT entity (y > 0.5 excludes the WD_M page-frame block).
+            _probe_doc = self._ladder_template_mgr.load_template(ladder_type)
+            _base_ys = [
+                e.dxf.insert.y for e in _probe_doc.modelspace()
+                if e.dxftype() == "INSERT" and e.dxf.insert.y > 0.5
+            ]
+            bottom_y = min(_base_ys) + _BOTTOM_MARGIN if _base_ys else 3.5
+            components_per_page = max(1, int((start_y - bottom_y) / _COMPONENT_Y_STEP) + 1)
+
+            cotag_counter = 100  # CR100, CR101, … unique per ladder_type group
+            for chunk_start in range(0, len(components), components_per_page):
+                if progress_dlg.cancelled:
+                    return
+                chunk = components[chunk_start : chunk_start + components_per_page]
+
+                page_str = f"L{ladder_page:03d}"
+                dxf_path = output_dir / f"{page_str}.dxf"
+
+                ladder_tmpl_doc = self._ladder_template_mgr.load_template(ladder_type)
+
+                component_placements: list = []
+                for comp_idx, io_item in enumerate(chunk):
+                    comp_tmpl_name = io_type_ladder_template_map.get(io_item.io_type_name, "")
+                    if not comp_tmpl_name:
+                        continue
+                    comp_tmpl_doc = self._ladder_component_template_mgr.load_template(comp_tmpl_name)
+                    if comp_tmpl_doc is None:
+                        continue
+                    comp_tmpl_doc = self._prepare_ladder_component_doc(comp_tmpl_doc, io_item, cotag_counter, ladder_page)
+                    cotag_counter += 1
+                    ip_x, ip_y = self._ladder_component_template_mgr.get_insertion_point(comp_tmpl_name)
+                    # Get the offset for the component template
+                    ox, oy = self._ladder_component_template_mgr.get_offset(comp_tmpl_name)
+                    slot_x = start_x - ip_x + ox
+                    slot_y = start_y - ip_y + oy - comp_idx * _COMPONENT_Y_STEP
+                    component_placements.append((comp_tmpl_doc, slot_x, slot_y, io_item))
+
+                progress_dlg.update_progress(
+                    len(generated_dxf), len(generated_dxf) + 1,
+                    f"Generating ladder page {page_str}",
+                    f"Ladder type: {ladder_type}",
+                )
+
+                page_config = dataclasses.replace(config, drawing_number=page_str)
+                gen = DrawingGenerator(page_config)
+                machine_prefix = self._machine_prefix()
+                ok, msg = gen.generate(
+                    [], str(dxf_path), ladder_tmpl_doc,
+                    io_items=io_items,
+                    io_template_placements=component_placements or None,
+                    controller_prefix=machine_prefix,
+                )
+                if ok:
+                    generated_dxf.append(dxf_path)
+                else:
+                    errors.append(f"{page_str}: {msg}")
+
+                ladder_page += 1
+    #ladder gen
+    def _prepare_ladder_component_doc(self, source_doc, io_item: "IOItem", comp_number: int = 101, ctrl_num: int = 1):
+        """Return a copy of *source_doc* with attribute placeholders replaced by io_item values."""
+        import io as _io
+        import ezdxf as _ezdxf
+
+        buf = _io.StringIO()
+        source_doc.write(buf)
+        buf.seek(0)
+        copy = _ezdxf.read(buf)
+
+        tag = io_item.tag.upper() if io_item.tag else ""
+        # address is only populated after _enrich_io_item; build a fallback from the component number
+        addr = io_item.address.upper() if io_item.address else ""
+        io_dir = ""
+        if not addr:
+            sig = (io_item.signal_type[0].upper() if io_item.signal_type else "D")
+            io_dir = "I" if (io_item.io_type or "").lower() == "input" else "O"
+            addr = f"{sig}{io_dir}{comp_number}"
+        #add a count for the pressure switch check if self does not have it
+        if not hasattr(self, 'ps_count'):
+            self.ps_count = 1
+        if not hasattr(self, 'solcount'):
+            self.solcount = 1
+        if not hasattr(self, 'sdcount'):
+            self.sdcount =1
+        substitutions = {
+            "COTAG":      f"CR{comp_number}",
+            "CONTL-IO":   f"{io_item.number}",
+            "NAME":       tag,
+            "COM_NAME":   f"COM_{tag}",
+            "%tagstrip%": f"{self._machine_prefix()}{io_dir}-{ctrl_num}",
+            "%tagcom%":   f"{self._machine_prefix()}{io_dir}-{ctrl_num}",
+            "COM_CONTL":  f"COM_{addr}",
+            "NUM":        addr,
+            "COM_NUM":    f"COM_{io_item.number}",
+            "CIRCUIT#":  f"CIRCUIT{io_item.circuit_no}" if io_item.circuit_no else "CIRCUIT#",
+            "PS#": f"PS{self.ps_count}",
+            "FULL_NAME" : io_item.description,
+            "SOL#": f"SOL{self.solcount}",
+            "SD#": f"SD{self.sdcount}",
+        }
+
+        for entity in copy.modelspace():
+            if entity.dxftype() != "INSERT":
+                continue
+            try:
+                for attrib in entity.attribs:
+                    # Match case-insensitively; write replacement as uppercase
+                    text_upper = attrib.dxf.get("text", "")
+                    if text_upper == "PS#":
+                        self.ps_count += 1
+                    if text_upper == "SOL#":
+                        self.solcount += 1
+                    if text_upper == "SD#":
+                        self.sdcount += 1
+                    if text_upper in substitutions:
+                        attrib.dxf.text = substitutions[text_upper]
+            except Exception:
+                pass
+
+        return copy
+
+    def _ladder_type_ladder_map(self):
+        return {
+                    t["name"]: t.get("ladder_type", "")
+                    for t in self._io_types
+                    if t.get("ladder_type")
+                }
+
+    def _ladder_type_ladder_component_template_map(self):
+        return {
+            t["name"]: t.get("ladder_component_template", "")
+            for t in self._io_types
+            if t.get("ladder_component_template")
+        }
+
+    def _ladder_comp_dict(self, io_items: list["IOItem"], io_type_ladder_map: dict[str, str]) -> dict[str, list["IOItem"]]:
+        ladder_component_dict: dict[str, list["IOItem"]] = {}
+        for io_item in io_items:
+            ladder_type = io_type_ladder_map.get(io_item.io_type_name, "")
+            if not ladder_type:
+                continue
+            ladder_component_dict.setdefault(ladder_type, []).append(io_item)
+        return ladder_component_dict
+      
     def _generate(self):
         if not self._project_circuit_refs:
             QMessageBox.warning(self, tr("msg_generate_title"), tr("msg_generate_no_circuits"))
@@ -3617,6 +3906,7 @@ class MainWindow(QMainWindow):
 
                         page_config = dataclasses.replace(config, drawing_number=page_str)
                         gen = DrawingGenerator(page_config)
+                        machine_prefix = self._machine_prefix()
                         
                         progress_dlg.update_progress(current_page, total_pages, f"Generating controller page {page_str}", f"Module: {module_name}")
                         
@@ -3625,6 +3915,7 @@ class MainWindow(QMainWindow):
                             io_items=io_items,
                             io_template_placements=io_template_placements or None,
                             controller_number=ctrl_idx,
+                            controller_prefix=machine_prefix,
                         )
                         if ok:
                             generated_dxf.append(dxf_path)
@@ -3632,6 +3923,17 @@ class MainWindow(QMainWindow):
                             errors.append(f"{page_str}: {msg}")
                         
                         current_page += 1
+
+            if not progress_dlg.cancelled:
+                # ── Ladder pages (placeholder) ────────────────────────────────────
+                self._generate_ladder_pages(
+                    progress_dlg=progress_dlg,
+                    output_dir=output_dir,
+                    config=config,
+                    io_items=io_items,
+                    generated_dxf=generated_dxf,
+                    errors=errors,
+                )
 
             if not progress_dlg.cancelled:
                 # Convert DXF → DWG if ODA converter is available
@@ -3703,6 +4005,18 @@ class MainWindow(QMainWindow):
         self._lbl_drawn_by_w.setText(tr("lbl_drawn_by"))
         self._lbl_paper_size_w.setText(tr("lbl_paper_size"))
         self._lbl_module_w.setText(tr("lbl_module"))
+        self._lbl_machine_type_w.setText(tr("lbl_machine_type"))
+        selected_machine_type = str(self._machine_type_cb.currentData() or _MACHINE_TYPE_REGULAR)
+        self._machine_type_cb.blockSignals(True)
+        self._machine_type_cb.clear()
+        self._machine_type_cb.addItem(tr("opt_machine_regular"), _MACHINE_TYPE_REGULAR)
+        self._machine_type_cb.addItem(tr("opt_machine_ahu"), _MACHINE_TYPE_AHU)
+        selected_idx = self._machine_type_cb.findData(selected_machine_type)
+        if selected_idx >= 0:
+            self._machine_type_cb.setCurrentIndex(selected_idx)
+        else:
+            self._machine_type_cb.setCurrentIndex(0)
+        self._machine_type_cb.blockSignals(False)
         self._tmpl_type_tabs.setTabText(0, tr("grp_templates"))
         self._tmpl_type_tabs.setTabText(1, tr("grp_ctrl_templates"))
         self._tmpl_type_tabs.setTabText(2, tr("grp_io_templates"))

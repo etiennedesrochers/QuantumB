@@ -233,11 +233,94 @@
   ],
   "C063": [
     {
-      "name": "Test",
-      "description": "Description",
+      "name": "1",
+      "description": "",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "Status"
+      "io_type": "1",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "2",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "2",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "3",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "3",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "4",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "4",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "5",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "5",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "6",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "6",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "7",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "7",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "8",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "8",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "9",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "9",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     }
   ],
   "2_Condenser_Fan": [

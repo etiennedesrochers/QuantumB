@@ -81,6 +81,7 @@ class DrawingGenerator:
         io_items: list[IOItem] | None = None,
         io_template_placements: list[tuple[Drawing, float, float, IOItem]] | None = None,
         controller_number: int = 1,
+        controller_prefix: str = "CU",
         progress_callback: callable | None = None,
     ) -> tuple[bool, str]:
         """
@@ -101,7 +102,9 @@ class DrawingGenerator:
                 for entry in io_template_placements:
                     if len(entry) == 4:
                         tmpl_doc, dx, dy, io_item = entry
-                        prepared = self._prepare_io_doc(tmpl_doc, io_item, controller_number)
+                        prepared = self._prepare_io_doc(
+                            tmpl_doc, io_item, controller_number, controller_prefix
+                        )
                     else:
                         tmpl_doc, dx, dy = entry
                         prepared = tmpl_doc
@@ -114,6 +117,9 @@ class DrawingGenerator:
             #we need to replace some text in it
             if controller_number ==0:
                 self.replace_value_dwg(doc, io_items)
+            else :
+                #Control replace
+                self.control_replace(doc, controller_number, controller_prefix)
             # Only draw our own border/title block when no template is used;
             # templates already contain their own title block and border.
             if template_doc is None:
@@ -129,6 +135,17 @@ class DrawingGenerator:
         except Exception as exc:
             return False, f"Error generating drawing: {exc}"
 
+    #Control Replace
+    def control_replace(self,doc,controller_number:int=1,prefix:str="CU"):
+        # Prefix is passed by caller so this class remains UI-agnostic.
+        prefix = str(prefix or "").strip() or "CU"
+
+        #We need to replace CTL# with the prefixe and the number of the controller
+        for entity in doc.modelspace():
+            if entity.dxftype() == "INSERT":
+                for attrib in entity.attribs:
+                    if attrib.dxf.get("text", "").find("CTL#") != -1:
+                        attrib.dxf.text = attrib.dxf.get("text", "").replace("CTL#", prefix + str(controller_number))
     def replace_value_dwg(self,doc,item_list: list[IOItem],controller_number:int=0):
         """
         Replace placeholder values, to find them we need to look for the old name.
@@ -252,7 +269,13 @@ class DrawingGenerator:
                 term_attrib.dxf.text = item.number
     # ── Internal helpers ────────────────────────────────────────────────────
     #Need to add the information of the io
-    def _prepare_io_doc(self, source_doc: Drawing, io_item: IOItem, controller_number: int) -> Drawing:
+    def _prepare_io_doc(
+        self,
+        source_doc: Drawing,
+        io_item: IOItem,
+        controller_number: int,
+        controller_prefix: str = "CU",
+    ) -> Drawing:
         """Return an in-memory copy of *source_doc* with placeholder attribute text
         replaced by values from *io_item*.
 
@@ -272,6 +295,7 @@ class DrawingGenerator:
 
         is_input = io_item.io_type.lower() == "input"
         i = "I" if is_input else "O"
+        machine_prefix = str(controller_prefix or "").strip() or "CU"
 
 
         substitutions = {
@@ -279,8 +303,8 @@ class DrawingGenerator:
             "COM_IO_CODE": "COM_" + io_item.tag.upper(),
             "num": io_item.address.upper(),
             "num_com":     "COM_" + io_item.address.upper(),
-            "%tagstrip%": "CTL" + i + "_" + str(controller_number).upper(),
-            "%tagstrip_com%": "COM_" + i + "_" + str(controller_number).upper(),
+            "%tagstrip%": machine_prefix + i + "_" + str(controller_number).upper(),
+            "%tagstrip_com%": "COM_" + machine_prefix + i + "_" + str(controller_number).upper(),
             "POS": io_item.number.upper(),
          }
 

@@ -47,15 +47,7 @@
     "description": "",
     "templates": [
       "VFD-L",
-      "VFD-L",
-      "VFD-CD",
-      {
-        "name": "AHU_HEAT_COILee",
-        "ladder_type": "",
-        "part_of_ladder": "",
-        "height": 0.0
-      },
-      "1 EXD-SH2-1-TRANS"
+      "VFD-L"
     ],
     "valves": [],
     "circuit_ios": []
@@ -242,6 +234,21 @@
     "templates": [
       {
         "name": "1 EXD-SH2",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0
+      }
+    ],
+    "valves": [],
+    "circuit_ios": []
+  },
+  {
+    "name": "ttt",
+    "circuit_number": "#",
+    "description": "",
+    "templates": [
+      {
+        "name": "C063",
         "ladder_type": "",
         "part_of_ladder": "",
         "height": 0.0

@@ -435,6 +435,7 @@ class CLIGenerator:
             rungs, io_items, config = self._apply_generation_substitutions(
                 rungs, io_items, config
             )
+            machine_prefix = "AHU" if str(settings.get("machine_type", "Regular")).strip() == "AHU" else "CU"
             
             # Determine if DWG conversion is available
             oda_available = _find_oda_converter() is not None
@@ -465,7 +466,12 @@ class CLIGenerator:
                     gen = DrawingGenerator(page_config)
                     
                     ok, msg = gen.generate(
-                        rungs, str(dxf_path), template_doc, io_items=io_items, controller_number=0
+                        rungs,
+                        str(dxf_path),
+                        template_doc,
+                        io_items=io_items,
+                        controller_number=0,
+                        controller_prefix=machine_prefix,
                     )
                     if ok:
                         generated_files.append(dxf_path)
@@ -571,6 +577,7 @@ class CLIGenerator:
                             [], str(dxf_path), ctrl_tmpl_doc,
                             io_items=io_items,
                             io_template_placements=io_template_placements or None,
+                            controller_prefix=machine_prefix,
                         )
                         if ok:
                             generated_files.append(dxf_path)

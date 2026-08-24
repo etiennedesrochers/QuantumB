@@ -6,7 +6,9 @@
     "direction": "Input",
     "io_template": "I_Status",
     "shared": true,
-    "shared_template": "I_Status2"
+    "shared_template": "I_Status2",
+    "ladder_type": "",
+    "ladder_component_template": ""
   },
   {
     "name": "18v",
@@ -15,7 +17,9 @@
     "direction": "Input",
     "io_template": "in_18v",
     "shared": false,
-    "shared_template": ""
+    "shared_template": "",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": ""
   },
   {
     "name": "non connecter",
@@ -92,5 +96,104 @@
     "shared_template": "",
     "ladder_type": "",
     "ladder_component_template": ""
+  },
+  {
+    "name": "1",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "",
+    "shared": false,
+    "shared_template": "",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_GAS_SNS"
+  },
+  {
+    "name": "2",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "",
+    "shared": false,
+    "shared_template": "",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_HP_SW"
+  },
+  {
+    "name": "3",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "",
+    "shared": false,
+    "shared_template": "",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_LP_SW"
+  },
+  {
+    "name": "4",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "",
+    "shared": false,
+    "shared_template": "",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_OIL_EN"
+  },
+  {
+    "name": "5",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "",
+    "shared": false,
+    "shared_template": "",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_PRESS_LIM_HIGH"
+  },
+  {
+    "name": "6",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "",
+    "shared": false,
+    "shared_template": "",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_PRESS_LIM_LOW"
+  },
+  {
+    "name": "7",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "",
+    "shared": false,
+    "shared_template": "",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_SMOKEDETEC"
+  },
+  {
+    "name": "8",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "",
+    "shared": false,
+    "shared_template": "",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_STS"
+  },
+  {
+    "name": "9",
+    "description": "",
+    "signal_category": "Analog",
+    "direction": "Input",
+    "io_template": "",
+    "shared": false,
+    "shared_template": "",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_SUPP-F_EN"
   }
 ]

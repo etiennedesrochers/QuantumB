@@ -56,6 +56,22 @@ class TemplateMetadataDialog(QDialog):
         self._height_spin.setValue(data.height if data else 0.0)
         form.addRow("Height:", self._height_spin)
 
+        # Offset X
+        self._offset_x_spin = QDoubleSpinBox()
+        self._offset_x_spin.setRange(-9999.99, 9999.99)
+        self._offset_x_spin.setDecimals(2)
+        self._offset_x_spin.setSuffix(" units")
+        self._offset_x_spin.setValue(data.offset_x if data else 0.0)
+        form.addRow("Offset X:", self._offset_x_spin)
+
+        # Offset Y
+        self._offset_y_spin = QDoubleSpinBox()
+        self._offset_y_spin.setRange(-9999.99, 9999.99)
+        self._offset_y_spin.setDecimals(2)
+        self._offset_y_spin.setSuffix(" units")
+        self._offset_y_spin.setValue(data.offset_y if data else 0.0)
+        form.addRow("Offset Y:", self._offset_y_spin)
+
         layout.addLayout(form)
 
         # Buttons
@@ -68,6 +84,8 @@ class TemplateMetadataDialog(QDialog):
         ladder_type = self._ladder_type_edit.text().strip()
         part_of_ladder = self._part_of_ladder_edit.text().strip()
         height = self._height_spin.value()
+        offset_x = self._offset_x_spin.value()
+        offset_y = self._offset_y_spin.value()
 
         # Create the Template object
         self.result_template = Template(
@@ -75,5 +93,7 @@ class TemplateMetadataDialog(QDialog):
             ladder_type=ladder_type,
             part_of_ladder=part_of_ladder,
             height=height,
+            offset_x=offset_x,
+            offset_y=offset_y,
         )
         self.accept()

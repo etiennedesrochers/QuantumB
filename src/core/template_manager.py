@@ -424,6 +424,30 @@ class TemplateManager:
         f = self.templates_dir / ".insertion_points.json"
         f.write_text(json.dumps(store, indent=2, ensure_ascii=False), encoding="utf-8")
 
+    def get_offset(self, template_name: str) -> tuple[float, float]:
+        """Return the (offset_x, offset_y) saved for *template_name* (default 0, 0)."""
+        pt = self._load_offsets().get(template_name, [0.0, 0.0])
+        return (float(pt[0]), float(pt[1]))
+
+    def set_offset(self, template_name: str, x: float, y: float) -> None:
+        """Persist the (offset_x, offset_y) for *template_name*."""
+        store = self._load_offsets()
+        store[template_name] = [x, y]
+        self._save_offsets(store)
+
+    def _load_offsets(self) -> dict:
+        f = self.templates_dir / ".offsets.json"
+        if f.exists():
+            try:
+                return json.loads(f.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+        return {}
+
+    def _save_offsets(self, store: dict) -> None:
+        f = self.templates_dir / ".offsets.json"
+        f.write_text(json.dumps(store, indent=2, ensure_ascii=False), encoding="utf-8")
+
     # ── template I/O list ───────────────────────────────────────────────────
 
     def get_template_ios(self, template_name: str) -> list[dict]:

@@ -37,6 +37,8 @@ class Template:
     ladder_type: str = ""           # template type (e.g., "io", "controller", "ladder")
     part_of_ladder: str | int = ""  # which ladder/rung this template belongs to
     height: float = 0.0             # height of the ladder template
+    offset_x: float = 0.0          # X offset applied when placing the template
+    offset_y: float = 0.0          # Y offset applied when placing the template
 
 
 @dataclass

@@ -1824,9 +1824,6 @@ class IOTypeDialog(QDialog):
         self._ladder_component_template_cb.addItems(ladder_component_templates)
         form.addRow("Ladder Component Template:", self._ladder_component_template_cb)
 
-        # Connect ladder type change to update available templates
-        self._ladder_type_cb.currentTextChanged.connect(self._sync_ladder_templates)
-
         if data:
             self._name_edit.setText(data.get("name", ""))
             self._desc_edit.setText(data.get("description", ""))
@@ -1873,31 +1870,21 @@ class IOTypeDialog(QDialog):
             self._shared_chk.setChecked(False)
 
     def _sync_ladder_templates(self):
-        """Filter ladder component templates based on selected ladder type."""
-        ladder_type = self._ladder_type_cb.currentText()
+        """Keep the full ladder component template list available."""
         current_selection = self._ladder_component_template_cb.currentText()
-        
+
         self._ladder_component_template_cb.blockSignals(True)
         self._ladder_component_template_cb.clear()
         self._ladder_component_template_cb.addItem("")  # Always include empty option
-        
+
         all_templates = _load_ladder_component_templates()
-        if ladder_type:
-            # Filter templates that match the selected ladder type
-            matching_templates = [
-                t for t in all_templates
-                if ladder_type.lower() in t.lower()
-            ]
-            self._ladder_component_template_cb.addItems(matching_templates)
-        else:
-            # If no ladder type selected, show all templates
-            self._ladder_component_template_cb.addItems(all_templates)
-        
+        self._ladder_component_template_cb.addItems(all_templates)
+
         # Try to restore previous selection
         idx = self._ladder_component_template_cb.findText(current_selection)
         if idx >= 0:
             self._ladder_component_template_cb.setCurrentIndex(idx)
-        
+
         self._ladder_component_template_cb.blockSignals(False)
 
     def _ok(self):

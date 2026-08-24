@@ -9,7 +9,7 @@ AC1032
   9
 $ACADMAINTVER
  90
-       55
+      378
   9
 $DWGCODEPAGE
   3
@@ -113,7 +113,7 @@ $INSBASE
   9
 $EXTMIN
  10
--10.00989286094559
+-10.00989286094558
  20
 -0.2974027023566062
  30
@@ -121,9 +121,9 @@ $EXTMIN
   9
 $EXTMAX
  10
-11.11901260411963
+1.167839321832484
  20
-1.263230417514942
+0.9803215491823936
  30
 0.0
   9
@@ -573,7 +573,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2456309.31635669
+2456309.274687500
   9
 $TDUCREATE
  40
@@ -581,19 +581,19 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461242.483960614
+2461277.490405092
   9
 $TDUUPDATE
  40
-2461242.65062728
+2461277.657071760
   9
 $TDINDWG
  40
-0.0015874421
+0.0817379051
   9
 $TDUSRTIMER
  40
-0.0015874421
+0.0817379051
   9
 $USRTIMER
  70
@@ -633,7 +633,7 @@ $SPLINESEGS
   9
 $HANDSEED
   5
-5F6
+632
   9
 $SURFTAB1
  70
@@ -1017,7 +1017,7 @@ $FINGERPRINTGUID
   9
 $VERSIONGUID
   2
-{1D88652A-3630-314B-B568-8640A896D5E4}
+{83D432D3-B2B4-9840-87EA-8DEC52066B7B}
   9
 $EXTNAMES
 290
@@ -1183,6 +1183,14 @@ $INTERFERECOLOR
  62
      1
   9
+$INTERFEREOBJVS
+345
+A3
+  9
+$INTERFEREVPVS
+346
+A0
+  9
 $CSHADOW
 280
      0
@@ -1207,38 +1215,6 @@ ObjectDBX Classes
  90
         0
  91
-        3
-280
-     0
-281
-     0
-  0
-CLASS
-  1
-ACDBPLACEHOLDER
-  2
-AcDbPlaceHolder
-  3
-ObjectDBX Classes
- 90
-        0
- 91
-        1
-280
-     0
-281
-     0
-  0
-CLASS
-  1
-LAYOUT
-  2
-AcDbLayout
-  3
-ObjectDBX Classes
- 90
-        0
- 91
         1
 280
      0
@@ -1255,7 +1231,7 @@ ObjectDBX Classes
  90
         0
  91
-        3
+        9
 280
      0
 281
@@ -1271,7 +1247,7 @@ ObjectDBX Classes
  90
      4095
  91
-        3
+        1
 280
      0
 281
@@ -1303,7 +1279,7 @@ ObjectDBX Classes
  90
      4095
  91
-        3
+       26
 280
      0
 281
@@ -1319,7 +1295,7 @@ ObjectDBX Classes
  90
      1153
  91
-        3
+       33
 280
      0
 281
@@ -1335,7 +1311,7 @@ ACDB_MLEADERSTYLE_CLASS
  90
      4095
  91
-        3
+        2
 280
      0
 281
@@ -1367,7 +1343,7 @@ EXAC_ESW
  90
      1025
  91
-        1
+        0
 280
      1
 281
@@ -1383,7 +1359,7 @@ ObjectDBX Classes
  90
      1153
  91
-        1
+        0
 280
      1
 281
@@ -1399,7 +1375,7 @@ ObjectDBX Classes
  90
         0
  91
-        3
+        0
 280
      0
 281
@@ -1411,11 +1387,11 @@ SPATIAL_INDEX
   2
 AcDbSpatialIndex
   3
-AutoCAD 2000
+ObjectDBX Classes
  90
         0
  91
-        3
+        0
 280
      0
 281
@@ -1431,7 +1407,7 @@ ObjectDBX Classes
  90
         0
  91
-        3
+        0
 280
      0
 281
@@ -1447,7 +1423,7 @@ ObjectDBX Classes
  90
      1025
  91
-        3
+        1
 280
      0
 281
@@ -1463,7 +1439,7 @@ ObjectDBX Classes
  90
      1025
  91
-        3
+        1
 280
      0
 281
@@ -1479,7 +1455,7 @@ ObjectDBX Classes
  90
         0
  91
-        3
+        1
 280
      0
 281
@@ -1525,9 +1501,9 @@ AcDbViewportTableRecord
  21
 1.0
  12
--1.621004989361314
+-5.166449010645145
  22
-1.382825856136208
+2.538005904379715
  13
 0.0
  23
@@ -1553,9 +1529,9 @@ AcDbViewportTableRecord
  37
 0.0
  40
-15.99784340523817
+12.90876257235826
  41
-2.420441347270616
+1.880235121234386
  42
 50.0
  43
@@ -2541,7 +2517,7 @@ VIEW
 100
 AcDbSymbolTable
  70
-     0
+     1
   0
 ENDTAB
   0
@@ -3104,6 +3080,8 @@ AcDbSymbolTable
      2
 100
 AcDbDimStyleTable
+ 71
+     0
   0
 DIMSTYLE
 105
@@ -3117,8 +3095,6 @@ AcDbDimStyleTableRecord
   2
 Standard
  70
-     0
-178
      0
 340
 11
@@ -3138,8 +3114,6 @@ Annotative
      0
  40
 0.0
-178
-     0
 340
 11
 1001
@@ -3594,6 +3568,8 @@ BLOCK
 5D
 100
 AcDbEntity
+ 67
+     1
   8
 0
 100
@@ -3620,6 +3596,8 @@ ENDBLK
 5D
 100
 AcDbEntity
+ 67
+     1
   8
 0
 100
@@ -3665,7 +3643,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.7306614647325602
+-0.7306614647325606
  30
 0.0
  40
@@ -3676,6 +3654,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -3684,16 +3664,6 @@ XREF_STYLE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -3720,6 +3690,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -3728,16 +3700,6 @@ XREF_FLAGS
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -3764,6 +3726,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -3772,16 +3736,6 @@ XREF_UNUSEDSTYLE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -3808,6 +3762,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -3816,16 +3772,6 @@ XREF_FILLWITH
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -3841,7 +3787,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.8106614647325602
+-0.8106614647325599
  30
 0.0
  40
@@ -3852,6 +3798,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -3860,16 +3808,6 @@ XREF_SORT
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -3896,6 +3834,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -3904,16 +3844,6 @@ XREF_TXTBTWN
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -3929,7 +3859,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.8506614647325602
+-0.8506614647325601
  30
 0.0
  40
@@ -3940,6 +3870,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -3948,16 +3880,6 @@ XREF_GRAPHIC
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -3984,6 +3906,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -3992,16 +3916,6 @@ XREF_GRAPHICSTYLE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4028,6 +3942,8 @@ NO,NC,NONC
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4036,16 +3952,6 @@ XREF_CONTACTMAP
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4061,7 +3967,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.9106614647325602
+-0.9106614647325599
  30
 0.0
  40
@@ -4072,6 +3978,8 @@ Standard
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4080,16 +3988,6 @@ XREF_TBLSTYLE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4116,6 +4014,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4124,16 +4024,6 @@ XREF_TBLTITLE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4149,7 +4039,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.9506614647325602
+-0.95066146473256
  30
 0.0
  40
@@ -4160,6 +4050,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4168,16 +4060,6 @@ XREF_TBLINDEX
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4193,7 +4075,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.9706614647325602
+-0.9706614647325599
  30
 0.0
  40
@@ -4204,6 +4086,8 @@ W1,T1,TYPE,T2,W2,REF,SH,SHDWGNAM,FILENAME,FULLFILENAME
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4212,16 +4096,6 @@ XREF_TBLFLDNAMS
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4248,6 +4122,8 @@ L,L,L,L,L,L,L,L,L,L
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4256,16 +4132,6 @@ XREF_TBLCOLJUST
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4292,6 +4158,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4300,16 +4168,6 @@ WNUM_OFFSET
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4336,6 +4194,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4344,16 +4204,6 @@ WNUM_FLAGS
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4380,6 +4230,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4388,16 +4240,6 @@ WNUM_GAP
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4424,6 +4266,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4432,16 +4276,6 @@ SORTMODE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4468,6 +4302,8 @@ LOCBOX
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4476,16 +4312,6 @@ LOCBOX_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4512,6 +4338,8 @@ _MULTI_WIRE
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4520,16 +4348,6 @@ FAN_INOUT_LAYS
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4545,7 +4363,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.6731911883042352
+-0.6731911883042354
  30
 0.0
  40
@@ -4556,6 +4374,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4564,16 +4384,6 @@ FAN_INOUT_STYLE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4600,6 +4410,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4608,16 +4420,6 @@ MISC_DATA
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4644,6 +4446,8 @@ WIREREF
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4652,16 +4456,6 @@ WIREREF_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4677,7 +4471,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.5531911883042351
+-0.5531911883042353
  30
 0.0
  40
@@ -4688,6 +4482,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4696,16 +4492,6 @@ IEC_PROJ
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4732,6 +4518,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4740,16 +4528,6 @@ IEC_INST
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4765,7 +4543,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.5931911883042351
+-0.5931911883042355
  30
 0.0
  40
@@ -4776,6 +4554,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4784,16 +4564,6 @@ IEC_LOC
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4820,6 +4590,8 @@ TAGFIXED
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4828,16 +4600,6 @@ TAGFIXED_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4864,6 +4626,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4872,16 +4636,6 @@ GAP_STYLE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4908,6 +4662,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4916,16 +4672,6 @@ MISC_FLAGS
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4952,6 +4698,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -4960,16 +4708,6 @@ ALT_XREFFMT
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -4996,6 +4734,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5004,16 +4744,6 @@ SHEETDWGNAME
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5040,6 +4770,8 @@ SYMS
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5048,16 +4780,6 @@ COMP_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5073,7 +4795,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.4531911883042352
+-0.4531911883042353
  30
 0.0
  40
@@ -5084,6 +4806,8 @@ LINK
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5092,16 +4816,6 @@ LINK_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5128,6 +4842,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5136,16 +4852,6 @@ ARROW_STYLE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5172,6 +4878,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5180,16 +4888,6 @@ PLC_STYLE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5220,6 +4918,8 @@ MISC
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5228,16 +4928,6 @@ MISC_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5268,6 +4958,8 @@ DESCCHILD
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5276,16 +4968,6 @@ CDESC_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5316,6 +4998,8 @@ XREFCHILD
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5324,16 +5008,6 @@ CXREF_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5364,6 +5038,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5372,16 +5048,6 @@ WLEADERS
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5412,6 +5078,8 @@ POS
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5420,16 +5088,6 @@ POS_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5460,6 +5118,8 @@ LOC
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5468,16 +5128,6 @@ LOC_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5508,6 +5158,8 @@ TAGS
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5516,16 +5168,6 @@ TAG_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5556,6 +5198,8 @@ XREF
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5564,16 +5208,6 @@ XREF_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5604,6 +5238,8 @@ DESC
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5612,16 +5248,6 @@ DESC_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5652,6 +5278,8 @@ TERMS
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5660,16 +5288,6 @@ TERM_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5700,6 +5318,8 @@ WIREFIXED
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5708,16 +5328,6 @@ WIREFIXED_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5744,6 +5354,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5752,16 +5364,6 @@ FEATURE_SCL
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5788,6 +5390,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5796,16 +5400,6 @@ UNIT_SCL
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5836,6 +5430,8 @@ WIRECOPY
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5844,16 +5440,6 @@ WIRECOPY_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5884,6 +5470,8 @@ WIRENO
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5892,16 +5480,6 @@ WIRENO_LAY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5932,6 +5510,8 @@ WIRES
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5940,16 +5520,6 @@ WIRELAYS
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -5976,6 +5546,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -5984,16 +5556,6 @@ DRWRUNG
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6020,6 +5582,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6028,16 +5592,6 @@ RUNGINC
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6064,6 +5618,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6072,16 +5628,6 @@ XY_DELIM
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6108,6 +5654,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6116,16 +5664,6 @@ SHEET
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6152,6 +5690,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6160,16 +5700,6 @@ HORIZ_FIRST
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6196,6 +5726,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6204,16 +5736,6 @@ CHAR_V
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6240,6 +5762,8 @@ A
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6248,16 +5772,6 @@ CHAR_H
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6284,6 +5798,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6292,16 +5808,6 @@ DISTV
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6328,6 +5834,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6336,16 +5844,6 @@ DISTH
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6372,6 +5870,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6380,16 +5880,6 @@ DATUMY
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6416,6 +5906,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6424,16 +5916,6 @@ DATUMX
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6460,6 +5942,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6468,16 +5952,6 @@ PH3SPACE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6504,6 +5978,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6512,16 +5988,6 @@ XREFFMT
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6548,6 +6014,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6556,16 +6024,6 @@ TAG-RSUF
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6592,6 +6050,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6600,16 +6060,6 @@ TAG-START
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6636,6 +6086,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6644,16 +6096,6 @@ WIRE-RSUF
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6680,6 +6122,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6688,16 +6132,6 @@ WIRE-START
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6728,6 +6162,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6736,16 +6172,6 @@ TAGFMT
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6776,6 +6202,8 @@ R
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6784,16 +6212,6 @@ TAGMODE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6824,6 +6242,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6832,16 +6252,6 @@ WIREFMT
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6872,6 +6282,8 @@ R
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6880,16 +6292,6 @@ WIREMODE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6920,6 +6322,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6928,16 +6332,6 @@ WINC
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -6968,6 +6362,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -6976,16 +6372,6 @@ DLADW
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -7016,6 +6402,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7024,16 +6412,6 @@ RUNGDIST
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -7064,6 +6442,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7072,16 +6452,6 @@ REFNUMS
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -7112,6 +6482,8 @@ H
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7120,16 +6492,6 @@ RUNGHORV
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ENDBLK
   5
@@ -7302,6 +6664,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7310,16 +6674,6 @@ W10USER
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0078125
- 31
-0.0
   0
 ATTDEF
   5
@@ -7354,6 +6708,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7362,16 +6718,6 @@ W09USER
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.015625
- 31
-0.0
   0
 ATTDEF
   5
@@ -7406,6 +6752,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7414,16 +6762,6 @@ W08USER
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0234375
- 31
-0.0
   0
 ATTDEF
   5
@@ -7458,6 +6796,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7466,16 +6806,6 @@ W07USER
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.03125
- 31
-0.0
   0
 ATTDEF
   5
@@ -7510,6 +6840,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7518,16 +6850,6 @@ W06USER
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0390625
- 31
-0.0
   0
 ATTDEF
   5
@@ -7562,6 +6884,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7570,16 +6894,6 @@ W05USER
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.046875
- 31
-0.0
   0
 ATTDEF
   5
@@ -7614,6 +6928,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7622,16 +6938,6 @@ W04USER
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0546875
- 31
-0.0
   0
 ATTDEF
   5
@@ -7666,6 +6972,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7674,16 +6982,6 @@ W03USER
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0625
- 31
-0.0
   0
 ATTDEF
   5
@@ -7718,6 +7016,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7726,16 +7026,6 @@ W02USER
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0703125
- 31
-0.0
   0
 ATTDEF
   5
@@ -7770,6 +7060,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7778,16 +7070,6 @@ W01USER
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.078125
- 31
-0.0
   0
 ATTDEF
   5
@@ -7824,6 +7106,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7832,16 +7116,6 @@ WIRENO
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0625
- 31
-0.0
   0
 ENDBLK
   5
@@ -7984,6 +7258,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -7992,16 +7268,6 @@ DESC1
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8028,6 +7294,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8036,16 +7304,6 @@ X4TERM01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8072,6 +7330,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8080,16 +7340,6 @@ SIGCODE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8118,6 +7368,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 Wire no.
   2
@@ -8126,16 +7378,6 @@ WIRENO
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8164,6 +7406,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 to
   2
@@ -8172,16 +7416,6 @@ XREF
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ENDBLK
   5
@@ -8348,6 +7582,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8356,16 +7592,6 @@ DESC3
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -8402,6 +7628,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8410,16 +7638,6 @@ DESC1
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8450,6 +7668,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8458,16 +7678,6 @@ DESC2
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -8502,6 +7712,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8510,16 +7722,6 @@ STRIPSEQ
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8546,6 +7748,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8554,16 +7758,6 @@ LINKTERM
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8590,6 +7784,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8598,16 +7794,6 @@ X8PIN01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8634,6 +7820,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8642,16 +7830,6 @@ X1PIN01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8678,6 +7856,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8686,16 +7866,6 @@ X4PIN01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8722,6 +7892,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8730,16 +7902,6 @@ X2PIN01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8768,6 +7930,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8776,16 +7940,6 @@ INST
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8812,6 +7966,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8820,16 +7976,6 @@ X8TERMDESC01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8856,6 +8002,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8864,16 +8012,6 @@ X4TERMDESC01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8900,6 +8038,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8908,16 +8048,6 @@ X2TERMDESC01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8944,6 +8074,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8952,16 +8084,6 @@ X1TERMDESC01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -8990,6 +8112,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -8998,16 +8122,6 @@ ASSYCODE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -9025,7 +8139,7 @@ AcDbText
  10
 0.2132325959314094
  20
--0.4062500000000107
+-0.4062500000000109
  30
 0.0
  40
@@ -9038,6 +8152,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9046,16 +8162,6 @@ CAT
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -9073,7 +8179,7 @@ AcDbText
  10
 0.0882325959314094
  20
--0.4062500000000107
+-0.4062500000000109
  30
 0.0
  40
@@ -9089,11 +8195,13 @@ WD
  11
 0.0882325959314094
  21
--0.4062500000000107
+-0.4062500000000109
  31
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9102,16 +8210,6 @@ MFG
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0882325959314094
- 21
--0.4062500000000107
- 31
-0.0
   0
 ATTDEF
   5
@@ -9140,6 +8238,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9148,16 +8248,6 @@ LOC
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -9184,6 +8274,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9192,16 +8284,6 @@ X8TERM01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -9228,6 +8310,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9236,16 +8320,6 @@ X2TERM01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -9276,6 +8350,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9284,16 +8360,6 @@ TERM01
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -9328,6 +8394,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9336,16 +8404,6 @@ X1TERM01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -9372,6 +8430,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9380,16 +8440,6 @@ X4TERM01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -9420,6 +8470,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9428,16 +8480,6 @@ TAGSTRIP
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ENDBLK
   5
@@ -9622,6 +8664,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9630,16 +8674,6 @@ INST
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.5282268757634654
- 31
-0.0
   0
 ATTDEF
   5
@@ -9663,11 +8697,13 @@ AcDbText
   1
 
  41
-0.8999999999999986
+0.8999999999999984
   7
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9676,16 +8712,6 @@ DESC3
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -9710,8 +8736,6 @@ AcDbText
 0.0100000000000016
   1
 
- 41
-0.9999999999998437
   7
 WD
  72
@@ -9724,6 +8748,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9732,16 +8758,6 @@ ASSYCODE
      9
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.109375
- 31
-0.0
   0
 ATTDEF
   5
@@ -9764,12 +8780,12 @@ AcDbText
 0.0124999999999993
   1
 
- 41
-1.000000000000057
   7
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9778,16 +8794,6 @@ X1TERM02
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -9810,12 +8816,12 @@ AcDbText
 0.0124999999999993
   1
 
- 41
-1.000000000000057
   7
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9824,16 +8830,6 @@ X4TERM01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -9872,6 +8868,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9882,16 +8880,6 @@ TERM02
      2
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.25
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -9938,6 +8926,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -9948,16 +8938,6 @@ TERM01
      2
 280
      0
- 71
-     1
- 72
-     0
- 11
--0.25
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -10002,6 +8982,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10010,16 +8992,6 @@ LOC
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.3586268757634627
- 31
-0.0
   0
 ATTDEF
   5
@@ -10044,8 +9016,6 @@ AcDbText
 0.009999999999998
   1
 
- 41
-1.000000000000199
   7
 WD
  72
@@ -10058,6 +9028,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10066,16 +9038,6 @@ MFG
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.1404463671921086
- 31
-0.0
   0
 ATTDEF
   5
@@ -10091,7 +9053,7 @@ AcDbText
  10
 -0.2417362034543942
  20
--0.872982066971332
+-0.8729820669713317
  30
 0.0
  40
@@ -10099,11 +9061,13 @@ AcDbText
   1
 NC
  41
-0.7999999999999989
+0.799999999999999
   7
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10112,16 +9076,6 @@ NC
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -10145,11 +9099,13 @@ AcDbText
   1
 NO
  41
-0.7999999999999989
+0.799999999999999
   7
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10158,16 +9114,6 @@ NO
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -10192,8 +9138,6 @@ AcDbText
 0.0100000000000016
   1
 
- 41
-0.9999999999998437
   7
 WD
  72
@@ -10206,6 +9150,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10214,16 +9160,6 @@ CAT
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.1593069337163691
- 31
-0.0
   0
 ATTDEF
   5
@@ -10246,8 +9182,6 @@ AcDbText
 0.009999999999998
   1
 CR
- 41
-1.000000000000199
   7
 WD
  72
@@ -10260,6 +9194,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10268,16 +9204,6 @@ FAMILY
      9
 280
      0
- 71
-     1
- 72
-     0
- 11
--0.0052823860712046
- 21
-0.1698243417033645
- 31
-0.0
   0
 ATTDEF
   5
@@ -10293,7 +9219,7 @@ AcDbText
  10
 -0.0086352882797804
  20
--0.872982066971332
+-0.8729820669713317
  30
 0.0
  40
@@ -10306,6 +9232,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10314,16 +9242,6 @@ XREFNC
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -10352,6 +9270,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10360,16 +9280,6 @@ XREFNO
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -10385,7 +9295,7 @@ AcDbText
  10
 -0.2417362034543942
  20
--0.529232066971332
+-0.5292320669713321
  30
 0.0
  40
@@ -10393,11 +9303,13 @@ AcDbText
   1
 
  41
-0.8999999999999986
+0.8999999999999984
   7
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10406,16 +9318,6 @@ DESC2
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -10439,11 +9341,13 @@ AcDbText
   1
 
  41
-0.8999999999999986
+0.8999999999999984
   7
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10452,16 +9356,6 @@ DESC1
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -10485,7 +9379,7 @@ AcDbText
   1
 CR
  41
-0.9000000000000004
+0.9000000000000003
   7
 WD
  72
@@ -10498,6 +9392,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10506,16 +9402,6 @@ TAG1
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.2023768757634627
- 31
-0.0
   0
 ENDBLK
   5
@@ -10666,6 +9552,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10674,16 +9562,6 @@ DESC1
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
--0.35625
- 31
-0.0
   0
 ATTDEF
   5
@@ -10710,6 +9588,8 @@ AcDbText
 WD
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10718,16 +9598,6 @@ X1TERM01
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTDEF
   5
@@ -10762,6 +9632,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10770,16 +9642,6 @@ SIGCODE
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
--0.0195206944016212
- 21
-0.0466182557824295
- 31
-0.0
   0
 ATTDEF
   5
@@ -10816,6 +9678,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 
   2
@@ -10824,16 +9688,6 @@ WIRENO
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0875
- 31
-0.0
   0
 ATTDEF
   5
@@ -10870,6 +9724,8 @@ WD
 0.0
 100
 AcDbAttributeDefinition
+280
+     0
   3
 to
   2
@@ -10878,16 +9734,6 @@ XREF
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
--0.18125
- 31
-0.0
   0
 ENDBLK
   5
@@ -10945,7 +9791,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.7306614647325602
+-0.7306614647325606
  30
 0.0
  40
@@ -10956,22 +9802,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_STYLE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -10998,22 +9836,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_FLAGS
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11040,22 +9870,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_UNUSEDSTYLE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11082,22 +9904,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_FILLWITH
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11113,7 +9927,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.8106614647325602
+-0.8106614647325599
  30
 0.0
  40
@@ -11124,22 +9938,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_SORT
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11166,22 +9972,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_TXTBTWN
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11197,7 +9995,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.8506614647325602
+-0.8506614647325601
  30
 0.0
  40
@@ -11208,22 +10006,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_GRAPHIC
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11250,22 +10040,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_GRAPHICSTYLE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11292,22 +10074,14 @@ NO,NC,NONC
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_CONTACTMAP
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11323,7 +10097,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.9106614647325602
+-0.9106614647325599
  30
 0.0
  40
@@ -11334,22 +10108,14 @@ Standard
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_TBLSTYLE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11376,22 +10142,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_TBLTITLE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11407,7 +10165,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.9506614647325602
+-0.95066146473256
  30
 0.0
  40
@@ -11418,22 +10176,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_TBLINDEX
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11449,7 +10199,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.9706614647325602
+-0.9706614647325599
  30
 0.0
  40
@@ -11460,22 +10210,14 @@ W1,T1,TYPE,T2,W2,REF,SH,SHDWGNAM,FILENAME,FULLFILENAME
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_TBLFLDNAMS
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11502,22 +10244,14 @@ MC,MC,MC,MC,MC,MC,MC,MC,L,L
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_TBLCOLJUST
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11544,22 +10278,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WNUM_OFFSET
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11586,22 +10312,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WNUM_FLAGS
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11628,22 +10346,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WNUM_GAP
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11670,22 +10380,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 SORTMODE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11712,22 +10414,14 @@ LOCBOX
 WD
 100
 AcDbAttribute
+280
+     0
   2
 LOCBOX_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11754,22 +10448,14 @@ _MULTI_WIRE
 WD
 100
 AcDbAttribute
+280
+     0
   2
 FAN_INOUT_LAYS
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11785,7 +10471,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.6731911883042352
+-0.6731911883042354
  30
 0.0
  40
@@ -11796,22 +10482,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 FAN_INOUT_STYLE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11838,22 +10516,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 MISC_DATA
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11880,22 +10550,14 @@ WIREREF
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WIREREF_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11911,7 +10573,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.5531911883042351
+-0.5531911883042353
  30
 0.0
  40
@@ -11922,22 +10584,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 IEC_PROJ
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11964,22 +10618,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 IEC_INST
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -11995,7 +10641,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.5931911883042351
+-0.5931911883042355
  30
 0.0
  40
@@ -12006,22 +10652,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 IEC_LOC
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12048,22 +10686,14 @@ TAGFIXED
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TAGFIXED_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12090,22 +10720,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 GAP_STYLE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12132,22 +10754,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 MISC_FLAGS
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12174,22 +10788,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 ALT_XREFFMT
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12216,22 +10822,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 SHEETDWGNAME
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12258,22 +10856,14 @@ SYMS
 WD
 100
 AcDbAttribute
+280
+     0
   2
 COMP_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12289,7 +10879,7 @@ AcDbText
  10
 0.0026038635663365
  20
--0.4531911883042352
+-0.4531911883042353
  30
 0.0
  40
@@ -12300,22 +10890,14 @@ LINK
 WD
 100
 AcDbAttribute
+280
+     0
   2
 LINK_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12342,22 +10924,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 ARROW_STYLE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12384,22 +10958,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 PLC_STYLE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12430,22 +10996,14 @@ MISC
 WD
 100
 AcDbAttribute
+280
+     0
   2
 MISC_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12476,22 +11034,14 @@ DESCCHILD
 WD
 100
 AcDbAttribute
+280
+     0
   2
 CDESC_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12522,22 +11072,14 @@ XREFCHILD
 WD
 100
 AcDbAttribute
+280
+     0
   2
 CXREF_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12568,22 +11110,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WLEADERS
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12614,22 +11148,14 @@ POS
 WD
 100
 AcDbAttribute
+280
+     0
   2
 POS_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12660,22 +11186,14 @@ LOC
 WD
 100
 AcDbAttribute
+280
+     0
   2
 LOC_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12706,22 +11224,14 @@ TAGS
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TAG_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12752,22 +11262,14 @@ XREF
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12798,22 +11300,14 @@ DESC
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12844,22 +11338,14 @@ TERMS
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TERM_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12890,22 +11376,14 @@ WIREFIXED
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WIREFIXED_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12932,22 +11410,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 FEATURE_SCL
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -12974,22 +11444,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 UNIT_SCL
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13020,22 +11482,14 @@ WIRECOPY
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WIRECOPY_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13066,22 +11520,14 @@ WIRENO
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WIRENO_LAY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13112,22 +11558,14 @@ WIRES
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WIRELAYS
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13154,22 +11592,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DRWRUNG
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13196,22 +11626,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 RUNGINC
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13238,22 +11660,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XY_DELIM
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13280,22 +11694,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 SHEET
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13322,22 +11728,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 HORIZ_FIRST
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13364,22 +11762,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 CHAR_V
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13406,22 +11796,14 @@ A
 WD
 100
 AcDbAttribute
+280
+     0
   2
 CHAR_H
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13448,22 +11830,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DISTV
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13490,22 +11864,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DISTH
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13532,22 +11898,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DATUMY
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13574,22 +11932,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DATUMX
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13616,22 +11966,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 PH3SPACE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13658,22 +12000,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREFFMT
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13700,22 +12034,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TAG-RSUF
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13742,22 +12068,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TAG-START
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13784,22 +12102,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WIRE-RSUF
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13826,22 +12136,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WIRE-START
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13872,22 +12174,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TAGFMT
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13918,22 +12212,14 @@ R
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TAGMODE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -13964,22 +12250,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WIREFMT
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14010,22 +12288,14 @@ R
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WIREMODE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14056,22 +12326,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WINC
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14102,22 +12364,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DLADW
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14148,22 +12402,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 RUNGDIST
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14194,22 +12440,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 REFNUMS
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14240,22 +12478,14 @@ H
 WD
 100
 AcDbAttribute
+280
+     0
   2
 RUNGHORV
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 SEQEND
   5
@@ -14283,9 +12513,9 @@ AcDbBlockReference
   2
 HT0001
  10
--3.06004663860557
+-3.060046638605569
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
 1001
@@ -14309,7 +12539,7 @@ VIA_WD_BASETAG
 1002
 {
 1000
-%SADAMPER_STS%
+%tagcom%
 1002
 }
 1001
@@ -14438,22 +12668,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC3
  70
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -14490,22 +12712,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC1
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14536,22 +12750,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC2
  70
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -14573,9 +12779,9 @@ MISC
 100
 AcDbText
  10
--3.06004663860557
+-3.060046638605569
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  40
@@ -14586,22 +12792,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 STRIPSEQ
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14615,9 +12813,9 @@ MISC
 100
 AcDbText
  10
--3.06004663860557
+-3.060046638605569
  20
-0.4598328140234003
+0.4598328140234005
  30
 0.0
  40
@@ -14628,22 +12826,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 LINKTERM
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14666,28 +12856,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X8PIN01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14701,7 +12881,7 @@ MISC
 100
 AcDbText
  10
--2.97323389367336
+-2.973233893673359
  20
 0.4781550565289976
  30
@@ -14710,28 +12890,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X1PIN01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14745,7 +12915,7 @@ MISC
 100
 AcDbText
  10
--3.173806896968983
+-3.173806896968982
  20
 0.424174166414879
  30
@@ -14754,28 +12924,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X4PIN01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14798,28 +12958,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X2PIN01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14833,7 +12983,7 @@ LOC
 100
 AcDbText
  10
--2.99754663860557
+-2.997546638605569
  20
 0.8813078140233976
  30
@@ -14848,22 +12998,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 INST
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14877,7 +13019,7 @@ MISC
 100
 AcDbText
  10
--3.06004663860557
+-3.060046638605569
  20
 0.4081644832541116
  30
@@ -14886,28 +13028,18 @@ AcDbText
 0.025
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X8TERMDESC01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14923,35 +13055,25 @@ AcDbText
  10
 -3.115287246529412
  20
-0.4387971774449682
+0.4387971774449684
  30
 0.0
  40
 0.025
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X4TERMDESC01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -14965,7 +13087,7 @@ MISC
 100
 AcDbText
  10
--3.066058280869342
+-3.066058280869341
  20
 0.4903885568972299
  30
@@ -14974,28 +13096,18 @@ AcDbText
 0.025
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X2TERMDESC01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -15018,28 +13130,18 @@ AcDbText
 0.025
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X1TERMDESC01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -15053,7 +13155,7 @@ MISC
 100
 AcDbText
  10
--2.99754663860557
+-2.997546638605569
  20
 0.1804578140233986
  30
@@ -15068,22 +13170,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 ASSYCODE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -15114,22 +13208,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 CAT
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -15145,7 +13231,7 @@ Continuous
 100
 AcDbText
  10
--3.329632702332506
+-3.329632702332505
  20
 0.0554578140233879
  30
@@ -15168,22 +13254,14 @@ WD
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 MFG
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
--2.971814042674161
- 21
-0.0554578140233879
- 31
-0.0
   0
 ATTRIB
   5
@@ -15197,7 +13275,7 @@ LOC
 100
 AcDbText
  10
--2.99754663860557
+-2.997546638605569
  20
 0.7117078140233986
  30
@@ -15212,22 +13290,14 @@ PCTL
 WD
 100
 AcDbAttribute
+280
+     0
   2
 LOC
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -15241,7 +13311,7 @@ MISC
 100
 AcDbText
  10
--3.06004663860557
+-3.060046638605569
  20
 0.3992078140233986
  30
@@ -15250,28 +13320,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X8TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -15285,7 +13345,7 @@ MISC
 100
 AcDbText
  10
--3.06004663860557
+-3.060046638605569
  20
 0.5242078140233986
  30
@@ -15294,28 +13354,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X2TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -15331,7 +13381,7 @@ Continuous
 100
 AcDbText
  10
--2.99754663860557
+-2.997546638605569
  20
 0.5554578140233986
  30
@@ -15339,29 +13389,21 @@ AcDbText
  40
 0.125
   1
-COM_DI204
+COM_NUM
  41
 0.8
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TERM01
  70
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -15383,37 +13425,27 @@ MISC
 100
 AcDbText
  10
--2.99754663860557
+-2.997546638605569
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  40
 0.0125
   1
 26-2
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X1TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -15427,37 +13459,27 @@ MISC
 100
 AcDbText
  10
--3.12254663860557
+-3.122546638605569
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  40
 0.0125
   1
 26-2
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X4TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 VIA_WD_WSEQ2
 1002
@@ -15489,29 +13511,21 @@ AcDbText
  40
 0.125
   1
-%SADAMPER_STS%
+%tagcom%
  41
 0.9
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TAGSTRIP
  70
      9
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 SEQEND
   5
@@ -15539,15 +13553,15 @@ PHANTOM2
 100
 AcDbLine
  10
--3.93504663860557
+-3.935046638605569
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  11
--3.12254663860557
+-3.122546638605569
  21
-0.4617078140233986
+0.4617078140233988
  31
 0.0
 1001
@@ -15577,9 +13591,9 @@ AcDbBlockReference
   2
 HA1S3
  10
--3.93504663860557
+-3.935046638605569
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
   0
@@ -15595,7 +13609,7 @@ DESC
 100
 AcDbText
  10
--5.362181986831589
+-4.687822591299393
  20
 0.1054578140233993
  30
@@ -15603,7 +13617,7 @@ AcDbText
  40
 0.125
   1
-COM_SADAMPER_STS
+COM_NAME
  41
 0.7
   7
@@ -15611,29 +13625,21 @@ WD
  72
      2
  11
--3.93504663860557
+-3.935046638605569
  21
 0.1054578140233993
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 DESC1
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
--3.93504663860557
- 21
-0.1054578140233993
- 31
-0.0
   0
 ATTRIB
   5
@@ -15647,9 +13653,9 @@ MISC
 100
 AcDbText
  10
--3.93504663860557
+-3.935046638605569
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  40
@@ -15660,22 +13666,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X1TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -15689,7 +13687,7 @@ MISC
 100
 AcDbText
  10
--4.117668515661593
+-4.03331897558275
  20
 0.508326069805829
  30
@@ -15697,7 +13695,7 @@ AcDbText
  40
 0.01
   1
-COM_SADAMPER_STS
+COM_NUM
   7
 WD
  72
@@ -15710,22 +13708,14 @@ WD
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 SIGCODE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
--3.954567333007191
- 21
-0.508326069805829
- 31
-0.0
   0
 ATTRIB
   5
@@ -15739,7 +13729,7 @@ WIREREF
 100
 AcDbText
  10
--4.348581461207409
+-4.348581461207408
  20
 0.5492078140234007
  30
@@ -15755,29 +13745,21 @@ WD
  72
      2
  11
--3.93504663860557
+-3.935046638605569
  21
 0.5492078140234007
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 WIRENO
  70
      9
 280
      0
- 71
-     1
- 72
-     0
- 11
--3.93504663860557
- 21
-0.5492078140234007
- 31
-0.0
   0
 ATTRIB
   5
@@ -15791,7 +13773,7 @@ XREF
 100
 AcDbText
  10
--4.087165561076004
+-4.087165561076003
  20
 0.2804578140233964
  30
@@ -15807,29 +13789,21 @@ WD
  72
      2
  11
--3.93504663860557
+-3.935046638605569
  21
 0.2804578140233964
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 XREF
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
--3.93504663860557
- 21
-0.2804578140233964
- 31
-0.0
   0
 SEQEND
   5
@@ -15863,7 +13837,7 @@ HCR1_RELAY-COIL
  10
 -1.24754663860557
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
 1001
@@ -15883,19 +13857,19 @@ VIA_WD_PINLIST
 1002
 }
 1001
-VIA_WD_BASETAG
-1002
-{
-1000
-CR12
-1002
-}
-1001
 VIA_WD_WD_WEBLINK
 1002
 {
 1000
 http://www.ab.com/industrialcontrols/products/relays_timers_and_temp_controllers/index.html
+1002
+}
+1001
+VIA_WD_BASETAG
+1002
+{
+1000
+COTAG
 1002
 }
 1001
@@ -15953,7 +13927,7 @@ AcDbText
  10
 -1.24754663860557
  20
-0.9899346897868639
+0.9899346897868641
  30
 0.0
  40
@@ -15969,27 +13943,19 @@ WD
  11
 -1.24754663860557
  21
-0.9899346897868639
+0.9899346897868641
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 INST
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
--1.24754663860557
- 21
-0.9899346897868639
- 31
-0.0
   0
 ATTRIB
   5
@@ -16003,9 +13969,9 @@ DESC
 100
 AcDbText
  10
--1.469246638605572
+-1.469246638605571
  20
--0.6632921859766014
+-0.6632921859766015
  30
 0.0
  40
@@ -16013,27 +13979,19 @@ AcDbText
   1
 
  41
-0.8999999999999986
+0.8999999999999984
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC3
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -16058,8 +14016,6 @@ AcDbText
 0.0100000000000016
   1
 700-HN128
- 41
-0.9999999999998437
   7
 WD
  72
@@ -16072,22 +14028,14 @@ WD
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 ASSYCODE
  70
      9
 280
      0
- 71
-     1
- 72
-     0
- 11
--1.24754663860557
- 21
-0.5710828140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -16101,37 +14049,27 @@ MISC
 100
 AcDbText
  10
--0.93504663860557
+-0.9350466386055698
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  40
 0.0124999999999993
   1
 24N
- 41
-1.000000000000057
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X1TERM02
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -16147,35 +14085,25 @@ AcDbText
  10
 -1.56004663860557
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  40
 0.0124999999999993
   1
 26-2
- 41
-1.000000000000057
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X4TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -16191,9 +14119,9 @@ Continuous
 100
 AcDbText
  10
--1.043358070931457
+-1.043358070931456
  20
-0.4304578140233986
+0.4304578140233988
  30
 0.0
  40
@@ -16207,13 +14135,15 @@ WD
  72
      1
  11
--0.99754663860557
+-0.9975466386055698
  21
-0.4617078140233986
+0.4617078140233988
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 TERM02
  70
@@ -16222,16 +14152,6 @@ TERM02
      2
 280
      0
- 71
-     1
- 72
-     0
- 11
--0.99754663860557
- 21
-0.4617078140233986
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -16257,7 +14177,7 @@ AcDbText
  10
 -1.543358070931457
  20
-0.4304578140233986
+0.4304578140233988
  30
 0.0
  40
@@ -16273,11 +14193,13 @@ WD
  11
 -1.49754663860557
  21
-0.4617078140233986
+0.4617078140233988
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 TERM01
  70
@@ -16286,16 +14208,6 @@ TERM01
      2
 280
      0
- 71
-     1
- 72
-     0
- 11
--1.49754663860557
- 21
-0.4617078140233986
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -16340,22 +14252,14 @@ WD
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 LOC
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
--1.24754663860557
- 21
-0.8203346897868613
- 31
-0.0
   0
 ATTRIB
   5
@@ -16371,17 +14275,15 @@ Continuous
 100
 AcDbText
  10
--1.257888294321731
+-1.25788829432173
  20
-0.5972067436333793
+0.5972067436333796
  30
 0.0
  40
 0.009999999999998
   1
 AB
- 41
-1.000000000000199
   7
 WD
  72
@@ -16389,27 +14291,19 @@ WD
  11
 -1.24754663860557
  21
-0.6021541812155071
+0.6021541812155073
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 MFG
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
--1.24754663860557
- 21
-0.6021541812155071
- 31
-0.0
   0
 ATTRIB
   5
@@ -16433,27 +14327,19 @@ AcDbText
   1
 NC
  41
-0.7999999999999989
+0.799999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 NC
  70
      9
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -16477,27 +14363,19 @@ AcDbText
   1
 NO
  41
-0.7999999999999989
+0.799999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 NO
  70
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -16513,17 +14391,15 @@ Continuous
 100
 AcDbText
  10
--1.303351500629232
+-1.303351500629231
  20
-0.616067310157638
+0.6160673101576382
  30
 0.0
  40
 0.0100000000000016
   1
 700-HC24A24
- 41
-0.9999999999998437
   7
 WD
  72
@@ -16531,27 +14407,19 @@ WD
  11
 -1.24754663860557
  21
-0.6210147477397676
+0.6210147477397677
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 CAT
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
--1.24754663860557
- 21
-0.6210147477397676
- 31
-0.0
   0
 ATTRIB
   5
@@ -16565,7 +14433,7 @@ MISC
 100
 AcDbText
  10
--1.26387698788308
+-1.263876987883079
  20
 0.631532155726763
  30
@@ -16574,36 +14442,26 @@ AcDbText
 0.009999999999998
   1
 CR
- 41
-1.000000000000199
   7
 WD
  72
      1
  11
--1.252829024676775
+-1.252829024676774
  21
 0.631532155726763
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 FAMILY
  70
      9
 280
      0
- 71
-     1
- 72
-     0
- 11
--1.252829024676775
- 21
-0.631532155726763
- 31
-0.0
   0
 ATTRIB
   5
@@ -16632,22 +14490,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREFNC
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -16669,29 +14519,21 @@ AcDbText
  40
 0.125
   1
-12-8,11-10,  ,  
+ ,  
  41
 0.8000000000000007
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREFNO
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -16713,29 +14555,21 @@ AcDbText
  40
 0.125
   1
-A-DI204
+CONTL-IO
  41
-0.8999999999999986
+0.8999999999999984
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC2
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -16757,29 +14591,21 @@ AcDbText
  40
 0.125
   1
-SADAMPER_STS
+NAME
  41
-0.8999999999999986
+0.8999999999999984
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC1
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -16793,7 +14619,7 @@ TAGS
 100
 AcDbText
  10
--1.480196934269171
+-1.523844273296765
  20
 0.6640846897868613
  30
@@ -16801,9 +14627,9 @@ AcDbText
  40
 0.125
   1
-CR12
+COTAG
  41
-0.9000000000000004
+0.9000000000000003
   7
 WD
  72
@@ -16816,22 +14642,14 @@ WD
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 TAG1
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
--1.24754663860557
- 21
-0.6640846897868613
- 31
-0.0
   0
 SEQEND
   5
@@ -16861,9 +14679,9 @@ AcDbBlockReference
   2
 HT0001
  10
--8.256269498605569
+-8.256269498605567
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
 1001
@@ -16887,7 +14705,7 @@ VIA_WD_BASETAG
 1002
 {
 1000
-%SADAMPER_STS%
+%tagstrip%
 1002
 }
 1001
@@ -17016,22 +14834,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC3
  70
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -17068,22 +14878,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC1
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17114,22 +14916,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC2
  70
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -17151,9 +14945,9 @@ MISC
 100
 AcDbText
  10
--8.256269498605569
+-8.256269498605567
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  40
@@ -17164,22 +14958,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 STRIPSEQ
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17193,9 +14979,9 @@ MISC
 100
 AcDbText
  10
--8.256269498605569
+-8.256269498605567
  20
-0.4598328140234003
+0.4598328140234005
  30
 0.0
  40
@@ -17206,22 +14992,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 LINKTERM
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17244,28 +15022,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X8PIN01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17279,7 +15047,7 @@ MISC
 100
 AcDbText
  10
--8.169456753673359
+-8.169456753673358
  20
 0.4781550565289976
  30
@@ -17288,28 +15056,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X1PIN01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17323,7 +15081,7 @@ MISC
 100
 AcDbText
  10
--8.37002975696899
+-8.370029756968991
  20
 0.424174166414879
  30
@@ -17332,28 +15090,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X4PIN01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17367,7 +15115,7 @@ MISC
 100
 AcDbText
  10
--8.2237161839981
+-8.223716183998096
  20
 0.5455770497365862
  30
@@ -17376,28 +15124,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X2PIN01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17411,7 +15149,7 @@ LOC
 100
 AcDbText
  10
--8.193769498605569
+-8.193769498605567
  20
 0.8813078140233976
  30
@@ -17426,22 +15164,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 INST
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17455,7 +15185,7 @@ MISC
 100
 AcDbText
  10
--8.256269498605569
+-8.256269498605567
  20
 0.4081644832541116
  30
@@ -17464,28 +15194,18 @@ AcDbText
 0.025
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X8TERMDESC01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17501,35 +15221,25 @@ AcDbText
  10
 -8.311510106529418
  20
-0.4387971774449682
+0.4387971774449684
  30
 0.0
  40
 0.025
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X4TERMDESC01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17543,7 +15253,7 @@ MISC
 100
 AcDbText
  10
--8.26228114086934
+-8.262281140869339
  20
 0.4903885568972299
  30
@@ -17552,28 +15262,18 @@ AcDbText
 0.025
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X2TERMDESC01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17587,7 +15287,7 @@ MISC
 100
 AcDbText
  10
--8.21700396993866
+-8.217003969938659
  20
 0.4686634600592683
  30
@@ -17596,28 +15296,18 @@ AcDbText
 0.025
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X1TERMDESC01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17631,7 +15321,7 @@ MISC
 100
 AcDbText
  10
--8.193769498605569
+-8.193769498605567
  20
 0.1804578140233986
  30
@@ -17646,22 +15336,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 ASSYCODE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17692,22 +15374,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 CAT
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17746,22 +15420,14 @@ WD
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 MFG
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
--8.16803690267416
- 21
-0.0554578140233879
- 31
-0.0
   0
 ATTRIB
   5
@@ -17775,7 +15441,7 @@ LOC
 100
 AcDbText
  10
--8.193769498605569
+-8.193769498605567
  20
 0.7117078140233986
  30
@@ -17790,22 +15456,14 @@ PCTL
 WD
 100
 AcDbAttribute
+280
+     0
   2
 LOC
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17819,7 +15477,7 @@ MISC
 100
 AcDbText
  10
--8.256269498605569
+-8.256269498605567
  20
 0.3992078140233986
  30
@@ -17828,28 +15486,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X8TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17863,7 +15511,7 @@ MISC
 100
 AcDbText
  10
--8.256269498605569
+-8.256269498605567
  20
 0.5242078140233986
  30
@@ -17872,28 +15520,18 @@ AcDbText
 0.0125
   1
 
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X2TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -17909,7 +15547,7 @@ Continuous
 100
 AcDbText
  10
--8.193769498605569
+-8.193769498605567
  20
 0.5554578140233986
  30
@@ -17917,29 +15555,21 @@ AcDbText
  40
 0.125
   1
-A-DI204
+CONTL-IO
  41
 0.8
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TERM01
  70
      8
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 N8SOL-TLINK
 1002
@@ -17961,37 +15591,27 @@ MISC
 100
 AcDbText
  10
--8.193769498605569
+-8.193769498605567
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  40
 0.0125
   1
 24-1
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X1TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -18005,37 +15625,27 @@ MISC
 100
 AcDbText
  10
--8.318769498605569
+-8.318769498605567
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  40
 0.0125
   1
 24-1
- 41
-0.9999999999999999
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X4TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
 1001
 VIA_WD_WSEQ2
 1002
@@ -18067,29 +15677,21 @@ AcDbText
  40
 0.125
   1
-%SADAMPER_STS%
+%tagstrip%
  41
 0.9
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 TAGSTRIP
  70
      9
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 SEQEND
   5
@@ -18109,7 +15711,7 @@ INSERT
 100
 AcDbEntity
   8
-WIREFIXED
+WIRENO
  48
 0.5
 100
@@ -18119,9 +15721,9 @@ AcDbBlockReference
   2
 WD_WNH
  10
--3.52879663860557
+-3.528796638605569
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
   0
@@ -18137,9 +15739,9 @@ MISC
 100
 AcDbText
  10
--3.52879663860557
+-3.528796638605569
  20
-0.4695203140233986
+0.4695203140233988
  30
 0.0
  40
@@ -18151,29 +15753,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
-0.4695203140233986
+0.4695203140233988
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 W10USER
  70
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.4695203140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -18187,9 +15781,9 @@ MISC
 100
 AcDbText
  10
--3.52879663860557
+-3.528796638605569
  20
-0.4773328140233986
+0.4773328140233988
  30
 0.0
  40
@@ -18201,29 +15795,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
-0.4773328140233986
+0.4773328140233988
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 W09USER
  70
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.4773328140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -18237,9 +15823,9 @@ MISC
 100
 AcDbText
  10
--3.52879663860557
+-3.528796638605569
  20
-0.4851453140233986
+0.4851453140233988
  30
 0.0
  40
@@ -18251,29 +15837,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
-0.4851453140233986
+0.4851453140233988
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 W08USER
  70
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.4851453140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -18287,9 +15865,9 @@ MISC
 100
 AcDbText
  10
--3.52879663860557
+-3.528796638605569
  20
-0.4929578140233986
+0.4929578140233988
  30
 0.0
  40
@@ -18301,29 +15879,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
-0.4929578140233986
+0.4929578140233988
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 W07USER
  70
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.4929578140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -18337,7 +15907,7 @@ MISC
 100
 AcDbText
  10
--3.52879663860557
+-3.528796638605569
  20
 0.5007703140233986
  30
@@ -18351,29 +15921,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
 0.5007703140233986
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 W06USER
  70
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.5007703140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -18387,7 +15949,7 @@ MISC
 100
 AcDbText
  10
--3.52879663860557
+-3.528796638605569
  20
 0.5085828140233986
  30
@@ -18401,29 +15963,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
 0.5085828140233986
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 W05USER
  70
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.5085828140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -18437,7 +15991,7 @@ MISC
 100
 AcDbText
  10
--3.52879663860557
+-3.528796638605569
  20
 0.5163953140233986
  30
@@ -18451,29 +16005,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
 0.5163953140233986
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 W04USER
  70
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.5163953140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -18487,7 +16033,7 @@ MISC
 100
 AcDbText
  10
--3.52879663860557
+-3.528796638605569
  20
 0.5242078140233986
  30
@@ -18501,29 +16047,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
 0.5242078140233986
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 W03USER
  70
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.5242078140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -18537,7 +16075,7 @@ MISC
 100
 AcDbText
  10
--3.52879663860557
+-3.528796638605569
  20
 0.5320203140233986
  30
@@ -18551,29 +16089,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
 0.5320203140233986
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 W02USER
  70
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.5320203140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -18587,7 +16117,7 @@ MISC
 100
 AcDbText
  10
--3.52879663860557
+-3.528796638605569
  20
 0.5398328140233986
  30
@@ -18601,29 +16131,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
 0.5398328140233986
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
 W01USER
  70
      1
 280
      1
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.5398328140233986
- 31
-0.0
   0
 ATTRIB
   5
@@ -18633,13 +16155,13 @@ ATTRIB
 100
 AcDbEntity
   8
-WIREFIXED
+WIRENO
   6
 Continuous
 100
 AcDbText
  10
--3.78725590273172
+-3.787255902731718
  20
 0.5242078140233986
  30
@@ -18653,29 +16175,21 @@ WD
  72
      1
  11
--3.52879663860557
+-3.528796638605569
  21
 0.5242078140233986
  31
 0.0
 100
 AcDbAttribute
+280
+     0
   2
-WIRENOF
+WIRENO
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
--3.52879663860557
- 21
-0.5242078140233986
- 31
-0.0
   0
 SEQEND
   5
@@ -18685,7 +16199,7 @@ SEQEND
 100
 AcDbEntity
   8
-WIREFIXED
+WIRENO
  48
 0.5
   0
@@ -18703,15 +16217,15 @@ ORG_14
 100
 AcDbLine
  10
--2.99754663860557
+-2.997546638605569
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  11
 -1.56004663860557
  21
-0.4617078140233986
+0.4617078140233988
  31
 0.0
 1001
@@ -18739,15 +16253,15 @@ PHANTOM2
 100
 AcDbLine
  10
--8.193769501437512
+-8.193769501437513
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  11
 -6.611435611437511
  21
-0.4617078140233986
+0.4617078140233988
  31
 0.0
 1001
@@ -18779,7 +16293,7 @@ HA1S1
  10
 -6.61143560860557
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
   0
@@ -18803,29 +16317,21 @@ AcDbText
  40
 0.125
   1
-SADAMPER_STS
+NAME
  41
 0.7
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 DESC1
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -18841,7 +16347,7 @@ AcDbText
  10
 -6.61143560860557
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  40
@@ -18852,22 +16358,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 X4TERM01
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -18889,27 +16387,19 @@ AcDbText
  40
 0.01
   1
-SADAMPER_STS
+NUM
   7
 WD
 100
 AcDbAttribute
+280
+     0
   2
 SIGCODE
  70
      1
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -18925,7 +16415,7 @@ AcDbText
  10
 -6.61143560860557
  20
-0.5492078140233971
+0.5492078140233973
  30
 0.0
  40
@@ -18938,22 +16428,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 WIRENO
  70
      9
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 ATTRIB
   5
@@ -18982,22 +16464,14 @@ AcDbText
 WD
 100
 AcDbAttribute
+280
+     0
   2
 XREF
  70
      0
 280
      0
- 71
-     1
- 72
-     0
- 11
-0.0
- 21
-0.0
- 31
-0.0
   0
 SEQEND
   5
@@ -19031,7 +16505,7 @@ AcDbLine
  30
 0.0
  11
--0.93504663860557
+-0.9350466386055698
  21
 0.4605987022898752
  31
@@ -19063,7 +16537,7 @@ WDDOT
  10
 1.137839321832484
  20
-0.4605987022898717
+0.4605987022898719
  30
 0.0
   0
@@ -19081,15 +16555,15 @@ ORG_14
 100
 AcDbLine
  10
--8.318769498605569
+-8.318769498605567
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
  11
--9.981173282287145
+-9.981173282287144
  21
-0.4617078140233986
+0.4617078140233988
  31
 0.0
 1001
@@ -19119,7 +16593,7 @@ WDDOT
  10
 -9.979892860945586
  20
-0.4617078140233986
+0.4617078140233988
  30
 0.0
   0
@@ -19205,7 +16679,7 @@ ACADE_WIRETYPE
   3
 ACDB_RECOMPOSE_DATA
 350
-5F5
+631
   3
 AcDbVariableDictionary
 350
@@ -19397,11 +16871,11 @@ AcDbXrecord
 280
      1
 300
-{1D88652A-3630-314B-B568-8640A896D5E4}
+{83D432D3-B2B4-9840-87EA-8DEC52066B7B}
 301
 {D4285CDC-5E6E-7040-B02E-7BBB16615270}
 302
-{1D88652A-3630-314B-B568-8640A896D5E4}
+{83D432D3-B2B4-9840-87EA-8DEC52066B7B}
 303
 
   0
@@ -19875,7 +17349,7 @@ CURRENT_WIRELAY
   0
 XRECORD
   5
-5F5
+631
 102
 {ACAD_REACTORS
 330
@@ -20698,14 +18172,14 @@ None
 
  75
     16
+147
+1.0
  76
      0
  77
      2
  78
    300
-147
-1.0
 148
 0.0
 149
@@ -20830,14 +18304,14 @@ None
 
  75
     16
+147
+1.0
  76
      0
  77
      2
  78
    300
-147
-1.0
 148
 0.0
 149
@@ -20905,15 +18379,15 @@ LAYOUT
   5
 22
 102
-{ACAD_REACTORS
-330
-1A
-102
-}
-102
 {ACAD_XDICTIONARY
 360
 194
+102
+}
+102
+{ACAD_REACTORS
+330
+1A
 102
 }
 330
@@ -20929,7 +18403,7 @@ ANSI_A_(8.50_x_11.00_Inches)
   6
 
  40
-6.349999904632568
+6.349999904632567
  41
 19.04999923706055
  42
@@ -20955,7 +18429,7 @@ ANSI_A_(8.50_x_11.00_Inches)
 142
 1.0
 143
-2.584895464708374
+2.584895464708373
  70
  11952
  72
@@ -20968,14 +18442,14 @@ ANSI_A_(8.50_x_11.00_Inches)
 
  75
      0
+147
+0.3868628397755418
  76
      0
  77
      2
  78
    300
-147
-0.3868628397755418
 148
 0.0
 149
@@ -21045,15 +18519,15 @@ MATERIAL
   5
 97
 102
-{ACAD_REACTORS
-330
-72
-102
-}
-102
 {ACAD_XDICTIONARY
 360
 188
+102
+}
+102
+{ACAD_REACTORS
+330
+72
 102
 }
 330
@@ -21062,20 +18536,6 @@ MATERIAL
 AcDbMaterial
   1
 ByBlock
- 72
-     1
- 73
-     2
- 78
-     2
-172
-     2
-176
-     2
-270
-     2
-274
-     2
  94
        63
   0
@@ -21083,15 +18543,15 @@ MATERIAL
   5
 96
 102
-{ACAD_REACTORS
-330
-72
-102
-}
-102
 {ACAD_XDICTIONARY
 360
 186
+102
+}
+102
+{ACAD_REACTORS
+330
+72
 102
 }
 330
@@ -21100,20 +18560,6 @@ MATERIAL
 AcDbMaterial
   1
 ByLayer
- 72
-     1
- 73
-     2
- 78
-     2
-172
-     2
-176
-     2
-270
-     2
-274
-     2
  94
        63
   0
@@ -21121,15 +18567,15 @@ MATERIAL
   5
 98
 102
-{ACAD_REACTORS
-330
-72
-102
-}
-102
 {ACAD_XDICTIONARY
 360
 110
+102
+}
+102
+{ACAD_REACTORS
+330
+72
 102
 }
 330
@@ -21138,10 +18584,6 @@ MATERIAL
 AcDbMaterial
   1
 Global
- 72
-     1
- 73
-     2
  43
 0.0208000000566244
  43
@@ -21174,10 +18616,6 @@ Global
 0.0
  43
 1.0
- 78
-     2
-172
-     2
  49
 0.0208000000566244
  49
@@ -21210,8 +18648,6 @@ Global
 0.0
  49
 1.0
-176
-     2
 142
 0.0208000000566244
 142
@@ -21244,8 +18680,6 @@ Global
 0.0
 142
 1.0
-270
-     2
 144
 0.0208000000566244
 144
@@ -21278,8 +18712,6 @@ Global
 0.0
 144
 1.0
-274
-     2
  94
        63
 1001
@@ -21342,8 +18774,6 @@ AcDbMLeaderStyle
 0.36
   3
 Standard
-341
-0
  44
 0.18
 300
@@ -21368,8 +18798,6 @@ Standard
      0
  46
 0.18
-343
-0
  94
 -1056964608
  47
@@ -21448,8 +18876,6 @@ AcDbMLeaderStyle
 0.36
   3
 Standard
-341
-0
  44
 0.18
 300
@@ -21474,8 +18900,6 @@ Standard
      0
  46
 0.18
-343
-0
  94
 -1056964608
  47
@@ -22475,27 +19899,29 @@ ANSI31
  40
 -0.2617993877991494
  40
-1.832595714594046
+1.832595714594044
   0
 TABLESTYLE
   5
 87
-102
-{ACAD_REACTORS
-330
-86
-102
-}
 102
 {ACAD_XDICTIONARY
 360
 5F3
 102
 }
+102
+{ACAD_REACTORS
+330
+86
+102
+}
 330
 86
 100
 AcDbTableStyle
+280
+     0
   3
 Standard
  70
@@ -22519,7 +19945,7 @@ Standard
  62
      0
  63
-   257
+     7
 283
      0
  90
@@ -22573,7 +19999,7 @@ Standard
  62
      0
  63
-   257
+     7
 283
      0
  90
@@ -22627,7 +20053,7 @@ Standard
  62
      0
  63
-   257
+     7
 283
      0
  90
@@ -22864,8 +20290,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -23126,8 +20550,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -23388,8 +20810,6 @@ AcDbVisualStyle
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -23650,8 +21070,6 @@ Basic
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -23912,8 +21330,6 @@ Brighten
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -24176,8 +21592,6 @@ ColorChange
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -24438,8 +21852,6 @@ Conceptual
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -24700,8 +22112,6 @@ Dim
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -24962,8 +22372,6 @@ EdgeColorOff
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -25224,8 +22632,6 @@ Facepattern
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -25486,8 +22892,6 @@ Flat
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -25748,8 +23152,6 @@ FlatWithEdges
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -26010,8 +23412,6 @@ Gouraud
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -26272,8 +23672,6 @@ GouraudWithEdges
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -26534,8 +23932,6 @@ Hidden
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -26796,8 +24192,6 @@ JitterOff
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -27058,8 +24452,6 @@ Linepattern
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -27320,8 +24712,6 @@ OverhangOff
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -27582,8 +24972,6 @@ Realistic
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -27846,8 +25234,6 @@ Shaded
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -28108,8 +25494,6 @@ Shaded with edges
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -28370,8 +25754,6 @@ Shades of Gray
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -28632,8 +26014,6 @@ Sketchy
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -28894,8 +26274,6 @@ Thicken
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -29156,8 +26534,6 @@ Wireframe
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -29418,8 +26794,6 @@ X-Ray
      1
  62
     18
-420
-        0
 176
      1
  90
@@ -29547,7 +26921,7 @@ DictionaryVariables
 280
      0
   1
-Standard
+STANDARD
   0
 DICTIONARYVAR
   5
@@ -29565,7 +26939,7 @@ DictionaryVariables
 280
      0
   1
-Standard
+STANDARD
   0
 DICTIONARYVAR
   5
@@ -29749,7 +27123,7 @@ AcDbDictionary
   3
 ACAD_ROUNDTRIP_2008_TABLESTYLE_CELLSTYLEMAP
 360
-5F4
+630
   0
 XRECORD
   5
@@ -30089,7 +27463,7 @@ B670623BF270F13306000000040000003600000000000000000000000000770E00006662782F3835
   0
 CELLSTYLEMAP
   5
-5F4
+630
 102
 {ACAD_REACTORS
 330
@@ -30741,7 +28115,7 @@ ACDSDATA
  70
      2
  71
-     2
+     8
   0
 ACDSSCHEMA
  90
@@ -30765,7 +28139,7 @@ ACDSRECORD
  95
         0
  90
-        2
+        1
   2
 AcDbDs::TreatedAsObjectData
 280
@@ -30777,7 +28151,7 @@ ACDSRECORD
  95
         0
  90
-        3
+        2
   2
 AcDbDs::Legacy
 280
@@ -30789,63 +28163,9 @@ ACDSRECORD
   1
 AcDbDs::ID
  90
-        4
-  2
-AcDs:Indexable
-280
-     1
-291
-     1
-101
-ACDSRECORD
-  1
-AcDbDs::ID
- 90
-        5
-  2
-AcDbDs::HandleAttribute
-280
-     7
-282
-     1
-  0
-ACDSSCHEMA
- 90
-        1
-  1
-AcDb3DSolid_ASM_Data
-  2
-AcDbDs::ID
-280
-    10
- 91
-        8
-  2
-ASM_Data
-280
-    15
- 91
-        0
-101
-ACDSRECORD
- 95
-        1
- 90
-        2
-  2
-AcDbDs::TreatedAsObjectData
-280
-     1
-291
-     1
-101
-ACDSRECORD
- 95
-        1
- 90
         3
   2
-AcDbDs::Legacy
+AcDs:Indexable
 280
      1
 291
@@ -30857,18 +28177,6 @@ AcDbDs::ID
  90
         4
   2
-AcDs:Indexable
-280
-     1
-291
-     1
-101
-ACDSRECORD
-  1
-AcDbDs::ID
- 90
-        5
-  2
 AcDbDs::HandleAttribute
 280
      7
@@ -30877,7 +28185,7 @@ AcDbDs::HandleAttribute
   0
 ACDSSCHEMA
  90
-        2
+        1
   1
 AcDbDs::TreatedAsObjectDataSchema
   2
@@ -30889,7 +28197,7 @@ AcDbDs::TreatedAsObjectData
   0
 ACDSSCHEMA
  90
-        3
+        2
   1
 AcDbDs::LegacySchema
   2
@@ -30901,7 +28209,7 @@ AcDbDs::Legacy
   0
 ACDSSCHEMA
  90
-        4
+        3
   1
 AcDbDs::IndexedPropertySchema
   2
@@ -30913,7 +28221,7 @@ AcDs:Indexable
   0
 ACDSSCHEMA
  90
-        5
+        4
   1
 AcDbDs::HandleAttributeSchema
   2
@@ -30939,9 +28247,9 @@ Thumbnail_Data
 280
     15
  94
-      966
+     1151
 310
-89504E470D0A1A0A0000000D4948445200000100000000690803000000E2200D7200000300504C5445212830FFFFFF2128300000000000000000000000000000000000000000000000000000330000660000990000CC0000FF0033000033330033660033990033CC0033FF0066000066330066660066990066CC0066FF0099
+89504E470D0A1A0A0000000D49484452000001000000008808030000003F38C55500000300504C5445212830FFFFFF2128300000000000000000000000000000000000000000000000000000330000660000990000CC0000FF0033000033330033660033990033CC0033FF0066000066330066660066990066CC0066FF0099
 310
 000099330099660099990099CC0099FF00CC0000CC3300CC6600CC9900CCCC00CCFF00FF0000FF3300FF6600FF9900FFCC00FFFF3300003300333300663300993300CC3300FF3333003333333333663333993333CC3333FF3366003366333366663366993366CC3366FF3399003399333399663399993399CC3399FF33CC00
 310
@@ -30953,9 +28261,13 @@ FF3366FF6666FF9966FFCC66FFFF9900009900339900669900999900CC9900FF9933009933339933
 310
 FF3366FF3399FF33CCFF33FFFF6600FF6633FF6666FF6699FF66CCFF66FFFF9900FF9933FF9966FF9999FF99CCFF99FFFFCC00FFCC33FFCC66FFCC99FFCCCCFFCCFFFFFF00FFFF33FFFF66FFFF99FFFFCCFFFFFF0000000D0D0D1A1A1A2828283535354343435050505D5D5D6B6B6B787878868686939393A1A1A1AEAEAEBB
 310
-BBBBC9C9C9D6D6D6E4E4E4F1F1F1FFFFFF0000000000000000000000000000000000000000000000000000000000002E4550F1000000814944415478DAEDD44D0A83301006D0DC2307EC2D3D803729B89D7D35D21A68C08D208CEF6DF2379B2F24530A00000000000000000000000000C05596255FA6D7EABC62AFA9B54664
+BBBBC9C9C9D6D6D6E4E4E4F1F1F1FFFFFF0000000000000000000000000000000000000000000000000000000000002E4550F1000000B44944415478DAEDD54D0E8320100650EFE1F59A70CB1EA03731713BFB56EDC268B1F46741E4BD2502912F33D075000000000000000000000000000000000000000000FCDD388E4D9F
 310
-081DF3613AFC658BCDBB2B8E7DAB93EA31C4C9BAB4FC897F786DBE639B8E0A06072EE0211E1DFED71433763F00000000000000000080BB7D00BC3C5052687B27A30000000049454E44AE426082
+BF9F09A07AB11F4A4F651B5C26AB55A92080A8E8FC11B78DB86E441C2C1FE6008661B7CDE3DBB47B46C515B0FFBBC300B293D23496AAAF80B22AF9A4814E28E2452F2F2D1E6F2EC1F3DCE79900FA2602F8E5196C3884E603585EC1865BA0F900000000000000000000F8CA1D61F47E1C6031E2B90000000049454E44AE4260
+310
+82D3A499FD1DB067E7933AE0C0495D1FF3D801CDC6F119B966E77D23A47D859C371FD7A575D10867FF0ADC348070D638B70DE03B9AF2F75D7EFDBB6CAB6E1EC0FEEBCF6AC1993703021080008AFF43A0BC2804200001941DC0FCFEBF3002108000CA0E0000000000000000000000000028CB1F3EF4BE3F0BE9BFD000000000
+310
+49454E44AE426082
   0
 ENDSEC
   0
