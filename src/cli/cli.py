@@ -290,6 +290,25 @@ class CLIGenerator:
         # For now, return as-is
         return rungs, io_items, config
 
+    def _resolve_project_circuit_numbers(self, project_circuits: list[str]) -> list[str]:
+        """Return the effective circuit number for each project circuit ref.
+
+        Mirrors the GUI's ``_resolve_project_circuit_numbers``: circuits whose
+        ``circuit_number`` is ``"#"`` are replaced by an auto-incrementing
+        counter (1, 2, 3, …) based on their order of appearance in the project
+        list. Circuits with any other number keep their original value.
+        """
+        resolved: list[str] = []
+        counter = 1
+        for name in project_circuits:
+            circuit = self._lookup_circuit(name)
+            if circuit is not None and circuit.circuit_number == "#":
+                resolved.append(str(counter))
+                counter += 1
+            else:
+                resolved.append(circuit.circuit_number if circuit else "")
+        return resolved
+
     def _build_generation_io_items(
         self,
         project_circuits: list[str],
@@ -303,13 +322,14 @@ class CLIGenerator:
         """
         manual_ios = list(manual_io_items or [])
         built_items: list[IOItem] = []
+        resolved_circuit_numbers = self._resolve_project_circuit_numbers(project_circuits)
 
-        for circuit_name in project_circuits:
+        for ref_idx, circuit_name in enumerate(project_circuits):
             circuit = self._lookup_circuit(circuit_name)
             if circuit is None:
                 continue
 
-            circuit_no = circuit.circuit_number or circuit_name
+            circuit_no = resolved_circuit_numbers[ref_idx]
 
             for io_entry in circuit.circuit_ios:
                 if not isinstance(io_entry, dict):
@@ -436,6 +456,7 @@ class CLIGenerator:
                 rungs, io_items, config
             )
             machine_prefix = "AHU" if str(settings.get("machine_type", "Regular")).strip() == "AHU" else "CU"
+            resolved_circuit_numbers = self._resolve_project_circuit_numbers(project_circuits)
             
             # Determine if DWG conversion is available
             oda_available = _find_oda_converter() is not None
@@ -447,12 +468,21 @@ class CLIGenerator:
             
             # Generate circuit pages
             print("\n=== Generating Circuit Pages ===")
-            for circuit_name in project_circuits:
+            for ref_idx, circuit_name in enumerate(project_circuits):
                 circuit = self._lookup_circuit(circuit_name)
                 if circuit is None:
                     print(f"Warning: Circuit '{circuit_name}' not found in library")
                     continue
-                
+
+                circuit_no = resolved_circuit_numbers[ref_idx]
+                # Only substitute IOs belonging to this specific circuit ref, otherwise
+                # circuits sharing the same template would all pick up whichever circuit's
+                # IO happened to be replaced first.
+                circuit_io_items = [
+                    it for it in io_items
+                    if it.circuit_name == circuit_name and it.circuit_no == circuit_no
+                ]
+
                 templates = circuit.templates if circuit.templates else []
                 for t in templates:
                     tmpl_name = t.name if isinstance(t, Template) else t
@@ -469,7 +499,7 @@ class CLIGenerator:
                         rungs,
                         str(dxf_path),
                         template_doc,
-                        io_items=io_items,
+                        io_items=circuit_io_items,
                         controller_number=0,
                         controller_prefix=machine_prefix,
                     )

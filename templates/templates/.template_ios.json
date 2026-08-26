@@ -51,35 +51,50 @@
       "description": "Return Fan Enable",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": "Fan Enable"
+      "io_type": "Enable",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     },
     {
       "name": "RTRN-F_MOD",
       "description": "Return Fan Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": "Modulation"
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     },
     {
-      "name": "RTRN-F_STS1",
+      "name": "RF-STS1",
       "description": "Return Fan Status 1",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "Status"
+      "io_type": "Status",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     },
     {
-      "name": "RTRN-F_STS2",
+      "name": "RF-STS2",
       "description": "Return Fan Status 2",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "Status"
+      "io_type": "Status",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     },
     {
-      "name": "RTRN-F_STS3",
+      "name": "RF-STS3",
       "description": "Return Fan Status 3",
       "signal_type": "Analog",
       "direction": "Input",
-      "io_type": "Status"
+      "io_type": "Status",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     }
   ],
   "3_Supply_Fan": [

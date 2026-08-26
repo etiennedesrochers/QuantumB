@@ -1871,6 +1871,36 @@ class MainWindow(QMainWindow):
 
             lst_circuit_numbers = self._resolve_project_circuit_numbers()
 
+            # Deduplicate tags within each circuit BEFORE adding reserved IOs below,
+            # so a renamed duplicate (e.g. a repeated "SF_STS1" becoming "SF_STS4")
+            # is recognized by the "already present" check and doesn't also get a
+            # duplicate "Reserved" entry for the same tag from the order file.
+            circuit_io_count = {}
+
+            for item in items:
+                if item.circuit_name and item.circuit_no:
+                    # Only strip an existing single-letter dedup suffix (e.g. "-A"),
+                    # not arbitrary trailing uppercase letters that are part of the tag itself.
+                    base_tag = re.sub(r"-[A-Z]$", "", item.tag)
+
+                    key = (item.circuit_name, item.circuit_no, base_tag)
+
+                    if key not in circuit_io_count:
+                        circuit_io_count[key] = 0
+                    elif base_tag[-2:] == "EN" or base_tag[-3:] == "MOD":
+                        continue
+                    else:
+                        # Read the count before incrementing so the first duplicate gets "A".
+                        letter = chr(ord("A") + circuit_io_count[key])
+                        circuit_io_count[key] += 1
+                        if base_tag and base_tag[-1].isdigit():
+                            item.tag = f"{base_tag[0:-1]}{int(base_tag[-1]) + circuit_io_count[key]*3}"
+                            if item.description and item.description[-1].isdigit():
+                                item.description = f"{item.description[0:-1]}{int(item.description[-1]) + circuit_io_count[key]*3}"
+                        
+                        else:
+                            item.tag = f"{base_tag}{letter}"
+
             for index, row in df.iterrows():
                 try:
                     tag = str(row.iloc[1]).strip() if pd.notna(row.iloc[1]) else None
@@ -1922,40 +1952,48 @@ class MainWindow(QMainWindow):
                     print(f"Warning: Skipping row {index} - {e}")
 
         except Exception as e:
-            print(f"Warning: Error reading order file: {e}")
+            print(f"Warning: Failed to load reserved IOs - {e}")
             return items
 
-        # Sort according to Excel order
+        # Sort according to Excel order (must run last, against final deduped tags)
         try:
             order_mapping = {
                 str(row.iloc[1]).strip(): index
                 for index, row in df.iterrows()
                 if pd.notna(row.iloc[1])
             }
-
             items.sort(key=lambda item: order_mapping.get(item.tag, float("inf")))
-
         except Exception as e:
             print(f"Warning: Error sorting items based on order file: {e}")
 
-        # Deduplicate tags within each circuit
-        circuit_io_count = {}
-
+        # One last check we need to check if the list has 2 IOs with the same name; if yes and one of them is reserved, we remove the reserved one
+        for item in items[:]:
+            if item.description == "Reserved":
+                for other_item in items:
+                    if (
+                        other_item.tag == item.tag
+                        and other_item.description != "Reserved"
+                    ):
+                        items.remove(item)
+                        break
+        # We need to remove duplication (same tag appearing more than once)
+        seen_tags: set[str] = set()
+        deduped_items: list[IOItem] = []
         for item in items:
-            if item.circuit_name and item.circuit_no:
-                # Only strip an existing single-letter dedup suffix (e.g. "-A"),
-                # not arbitrary trailing uppercase letters that are part of the tag itself.
-                base_tag = re.sub(r"-[A-Z]$", "", item.tag)
-
-                key = (item.circuit_name, item.circuit_no, base_tag)
-
-                if key not in circuit_io_count:
-                    circuit_io_count[key] = 0
+            
+            if item.tag in seen_tags:
+                if item.description == "Reserved":
+                    #If the one we have seen is reserved and the new one is not then we remove the reserved one and keep the new one
+                    for other_item in deduped_items:
+                        if other_item.tag == item.tag and other_item.description == "Reserved":
+                            deduped_items.remove(other_item)
+                            break
                 else:
-                    circuit_io_count[key] += 1
-                    letter = chr(ord("A") + circuit_io_count[key])
-                    item.tag = f"{base_tag}-{letter}"
+                    continue
 
+            seen_tags.add(item.tag)
+            deduped_items.append(item)
+        items[:] = deduped_items
         return items
 
     def _apply_io_filter(self, filter_type: str):
@@ -1965,7 +2003,11 @@ class MainWindow(QMainWindow):
         self._io_items.clear()
         self._io_table_row_mapping.clear()
         
-        # Filter items from _io_items_full
+        # Filter items from _io_items_full. Work on copies so _sort_io_items'
+        # dedup renaming doesn't permanently mutate the stored tags - otherwise
+        # repeated calls re-sort already-renamed tags against the (unchanged)
+        # order file and lose their original ordering.
+        import dataclasses as _dc
         inputs_list = []
         outputs_list = []
         for idx, item in enumerate(self._io_items_full):
@@ -1973,9 +2015,9 @@ class MainWindow(QMainWindow):
             if filter_type != "All" and item.io_type != filter_type:
                 continue
             if item.io_type == "Input":
-                inputs_list.append(item)
+                inputs_list.append(_dc.replace(item))
             else:
-                outputs_list.append(item)
+                outputs_list.append(_dc.replace(item))
         
         # Sort the filtered items separately by type
         sorted_inputs = self._sort_io_items(inputs_list, "Input") if inputs_list else []
@@ -3814,11 +3856,21 @@ class MainWindow(QMainWindow):
         total_pages = total_circuit_pages + total_controller_pages + (1 if use_dwg else 0)
         current_page = 0
 
+        resolved_circuit_numbers = self._resolve_project_circuit_numbers()
+
         try:
-            for circuit_name in self._project_circuit_refs:
+            for ref_idx, circuit_name in enumerate(self._project_circuit_refs):
                 circuit = self._lookup_circuit(circuit_name)
                 if circuit is None:
                     continue
+                circuit_no = resolved_circuit_numbers[ref_idx]
+                # Only substitute IOs that belong to this specific circuit ref, otherwise
+                # circuits sharing the same template would all pick up whichever circuit's
+                # IO happened to be replaced first (see io-deduplication memory notes).
+                circuit_io_items = [
+                    it for it in io_items
+                    if it.circuit_name == circuit_name and it.circuit_no == circuit_no
+                ]
                 # Extract template names, handling both string and Template object types
                 templates = [t.name if isinstance(t, Template) else t for t in (circuit.templates or [])]
                 for tmpl_name in templates:
@@ -3835,7 +3887,7 @@ class MainWindow(QMainWindow):
                     
                     progress_dlg.update_progress(current_page, total_pages, f"Generating circuit page {page_str}", f"Template: {tmpl_name}")
             
-                    ok, msg = gen.generate(rungs, str(dxf_path), template_doc, io_items=io_items, controller_number=0)
+                    ok, msg = gen.generate(rungs, str(dxf_path), template_doc, io_items=circuit_io_items, controller_number=0)
                     if ok:
                         generated_dxf.append(dxf_path)
                     else:

@@ -63,10 +63,12 @@ class DrawingGenerator:
     # Class-level variables shared across all instances
     _biggest_fuse_number: int = 0
     _count_link_page: int =0
+    _biggest_cr_number: int = 0
     
     def __init__(self, config: LadderConfig | None = None):
         self.config = config or LadderConfig()
         self.biggest_fuse_number = DrawingGenerator._biggest_fuse_number
+        self.biggest_cr_number = DrawingGenerator._biggest_cr_number
 
 
     def reset_static(self):
@@ -302,11 +304,16 @@ class DrawingGenerator:
             "IO_CODE":     io_item.tag.upper(),
             "COM_IO_CODE": "COM_" + io_item.tag.upper(),
             "num": io_item.address.upper(),
+            "NUM": io_item.address.upper(),
             "num_com":     "COM_" + io_item.address.upper(),
             "%tagstrip%": machine_prefix + i + "_" + str(controller_number).upper(),
             "%tagstrip_com%": "COM_" + machine_prefix + i + "_" + str(controller_number).upper(),
             "POS": io_item.number.upper(),
-         }
+            "LINE1":io_item.description.upper(),
+            "SLINE1": io_item.signal_type,
+            "SLINE2":io_item.address,
+            "SLINE3": io_item.tag,
+        }
 
         #print(f"Preparing I/O template for '{io_item.tag}' with substitutions: {substitutions}")
         for entity in copy.modelspace():
@@ -315,7 +322,12 @@ class DrawingGenerator:
             try:
                 for attrib in entity.attribs:
                     text = attrib.dxf.get("text", "")
-                    if text in substitutions:
+                    if text == "CR!":
+                        # Persistent counter across documents/instances, unique per placed IO template.
+                        self.biggest_cr_number += 1
+                        DrawingGenerator._biggest_cr_number = self.biggest_cr_number
+                        attrib.dxf.text = f"CR{self.biggest_cr_number}"
+                    elif text in substitutions:
                         attrib.dxf.text = substitutions[text].upper()
             except Exception as exc:
                 print(f"Warning: failed to substitute attributes for IO '{io_item.tag}': {exc}")
