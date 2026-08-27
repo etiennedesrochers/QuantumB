@@ -38,5 +38,13 @@
   "in_status_box_2": [
     6.1419,
     -1.1318
+  ],
+  "in_pressure_switch_1": [
+    3.3211,
+    -0.7497
+  ],
+  "in_pressure_switch_2": [
+    3.3219,
+    -0.9025
   ]
 }

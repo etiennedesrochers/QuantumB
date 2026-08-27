@@ -1720,8 +1720,17 @@ class MainWindow(QMainWindow):
         self._lbl_io_summary.setText(
             f"{num_mod} module(s)  ·  {total_io} IO(s)  ({total_in} in / {total_out} out)"
         )
-        input_count =0
-        output_count=0
+        self._assign_io_addresses(self._io_items)
+
+    def _assign_io_addresses(self, items: list["IOItem"]) -> None:
+        """Assign module-based address/number fields to *items* in place.
+
+        Shared by ``_refresh_io_summary`` (display list) and
+        ``_get_generation_io_items`` (generation list) so both paths compute
+        addresses consistently instead of only the display copies getting them.
+        """
+        input_count = 0
+        output_count = 0
         input_index = 0
         output_index = 0
         machine_prefix = self._machine_prefix()
@@ -1729,7 +1738,7 @@ class MainWindow(QMainWindow):
         #For each io, we will assign a module number on the address
         #CTL(I for Input and O for output)_(controller number)
         #We will also add a number 
-        for item in self._io_items:
+        for item in items:
             analog = item.signal_type.lower() in ("analog", "analog_input", "analog_output")
             if analog:
                 analog = "A"
@@ -1737,17 +1746,17 @@ class MainWindow(QMainWindow):
                 analog = "D"
             #if item is input
             if item.io_type == "Input":
-                item.address = f"{machine_prefix}{(input_index // len(self._modules[0].get("inputs"))) + 1}-I"
+                item.address = f"{machine_prefix}{(input_index // len(self._modules[0].get('inputs'))) + 1}-I"
                 input_count += 1
                 zero = "0" if input_count%8 < 10 else ""
-                item.number = f"{analog}I{(input_index // len(self._modules[0].get("inputs"))) + 1}{zero}{input_count%8}"
+                item.address = f"{analog}I{(input_index // len(self._modules[0].get('inputs'))) + 1}{zero}{input_count%8}"
                 input_index += 1
                 
             else:
-                item.address = f"{machine_prefix}{(output_index // len(self._modules[0].get("outputs"))) + 1}-O"
+                item.address = f"{machine_prefix}{(output_index // len(self._modules[0].get('outputs'))) + 1}-O"
                 output_count += 1
                 zero = "0" if output_count%6 < 10 else ""
-                item.number = f"{analog}O{(output_index // len(self._modules[0].get("outputs"))) + 1}{zero}{output_count%6}"
+                item.address = f"{analog}O{(output_index // len(self._modules[0].get('outputs'))) + 1}{zero}{output_count%6}"
                 output_index += 1
 
     def _machine_prefix(self) -> str:
@@ -1789,6 +1798,7 @@ class MainWindow(QMainWindow):
                     circuit_name=circuit_name,
                     circuit_no=circuit_no,
                     template_name="",
+                    address="",  # will be assigned in _refresh_io_summary
                 ))
             
             # Then add template-based IOs
@@ -1812,6 +1822,7 @@ class MainWindow(QMainWindow):
                         circuit_name=circuit_name,
                         circuit_no=circuit_no,
                         template_name=tmpl_name,
+                        address="",  # will be assigned in _refresh_io_summary
                     ))
         
         # Add back manually added or project-loaded IOs that are not already
@@ -1835,7 +1846,6 @@ class MainWindow(QMainWindow):
         # Apply the current filter
         self._apply_io_filter(self._io_filter_type)
         self._refresh_io_summary()
-
     def _sort_io_items(
         self,
         items: list[IOItem],
@@ -1893,13 +1903,13 @@ class MainWindow(QMainWindow):
                         # Read the count before incrementing so the first duplicate gets "A".
                         letter = chr(ord("A") + circuit_io_count[key])
                         circuit_io_count[key] += 1
-                        if base_tag and base_tag[-1].isdigit():
+                        if base_tag and base_tag[-1].isdigit() and self._machine_type_cb.currentText() == "AHU":
                             item.tag = f"{base_tag[0:-1]}{int(base_tag[-1]) + circuit_io_count[key]*3}"
                             if item.description and item.description[-1].isdigit():
                                 item.description = f"{item.description[0:-1]}{int(item.description[-1]) + circuit_io_count[key]*3}"
                         
                         else:
-                            item.tag = f"{base_tag}{letter}"
+                            item.tag = f"{base_tag}-{letter}"
 
             for index, row in df.iterrows():
                 try:
@@ -1933,6 +1943,7 @@ class MainWindow(QMainWindow):
                         items.append(
                             IOItem(
                                 tag=tag,
+                                address="",  # will be assigned in _refresh_io_summary
                                 io_type=io_type,
                                 description="Reserved",
                                 signal_type="Analog",
@@ -1994,6 +2005,12 @@ class MainWindow(QMainWindow):
             seen_tags.add(item.tag)
             deduped_items.append(item)
         items[:] = deduped_items
+        
+
+
+        
+
+
         return items
 
     def _apply_io_filter(self, filter_type: str):
@@ -3551,6 +3568,10 @@ class MainWindow(QMainWindow):
 
 
         #$, $+1
+        count_i = 0
+        count_o = 0
+       
+
         return rungs, io_items, config
 
     def _enrich_io_item(
@@ -3595,7 +3616,9 @@ class MainWindow(QMainWindow):
             for item in self._io_items_full
             if item.io_type == "Output"
         ]
-        return self._sort_io_items(all_inputs, "Input") + self._sort_io_items(all_outputs, "Output")
+        result = self._sort_io_items(all_inputs, "Input") + self._sort_io_items(all_outputs, "Output")
+        self._assign_io_addresses(result)
+        return result
 
     # ladder gen here 
     def _generate_ladder_pages(
@@ -3684,7 +3707,9 @@ class MainWindow(QMainWindow):
                     [], str(dxf_path), ladder_tmpl_doc,
                     io_items=io_items,
                     io_template_placements=component_placements or None,
+                    controller_number  = io_items[0].number if io_items else 0,
                     controller_prefix=machine_prefix,
+                    control=False,
                 )
                 if ok:
                     generated_dxf.append(dxf_path)
@@ -3706,12 +3731,14 @@ class MainWindow(QMainWindow):
         tag = io_item.tag.upper() if io_item.tag else ""
         # address is only populated after _enrich_io_item; build a fallback from the component number
         addr = io_item.address.upper() if io_item.address else ""
-        io_dir = ""
+        io_dir = "I" if (io_item.io_type or "").lower() == "input" else "O"
         if not addr:
             sig = (io_item.signal_type[0].upper() if io_item.signal_type else "D")
-            io_dir = "I" if (io_item.io_type or "").lower() == "input" else "O"
+           
             addr = f"{sig}{io_dir}{comp_number}"
+        addr = f"{self._machine_prefix()}-{ctrl_num}-{addr}"
         #add a count for the pressure switch check if self does not have it
+
         if not hasattr(self, 'ps_count'):
             self.ps_count = 1
         if not hasattr(self, 'solcount'):
@@ -3726,9 +3753,10 @@ class MainWindow(QMainWindow):
             "%tagstrip%": f"{self._machine_prefix()}{io_dir}-{ctrl_num}",
             "%tagcom%":   f"{self._machine_prefix()}{io_dir}-{ctrl_num}",
             "COM_CONTL":  f"COM_{addr}",
-            "NUM":        addr,
+            "NUM":        f"{addr}",
             "COM_NUM":    f"COM_{io_item.number}",
             "CIRCUIT#":  f"CIRCUIT{io_item.circuit_no}" if io_item.circuit_no else "CIRCUIT#",
+            "POS" : addr,
             "PS#": f"PS{self.ps_count}",
             "FULL_NAME" : io_item.description,
             "SOL#": f"SOL{self.solcount}",
@@ -3750,9 +3778,14 @@ class MainWindow(QMainWindow):
                         self.sdcount += 1
                     if text_upper in substitutions:
                         attrib.dxf.text = substitutions[text_upper]
+
+                    if attrib.dxf.text == f"%{io_item.tag}%":
+                        attrib.dxf.text = f"{self._machine_prefix()}{io_dir }-{ctrl_num}"
+                    elif attrib.dxf.text == f"%COM_{io_item.tag}%":
+                        attrib.dxf.text = f"COM_{self._machine_prefix()}{io_dir }-{ctrl_num}"
             except Exception:
                 pass
-
+        
         return copy
 
     def _ladder_type_ladder_map(self):
@@ -3779,6 +3812,7 @@ class MainWindow(QMainWindow):
         return ladder_component_dict
       
     def _generate(self):
+        self._refresh_io_summary()
         if not self._project_circuit_refs:
             QMessageBox.warning(self, tr("msg_generate_title"), tr("msg_generate_no_circuits"))
             return
@@ -3800,7 +3834,7 @@ class MainWindow(QMainWindow):
 
         # Always generate from the complete IO set, not only visible rows.
         generation_io_items = self._get_generation_io_items()
-
+       
         rungs, io_items, config = self._apply_generation_substitutions(
             self._rungs, generation_io_items, config
         )
@@ -3886,7 +3920,7 @@ class MainWindow(QMainWindow):
                     gen = DrawingGenerator(page_config)
                     
                     progress_dlg.update_progress(current_page, total_pages, f"Generating circuit page {page_str}", f"Template: {tmpl_name}")
-            
+                  
                     ok, msg = gen.generate(rungs, str(dxf_path), template_doc, io_items=circuit_io_items, controller_number=0)
                     if ok:
                         generated_dxf.append(dxf_path)

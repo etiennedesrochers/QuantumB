@@ -1,18 +1,24 @@
 {
   "1_Condenser_Fan": [
     {
-      "name": "CD-F_EN#",
+      "name": "Cd-F_En#",
       "description": "Conderser Fan Enable #",
       "signal_type": "Digital",
       "direction": "Output",
-      "io_type": "Fan Enable"
+      "io_type": "Enable",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     },
     {
-      "name": "CD-F_MOD#",
+      "name": "Cd-F_Mod#",
       "description": "Condenser Fan Modulation",
       "signal_type": "Analog",
       "direction": "Output",
-      "io_type": "Modulation"
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
     }
   ],
   "2_Supply_Fan": [
@@ -340,8 +346,8 @@
   ],
   "2_Condenser_Fan": [
     {
-      "name": "Cd-F_En#",
-      "description": "Condenser Enable #",
+      "name": "Cd_F_En#",
+      "description": "Condenser Fan Enable #",
       "signal_type": "Digital",
       "direction": "Output",
       "io_type": "Enable",
@@ -350,11 +356,31 @@
       "ladder_component_template": ""
     },
     {
-      "name": "Cd-F_En#",
+      "name": "Cd_F_Mod#",
       "description": "Condenser Fan Modulation #",
       "signal_type": "Analog",
       "direction": "Output",
       "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "Cd_Sts#-A",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "Status",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "Cd_Sts#-B",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "Status",
       "ladder_type": "",
       "ladder_template": "",
       "ladder_component_template": ""
@@ -514,6 +540,38 @@
     {
       "name": "GAS_HEAT_MOD",
       "description": "Gas burner modulation",
+      "signal_type": "Analog",
+      "direction": "Output",
+      "io_type": "Modulation",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    }
+  ],
+  "2_Condenser_Fan_3": [
+    {
+      "name": "Cd_Sts#-C",
+      "description": "",
+      "signal_type": "Analog",
+      "direction": "Input",
+      "io_type": "Status",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "Cd_F-En#",
+      "description": "",
+      "signal_type": "Digital",
+      "direction": "Output",
+      "io_type": "Enable",
+      "ladder_type": "",
+      "ladder_template": "",
+      "ladder_component_template": ""
+    },
+    {
+      "name": "Cd-F_Mod#",
+      "description": "",
       "signal_type": "Analog",
       "direction": "Output",
       "io_type": "Modulation",

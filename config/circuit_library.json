@@ -352,5 +352,54 @@
     ],
     "valves": [],
     "circuit_ios": []
+  },
+  {
+    "name": "1016 - C",
+    "circuit_number": "#",
+    "description": "",
+    "templates": [
+      {
+        "name": "VFD-L",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
+      },
+      {
+        "name": "VFD-L",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
+      },
+      {
+        "name": "VFD-L",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
+      },
+      {
+        "name": "2_Condenser_Fan",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
+      },
+      {
+        "name": "2_Condenser_Fan_3",
+        "ladder_type": "",
+        "part_of_ladder": "",
+        "height": 0.0,
+        "offset_x": 0.0,
+        "offset_y": 0.0
+      }
+    ],
+    "valves": [],
+    "circuit_ios": []
   }
 ]

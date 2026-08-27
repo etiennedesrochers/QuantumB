@@ -411,6 +411,35 @@ class CLIGenerator:
         enriched = dataclasses.replace(io_item)
         return enriched
 
+    def _assign_io_addresses(self, items: list[IOItem], machine_prefix: str) -> None:
+        """Assign module-based address/number fields to *items* in place.
+
+        Mirrors the GUI's ``MainWindow._assign_io_addresses`` so CLI-generated
+        circuit pages get a real address instead of the IOItem default "".
+        """
+        if not self.modules:
+            return
+        input_count = 0
+        output_count = 0
+        input_index = 0
+        output_index = 0
+        module_def = self.modules[0]
+
+        for item in items:
+            analog = "A" if item.signal_type.lower() in ("analog", "analog_input", "analog_output") else "D"
+            if item.io_type == "Input":
+                item.address = f"{machine_prefix}{(input_index // len(module_def.get('inputs'))) + 1}-I"
+                input_count += 1
+                zero = "0" if input_count % 8 < 10 else ""
+                item.number = f"{analog}I{(input_index // len(module_def.get('inputs'))) + 1}{zero}{input_count % 8}"
+                input_index += 1
+            else:
+                item.address = f"{machine_prefix}{(output_index // len(module_def.get('outputs'))) + 1}-O"
+                output_count += 1
+                zero = "0" if output_count % 6 < 10 else ""
+                item.number = f"{analog}O{(output_index // len(module_def.get('outputs'))) + 1}{zero}{output_count % 6}"
+                output_index += 1
+
     def generate(self) -> tuple[bool, str]:
         """
         Generate drawings from the project file.
@@ -456,6 +485,7 @@ class CLIGenerator:
                 rungs, io_items, config
             )
             machine_prefix = "AHU" if str(settings.get("machine_type", "Regular")).strip() == "AHU" else "CU"
+            self._assign_io_addresses(io_items, machine_prefix)
             resolved_circuit_numbers = self._resolve_project_circuit_numbers(project_circuits)
             
             # Determine if DWG conversion is available
@@ -502,6 +532,7 @@ class CLIGenerator:
                         io_items=circuit_io_items,
                         controller_number=0,
                         controller_prefix=machine_prefix,
+                        machine_prefix=machine_prefix,
                     )
                     if ok:
                         generated_files.append(dxf_path)
@@ -608,6 +639,7 @@ class CLIGenerator:
                             io_items=io_items,
                             io_template_placements=io_template_placements or None,
                             controller_prefix=machine_prefix,
+                            machine_prefix=machine_prefix,
                         )
                         if ok:
                             generated_files.append(dxf_path)

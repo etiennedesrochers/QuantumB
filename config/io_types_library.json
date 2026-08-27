@@ -55,7 +55,9 @@
     "direction": "Input",
     "io_template": "in_status_box_1",
     "shared": true,
-    "shared_template": "in_status_box_2"
+    "shared_template": "in_status_box_2",
+    "ladder_type": "BASE_LADDER+24VDC",
+    "ladder_component_template": "LADDER_COMP_STS"
   },
   {
     "name": "Enable",

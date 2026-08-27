@@ -85,6 +85,8 @@ class DrawingGenerator:
         controller_number: int = 1,
         controller_prefix: str = "CU",
         progress_callback: callable | None = None,
+        machine_prefix: str = "CU",
+        control : bool = False
     ) -> tuple[bool, str]:
         """
         Build a ladder diagram and save to *output_path*.
@@ -117,11 +119,13 @@ class DrawingGenerator:
             self._setup_layers(doc)
             #if the controller number i =0 then not a controller
             #we need to replace some text in it
-            if controller_number ==0:
-                self.replace_value_dwg(doc, io_items)
+            if controller_number == 0:
+                self.replace_value_dwg(doc, io_items, controller_number=controller_number, machine_prefix=machine_prefix)
             else :
                 #Control replace
                 self.control_replace(doc, controller_number, controller_prefix)
+
+            
             # Only draw our own border/title block when no template is used;
             # templates already contain their own title block and border.
             if template_doc is None:
@@ -148,7 +152,7 @@ class DrawingGenerator:
                 for attrib in entity.attribs:
                     if attrib.dxf.get("text", "").find("CTL#") != -1:
                         attrib.dxf.text = attrib.dxf.get("text", "").replace("CTL#", prefix + str(controller_number))
-    def replace_value_dwg(self,doc,item_list: list[IOItem],controller_number:int=0):
+    def replace_value_dwg(self,doc,item_list: list[IOItem],controller_number:int=0,machine_prefix:str="CU") -> int:
         """
         Replace placeholder values, to find them we need to look for the old name.
         Fuse numbers continue sequentially across documents.
@@ -161,6 +165,12 @@ class DrawingGenerator:
         self.biggest_fuse_number = DrawingGenerator._biggest_fuse_number
         doc_base = None  # Will be set on first FU! encountered
         as_replace_link_page= False
+
+        ##TODOO: MACHINE PREFIX
+        
+        
+
+
         for item in item_list:
             if item.old_name:
                 for entity in doc.modelspace():
@@ -175,6 +185,12 @@ class DrawingGenerator:
                             if item.circuit_no!='N' and (attrib.dxf.get("text", "").find("#") != -1):
                                 attrib.dxf.text = attrib.dxf.get("text", "").replace("#", str(controller_number+1))
 
+
+                            if attrib.dxf.text == f"%{item.tag}%":
+                                attrib.dxf.text = f"{machine_prefix}-{item.address}"
+                            elif attrib.dxf.text == f"%COM_{item.tag}%":
+                                attrib.dxf.text = f"COM_{machine_prefix}-{item.address}"
+                        
         # Sync to class variable so next instance picks it up
         DrawingGenerator._biggest_fuse_number = self.biggest_fuse_number
         return self.biggest_fuse_number
@@ -275,6 +291,7 @@ class DrawingGenerator:
         self,
         source_doc: Drawing,
         io_item: IOItem,
+        io_items : list[IOItem],
         controller_number: int,
         controller_prefix: str = "CU",
     ) -> Drawing:
@@ -299,21 +316,23 @@ class DrawingGenerator:
         i = "I" if is_input else "O"
         machine_prefix = str(controller_prefix or "").strip() or "CU"
 
-
+        addr = f"{machine_prefix}-{io_item.address.upper()}"
         substitutions = {
             "IO_CODE":     io_item.tag.upper(),
             "COM_IO_CODE": "COM_" + io_item.tag.upper(),
-            "num": io_item.address.upper(),
-            "NUM": io_item.address.upper(),
-            "num_com":     "COM_" + io_item.address.upper(),
-            "%tagstrip%": machine_prefix + i + "_" + str(controller_number).upper(),
-            "%tagstrip_com%": "COM_" + machine_prefix + i + "_" + str(controller_number).upper(),
-            "POS": io_item.number.upper(),
+            "num": addr,
+            "NUM": addr,
+            "POS": addr,
+            "num_com":     f"COM_{addr}",
+            "%tagstrip%": addr,
+            "%tagstrip_com%": addr,
             "LINE1":io_item.description.upper(),
             "SLINE1": io_item.signal_type,
             "SLINE2":io_item.address,
             "SLINE3": io_item.tag,
         }
+
+     
 
         #print(f"Preparing I/O template for '{io_item.tag}' with substitutions: {substitutions}")
         for entity in copy.modelspace():
@@ -327,8 +346,15 @@ class DrawingGenerator:
                         self.biggest_cr_number += 1
                         DrawingGenerator._biggest_cr_number = self.biggest_cr_number
                         attrib.dxf.text = f"CR{self.biggest_cr_number}"
+
+                    
                     elif text in substitutions:
                         attrib.dxf.text = substitutions[text].upper()
+
+                    if attrib.dxf.text == f"%{io_item.tag}%":
+                        attrib.dxf.text = addr
+                    elif attrib.dxf.text == f"%COM_{io_item.tag}%":
+                        attrib.dxf.text = f"COM_{addr}"
             except Exception as exc:
                 print(f"Warning: failed to substitute attributes for IO '{io_item.tag}': {exc}")
             
