@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "settings": {
+    "title": "ELECTRICAL DRAWING",
+    "project": "Parity Check",
+    "drawing_number": "PARITY-001",
+    "revision": "A",
+    "drawn_by": "parity_check.py",
+    "paper_size": "A3 Landscape"
+  },
+  "project_circuits": [
+    "CU001"
+  ],
+  "io_items": [],
+  "rungs": []
+}

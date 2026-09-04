@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Node
+node_modules/
+npm-debug.log*
+
 # Distribution / packaging
 .Python
 build/
@@ -27,6 +31,15 @@ wheels/
 venv/
 env/
 ENV/
+.claude/
+.code-review-graph/
+.codebuddy/
+.kiro/
+.__pycache__/
+.continue/
+.gemini/
+.github/
+.qoder/
 
 # Environment variables
 .env

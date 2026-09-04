@@ -1,6 +1,7 @@
-PySide6>=6.0.0
+# New stack (service layer + FastAPI). The legacy GUI deps (PySide6, Flask)
+# are NOT needed here — see legacy_code_interface/requirements.txt for those.
+fastapi>=0.110
+uvicorn[standard]>=0.27
 ezdxf>=1.0.0
 pandas>=1.5.0
 openpyxl>=3.0.0
-Flask>=2.0.0
-Flask-CORS>=3.0.0
