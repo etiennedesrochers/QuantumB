@@ -156,6 +156,37 @@ def save_valve_ios(ios: dict[str, list[dict]]) -> dict[str, list[dict]]:
     return ios
 
 
+def list_valve_configurations() -> list[dict[str, Any]]:
+    data = _read_config_json("valve_config.json", [])
+    if isinstance(data, dict):
+        data = data.get("manufacturers", [])
+    if not isinstance(data, list):
+        return []
+    return [item for item in data if isinstance(item, dict)]
+
+
+def save_valve_configurations(configurations: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for configuration in configurations:
+        manufacturer = str(configuration.get("manufacturer") or "").strip()
+        if not manufacturer:
+            continue
+        normalized.append({
+            "manufacturer": manufacturer,
+            "template": str(configuration.get("template") or "").strip(),
+            "first_page": str(configuration.get("first_page") or "").strip(),
+            "second_page": str(configuration.get("second_page") or "").strip(),
+            "first_page_psu_shared_by": max(
+                1, int(configuration.get("first_page_psu_shared_by") or 2)
+            ),
+            "second_page_valves_per_page": max(
+                1, int(configuration.get("second_page_valves_per_page") or 2)
+            ),
+        })
+    _write_config_json("valve_config.json", normalized)
+    return normalized
+
+
 def list_io_types() -> list[dict]:
     """Named I/O types; same file the CLI generator reads."""
     return _read_config_json("io_types_library.json", [])

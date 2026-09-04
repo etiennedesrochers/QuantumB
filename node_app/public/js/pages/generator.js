@@ -11,6 +11,7 @@ const TENSIONS = ["208", "480", "575"];
 let circuits = [];
 let currentProjectId = null;
 let ioRequestToken = 0;
+let valveTypes = [];
 
 /** The API returns tensions as {label, value}; fall back to plain strings. */
 function tensionOptions(tensions) {
@@ -22,6 +23,7 @@ export async function mount(root) {
   circuits = [];
   currentProjectId = null;
   ioRequestToken = 0;
+  valveTypes = [];
   root.replaceChildren(render(root));
 
   const manufacturer = root.querySelector("#manufacturer");
@@ -32,6 +34,7 @@ export async function mount(root) {
   root.querySelector("#generateForm").addEventListener("submit", (e) => submit(root, e));
   root.querySelector("#controller").addEventListener("change", () => refreshIoPreview(root));
   root.querySelector("#machineType").addEventListener("change", () => refreshIoPreview(root));
+  root.querySelector("#useValves").addEventListener("change", (event) => toggleValveControls(root, event.target.checked));
 
   // Project action buttons
   root.querySelector("#btnNewProject").addEventListener("click", () => newProject(root));
@@ -69,6 +72,13 @@ export async function mount(root) {
     });
   } catch (error) {
     toast.error(`Could not load machine types: ${error.message}`);
+  }
+
+  try {
+    valveTypes = await cached("valveTypes", api.valveTypes);
+    renderValveControls(root);
+  } catch (error) {
+    toast.error(`Could not load valve types: ${error.message}`);
   }
 
   // Auto-load project if redirected from Projects page
@@ -119,6 +129,17 @@ function render(root) {
       ]),
     ]),
 
+    el("section", { class: "card stack" }, [
+      el("h2", { text: "Valves" }),
+      el("label", { class: "checkbox-label" }, [
+        el("input", { id: "useValves", type: "checkbox" }),
+        el("span", { text: "Use valves" }),
+      ]),
+      el("div", { id: "valveControls", class: "grid grid-4", hidden: true }, [
+        el("p", { class: "muted", text: "Loading valve types..." }),
+      ]),
+    ]),
+
     el("div", { class: "split" }, [
       el("section", { class: "card" }, [
         el("h2", { text: "Circuits" }),
@@ -157,6 +178,46 @@ function field(label, control) {
   return el("label", { class: "field" }, [el("span", { class: "field-label", text: label }), control]);
 }
 
+function renderValveControls(root) {
+  const controls = root.querySelector("#valveControls");
+  if (!controls) return;
+
+  if (circuits.length === 0) {
+    controls.replaceChildren(el("p", { class: "muted", text: "Load circuits to configure their valves." }));
+    return;
+  }
+
+  if (valveTypes.length === 0) {
+    controls.replaceChildren(el("p", { class: "muted", text: "No valve types configured." }));
+    return;
+  }
+
+  controls.replaceChildren(
+    ...circuits.map((circuit, circuitIndex) => el("div", { class: "stack valve-circuit-controls" }, [
+      el("h3", { text: circuit.name || `Circuit ${circuitIndex + 1}` }),
+      el("div", { class: "grid grid-4" }, valveTypes.map((valveType) => field(
+        `${valveType} valves`,
+        el("input", {
+          type: "number",
+          min: "0",
+          step: "1",
+          value: String(circuit.valve_quantities?.[valveType] || 0),
+          dataset: { valveType, circuitIndex: String(circuitIndex) },
+          onInput: (event) => {
+            circuit.valve_quantities ||= {};
+            circuit.valve_quantities[valveType] = Math.max(0, Math.floor(num(event.target.value, 0)));
+          },
+        })
+      ))),
+    ]))
+  );
+}
+
+function toggleValveControls(root, enabled) {
+  const controls = root.querySelector("#valveControls");
+  if (controls) controls.hidden = !enabled;
+}
+
 async function refreshCapacities(manufacturerEl, capacityEl) {
   try {
     const filters = await api.workbook.generatorFilters(manufacturerEl.value);
@@ -181,11 +242,13 @@ async function loadCircuits(root, button) {
       const payload = await api.workbook.circuits(capacity, manufacturer, tension);
       circuits = payload.circuits || [];
       renderCircuits(root.querySelector("#circuitList"), tension);
+      renderValveControls(root);
       refreshIoPreview(root);
       toast.success(`Loaded ${circuits.length} circuit(s).`);
     } catch (error) {
       circuits = [];
       renderCircuits(root.querySelector("#circuitList"), tension);
+      renderValveControls(root);
       refreshIoPreview(root);
       toast.error(`Could not load circuits: ${error.message}`);
     }
@@ -248,6 +311,7 @@ function buildPayload(root, compressorLibrary) {
     return {
       name: circuit.name || `CU${String(index + 1).padStart(3, "0")}`,
       description: circuit.description || "",
+      valves: root.querySelector("#useValves").checked ? circuit.valve_quantities || {} : {},
       compressors,
     };
   });
@@ -257,6 +321,7 @@ function buildPayload(root, compressorLibrary) {
     project_number: root.querySelector("#projectNumber").value || "",
     revision: root.querySelector("#revision").value || "A",
     drawn_by: root.querySelector("#drawnBy").value || "",
+    manufacturer: root.querySelector("#manufacturer").value || "",
     voltage: root.querySelector("#tension").value || "",
     circuits: selectionCircuits,
   };
@@ -408,7 +473,10 @@ function newProject(root) {
   root.querySelector("#manufacturer").value = "";
   root.querySelector("#capacity").value = "";
   root.querySelector("#tension").value = "";
+  root.querySelector("#useValves").checked = false;
+  toggleValveControls(root, false);
   circuits = [];
+  renderValveControls(root);
   renderCircuits(root.querySelector("#circuitList"), "");
   refreshIoPreview(root);
   updateProjectBadge(root, null);
@@ -436,6 +504,7 @@ async function saveCurrentProject(root, button) {
       capacity: cap,
       tension: tension,
       format: format,
+      use_valves: root.querySelector("#useValves").checked,
     },
     circuits: circuits,
   };
@@ -484,9 +553,16 @@ async function applyLoadedProject(root, proj) {
   if (settings.capacity && capSelect) capSelect.value = settings.capacity;
   if (settings.tension && tenSelect) tenSelect.value = settings.tension;
 
+  const useValves = root.querySelector("#useValves");
+  if (useValves) {
+    useValves.checked = Boolean(settings.use_valves);
+    toggleValveControls(root, useValves.checked);
+  }
+
   circuits = proj.circuits || [];
 
   renderCircuits(root.querySelector("#circuitList"), settings.tension || tenSelect?.value || "");
+  renderValveControls(root);
   refreshIoPreview(root);
   updateProjectBadge(root, proj);
   toast.success(`Opened project '${proj.name || proj.id}'.`);

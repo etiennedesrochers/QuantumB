@@ -57,6 +57,19 @@ const CATEGORIES = [
       { key: "rules", label: "Rules", load: api.rules, save: api.saveRules },
     ],
   },
+  {
+    key: "valves",
+    label: "Valves",
+    icon: "🔧",
+    description: "Valve templates and page assignments by compressor manufacturer.",
+    sources: [
+      {
+        key: "valve-configurations",
+        label: "Valve Configuration",
+        load: async () => Promise.all([api.valveConfigurations(), api.workbook.compressors(), api.templates()]),
+      },
+    ],
+  },
 ];
 
 let activeCategory = CATEGORIES[0];
@@ -200,6 +213,10 @@ function renderData(root, data, source) {
     return el("p", { class: "muted", text: "No data available." });
   }
 
+  if (sourceKey === "valve-configurations" && Array.isArray(data)) {
+    return renderValveConfigurations(root, data[0], data[1], data[2]);
+  }
+
   // ── Drawing Templates View ───────────────────────────────────────────────
   if (sourceKey === "templates" && typeof data === "object" && !Array.isArray(data)) {
     cachedTemplates = data;
@@ -237,6 +254,139 @@ function renderData(root, data, source) {
   }
 
   return el("pre", { class: "code", text: JSON.stringify(data, null, 2) });
+}
+
+function renderValveConfigurations(root, configurations, workbookCompressors, templates) {
+  const manufacturers = [...new Set((workbookCompressors || [])
+    .map((compressor) => String(compressor.manufacturer || "").trim())
+    .filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b));
+  const configured = new Map((configurations || []).map((item) => [item.manufacturer, item]));
+  for (const manufacturer of configured.keys()) {
+    if (!manufacturers.includes(manufacturer)) manufacturers.push(manufacturer);
+  }
+  manufacturers.sort((a, b) => a.localeCompare(b));
+  const valveTemplates = templates?.valves || [];
+
+  if (manufacturers.length === 0) {
+    return el("p", { class: "muted", text: "Add a compressor manufacturer before configuring its valves." });
+  }
+
+  const rows = manufacturers.map((manufacturer) => {
+    const configuration = configured.get(manufacturer) || {};
+    return el("div", { class: "grid grid-4 valve-configuration-row" }, [
+      el("div", { class: "field" }, [
+        el("span", { class: "field-label", text: "Manufacturer" }),
+        el("strong", { text: manufacturer }),
+      ]),
+      valveTemplateField("Valve template", "template", manufacturer, configuration.template, valveTemplates),
+      valveTemplateField("First page (PSU)", "firstPage", manufacturer, configuration.first_page, valveTemplates),
+      valveTemplateField("Second page", "secondPage", manufacturer, configuration.second_page, valveTemplates),
+      valveCountField("Valves per first page", "valvesPerFirstPage", manufacturer, configuration.first_page_psu_shared_by),
+      valveCountField("Valves per second page", "valvesPerSecondPage", manufacturer, configuration.second_page_valves_per_page),
+    ]);
+  });
+
+  const saveButton = el("button", {
+    type: "button",
+    class: "btn btn-primary",
+    onClick: () => saveValveConfigurations(root, saveButton),
+  }, ["Save valve configuration"]);
+  const importButton = el("button", {
+    type: "button",
+    class: "btn btn-secondary",
+    onClick: () => importValveManufacturers(root, configurations, workbookCompressors, importButton),
+  }, ["Import manufacturers from workbook"]);
+
+  return el("div", { class: "stack" }, [
+    el("div", { class: "row-between wrap" }, [
+      el("p", { class: "muted", text: "Choose the valve drawing template and its two pages for each compressor manufacturer." }),
+      importButton,
+    ]),
+    el("div", { class: "stack" }, rows),
+    !valveTemplates.length ? el("p", { class: "muted", text: "No valve templates are available yet. Add them under Templates > valves." }) : null,
+    el("div", { class: "row-end" }, [saveButton]),
+  ]);
+}
+
+function valveTemplateField(label, field, manufacturer, value, templates) {
+  return el("label", { class: "field" }, [
+    el("span", { class: "field-label", text: label }),
+    el("select", { dataset: { valveConfiguration: field, manufacturer } }, [
+      el("option", { value: "" }, ["Not selected"]),
+      ...templates.map((template) => el("option", {
+        value: template,
+        selected: template === value,
+      }, [template])),
+    ]),
+  ]);
+}
+
+function valveCountField(label, field, manufacturer, value) {
+  return el("label", { class: "field" }, [
+    el("span", { class: "field-label", text: label }),
+    el("input", {
+      type: "number",
+      min: "1",
+      step: "1",
+      value: String(Math.max(1, Math.floor(Number(value) || 2))),
+      dataset: { valveConfiguration: field, manufacturer },
+    }),
+  ]);
+}
+
+async function saveValveConfigurations(root, button) {
+  const configurations = [...root.querySelectorAll("select[data-valve-configuration='template']")].map((input) => {
+    const manufacturer = input.dataset.manufacturer;
+    return {
+      manufacturer,
+      template: input.value,
+      first_page: root.querySelector(`select[data-valve-configuration='firstPage'][data-manufacturer="${CSS.escape(manufacturer)}"]`).value,
+      second_page: root.querySelector(`select[data-valve-configuration='secondPage'][data-manufacturer="${CSS.escape(manufacturer)}"]`).value,
+      first_page_psu_shared_by: Math.max(1, Math.floor(Number(
+        root.querySelector(`input[data-valve-configuration='valvesPerFirstPage'][data-manufacturer="${CSS.escape(manufacturer)}"]`).value
+      ) || 2)),
+      second_page_valves_per_page: Math.max(1, Math.floor(Number(
+        root.querySelector(`input[data-valve-configuration='valvesPerSecondPage'][data-manufacturer="${CSS.escape(manufacturer)}"]`).value
+      ) || 2)),
+    };
+  });
+
+  await withBusy(button, "Saving…", async () => {
+    try {
+      await api.saveValveConfigurations(configurations);
+      toast.success("Valve configuration saved.");
+    } catch (error) {
+      toast.error(`Could not save valve configuration: ${error.message}`);
+    }
+  });
+}
+
+async function importValveManufacturers(root, configurations, workbookCompressors, button) {
+  const existing = new Map((configurations || []).map((item) => [item.manufacturer, item]));
+  for (const compressor of workbookCompressors || []) {
+    const manufacturer = String(compressor.manufacturer || "").trim();
+    if (manufacturer && !existing.has(manufacturer)) {
+      existing.set(manufacturer, {
+        manufacturer,
+        template: "",
+        first_page: "",
+        second_page: "",
+        first_page_psu_shared_by: 2,
+        second_page_valves_per_page: 2,
+      });
+    }
+  }
+
+  await withBusy(button, "Importing…", async () => {
+    try {
+      await api.saveValveConfigurations([...existing.values()]);
+      toast.success("Workbook manufacturers imported.");
+      await loadSource(root, activeSource);
+    } catch (error) {
+      toast.error(`Could not import workbook manufacturers: ${error.message}`);
+    }
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

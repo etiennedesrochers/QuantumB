@@ -63,6 +63,7 @@ class SelectionCircuit(BaseModel):
 
     name: str
     description: str = ""
+    valves: dict[str, int] = Field(default_factory=dict)
     compressors: list[SelectionCompressor] = Field(default_factory=list)
 
 
@@ -75,6 +76,7 @@ class SelectionPayload(BaseModel):
     project_number: str = ""
     revision: str = "A"
     drawn_by: str = ""
+    manufacturer: str = ""
     circuits: list[SelectionCircuit] = Field(min_length=1)
 
 

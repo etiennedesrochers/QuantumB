@@ -92,7 +92,16 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 .grid { display: grid; gap: 14px; }
 .grid-2 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 .grid-4 { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.valve-configuration-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .align-end { align-items: end; }
+
+@media (max-width: 760px) {
+  .valve-configuration-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 520px) {
+  .valve-configuration-row { grid-template-columns: 1fr; }
+}
 
 .row-between { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .row-end { display: flex; justify-content: flex-end; margin-top: 14px; }

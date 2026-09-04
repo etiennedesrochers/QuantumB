@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "name": "XNNOV Circuit Selection",
-  "updated_at": "2026-09-04T10:36:27.473383",
+  "name": "Projet Test",
+  "updated_at": "2026-09-04T15:20:56.593656",
   "settings": {
-    "title": "XNNOV Circuit Selection",
-    "project_name": "XNNOV Circuit Selection",
-    "project": "PRJ-001",
-    "project_number": "PRJ-001",
+    "title": "Projet Test",
+    "project_name": "Projet Test",
+    "project": "P-T3T3T",
+    "project_number": "P-T3T3T",
     "drawing_number": "",
     "revision": "A",
     "drawn_by": "",
@@ -15,7 +15,9 @@
     "manufacturer": "Copeland",
     "capacity": "13",
     "tension": "208",
-    "format": "both"
+    "format": "both",
+    "use_valves": true,
+    "valve_quantities": {}
   },
   "circuits": [
     {
@@ -43,7 +45,11 @@
             }
           ]
         }
-      ]
+      ],
+      "valve_quantities": {
+        "heat": 2,
+        "cool": 2
+      }
     }
   ],
   "project_circuits": [

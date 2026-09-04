@@ -107,6 +107,16 @@ def save_valve_ios(payload: dict[str, list[dict[str, Any]]]) -> dict[str, list[d
     return library_service.save_valve_ios(payload)
 
 
+@router.get("/valve-configurations")
+def list_valve_configurations() -> list[dict[str, Any]]:
+    return library_service.list_valve_configurations()
+
+
+@router.put("/valve-configurations")
+def save_valve_configurations(payload: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return library_service.save_valve_configurations(payload)
+
+
 @router.get("/app-config")
 def get_app_config() -> dict[str, Any]:
     return library_service.get_app_config()

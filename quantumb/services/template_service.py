@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import tempfile
+import re
 from pathlib import Path
 
 from ..legacy_bridge import ensure_legacy_importable
@@ -146,6 +147,28 @@ def get_template_ios(category: str, template_name: str) -> list[dict]:
 
     mgr = template_manager.TemplateManager(category_dirs[category])
     return sort_io_items(mgr.get_template_ios(template_name))
+
+
+def get_template_placeholders(category: str, template_name: str) -> list[str]:
+    """Return replacement candidates, including placeholders and plain text values."""
+    category_dirs = template_manager._TEMPLATE_TYPE_DIRS
+    if category not in category_dirs:
+        raise NotFoundError(f"Unknown template category: {category}")
+
+    doc = template_manager.TemplateManager(category_dirs[category]).load_template(template_name)
+    if doc is None:
+        raise NotFoundError(f"Template '{template_name}' not found in {category}")
+
+    values: set[str] = set()
+    for entity in doc.modelspace():
+        if entity.dxftype() != "INSERT":
+            continue
+        for attribute in entity.attribs:
+            text = attribute.dxf.get("text", "").strip()
+            values.update(re.findall(r"%[^%]+%", text))
+            if re.fullmatch(r"[A-Za-z][A-Za-z0-9 /#_.-]{1,60}", text):
+                values.add(text)
+    return sorted(values)
 
 
 def save_template_ios(category: str, template_name: str, ios: list[dict]) -> list[dict]:

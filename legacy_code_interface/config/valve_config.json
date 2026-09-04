@@ -1,4 +1,18 @@
-{
-  "template": "",
-  "quantity": 2
-}
+[
+  {
+    "manufacturer": "Copeland",
+    "template": "",
+    "first_page": "1 EXD-SH2-1-TRANS",
+    "second_page": "1 EXD-SH2",
+    "first_page_psu_shared_by": 2,
+    "second_page_valves_per_page": 2
+  },
+  {
+    "manufacturer": "Mitsubishi",
+    "template": "",
+    "first_page": "1 EXD-SH2-1-TRANS",
+    "second_page": "1 EXD-SH2",
+    "first_page_psu_shared_by": 2,
+    "second_page_valves_per_page": 2
+  }
+]

@@ -54,6 +54,11 @@ def get_template_ios(category: str, name: str) -> list[dict]:
     return template_service.get_template_ios(category, name)
 
 
+@router.get("/templates/{category}/{name}/placeholders")
+def get_template_placeholders(category: str, name: str) -> list[str]:
+    return template_service.get_template_placeholders(category, name)
+
+
 @router.put("/templates/{category}/{name}/ios")
 def save_template_ios(category: str, name: str, payload: list[dict] = Body(...)) -> list[dict]:
     return template_service.save_template_ios(category, name, payload)

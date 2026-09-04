@@ -49,6 +49,21 @@ const CATEGORIES = [
       { key: "rules", label: "Rules", load: api.rules, save: api.saveRules },
     ],
   },
+    {
+      key: "valves",
+      label: "Valves",
+      icon: "🔧",
+      description: "Valve configuration.",
+      sources: [
+        {
+          key: "valves",
+          label: "Valves",
+          load: async () => null,
+          emptyTitle: "Valve Configuration",
+          emptyMessage: "No valves configured yet.",
+        },
+      ],
+    },
 ];
 
 let activeCategory = CATEGORIES[0];
@@ -176,6 +191,12 @@ async function loadSource(root, source) {
 function renderData(root, data, source) {
   const sourceKey = source.key;
   if (data === null || data === undefined) {
+    if (source.emptyMessage) {
+      return el("div", { class: "stack" }, [
+        el("h3", { text: source.emptyTitle || source.label }),
+        el("p", { class: "muted", text: source.emptyMessage }),
+      ]);
+    }
     return el("p", { class: "muted", text: "No data available." });
   }
 

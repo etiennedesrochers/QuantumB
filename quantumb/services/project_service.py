@@ -128,6 +128,8 @@ def save_project(data: dict[str, Any], project_id: str | None = None) -> dict[st
             "capacity": settings.get("capacity", ""),
             "tension": settings.get("tension", ""),
             "format": settings.get("format", "both"),
+            "use_valves": bool(settings.get("use_valves", False)),
+            "valve_quantities": settings.get("valve_quantities", {}),
         },
         "circuits": data.get("circuits", []),
         "project_circuits": data.get("project_circuits") or [

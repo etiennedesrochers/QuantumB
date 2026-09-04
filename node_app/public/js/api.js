@@ -78,6 +78,8 @@ export const api = {
     request(`/templates/${cat}/${encodeURIComponent(name)}/info`, { method: "PUT", body: data }),
   templateIos: (cat, name) =>
     request(`/templates/${cat}/${encodeURIComponent(name)}/ios`),
+  templatePlaceholders: (cat, name) =>
+    request(`/templates/${cat}/${encodeURIComponent(name)}/placeholders`),
   saveTemplateIos: (cat, name, ios) =>
     request(`/templates/${cat}/${encodeURIComponent(name)}/ios`, { method: "PUT", body: ios }),
 
@@ -107,6 +109,8 @@ export const api = {
   saveValveTypes: (data) => request("/valve-types", { method: "PUT", body: data }),
   valveIos: () => request("/valve-ios"),
   saveValveIos: (data) => request("/valve-ios", { method: "PUT", body: data }),
+  valveConfigurations: () => request("/valve-configurations"),
+  saveValveConfigurations: (data) => request("/valve-configurations", { method: "PUT", body: data }),
   appConfig: () => request("/app-config"),
   saveAppConfig: (data) => request("/app-config", { method: "PUT", body: data }),
 
