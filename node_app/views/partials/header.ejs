@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> · QuantumB</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <script>window.__API_BASE__ = "<%= apiBase %>";</script>
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar-inner">
+      <a class="brand" href="/generator">QuantumB</a>
+      <nav id="nav" class="nav-links">
+        <% pages.forEach(function (page) { %>
+          <a href="/<%= page.route %>" class="<%= active === page.route ? 'is-active' : '' %>"><%= page.nav %></a>
+        <% }); %>
+      </nav>
+      <div class="navbar-actions">
+        <a class="link-muted" href="<%= apiBase %>/docs" target="_blank" rel="noopener">API docs</a>
+        <button id="themeToggle" class="btn btn-ghost" type="button" title="Toggle theme">&#9788;</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="view" class="view" aria-live="polite">

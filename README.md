@@ -1,113 +1,76 @@
+# QuantumB
 
-# QuantumB — AutoCAD Electrical Drawing Generator
+Generates AutoCAD electrical drawings (DXF/DWG) for XNNOV refrigeration
+circuits from an Excel workbook + a shared compressor/template library.
 
-QuantumB generates AutoCAD electrical ladder-diagram drawings (DXF/DWG) from
-project data: circuits, I/O lists, valves, controller modules, and reusable
-DXF templates. It ships as a desktop GUI, a scriptable CLI, and a web
-interface, all built on the same core generation engine.
+## Layout
 
-## Features
+| Path | What it is |
+|---|---|
+| `quantumb/services/` | Plain-Python facade over the drawing engine. No web/GUI imports. |
+| `quantumb/api/` | FastAPI app — thin HTTP layer over the services. |
+| `node_app/` | Express + EJS front end (`:3000`), calls the API at `:8000`. |
+| `web_ui/` | Previous vanilla-JS SPA, still served by FastAPI at `/`. Kept until `node_app/` reaches parity. |
+| `order_file/IO_Order.xlsx` | I/O ordering workbook — one sheet per machine type. |
+| `legacy_code_interface/` | **Frozen** original app: PySide6 GUI, CLI, Flask server, old web UI, and the shared engine (`src/core`), config JSON, DXF templates and the Excel workbook. |
+| `scripts/` | `START_WEB.*` (both servers), `START_API.*`, `parity_check.py`, `build_order_file.py`. |
+| `docs/REWRITE_PLAN.md` | The rewrite plan and its current status. |
 
-- **Project-based drawing generation** — define circuits, I/O items, rungs,
-  valves, and controller modules in a `.aepj` project file and generate
-  fully laid-out DXF (and optionally DWG) pages.
-- **Template system** — import `.dxf`/`.dwg` files as reusable templates for
-  controllers, I/O blocks, ladder base pages, ladder components, and valves.
-- **Desktop GUI** (PySide6) — interactive project editor with live preview,
-  template management, and Excel import/export of templates and I/O.
-- **CLI mode** — non-interactive generation for automation/CI, from either a
-  `.aepj` project file or an XNNOV Selection Tool JSON payload.
-- **Web interface** (Flask) — browser-based circuit/compressor configurator
-  that posts selections straight to the generator and returns a ZIP of the
-  generated drawings.
-- **DWG conversion** — optional conversion via the free ODA File Converter
-  when generating `.dwg` output.
+`quantumb/legacy_bridge.py` is the only module that knows where the legacy code
+lives; it puts `legacy_code_interface/` on `sys.path` so the engine keeps
+importing as `src.core.*`. Do not create a top-level `src/` — it would shadow
+that package.
 
-## Project layout
+## Running
 
-```
-app.py                  # Entry point — dispatches to GUI or CLI mode
-src/
-  core/                  # Business logic: models, circuit/module/template/
-                          # valve/rules managers, drawing generator, project
-                          # manager, selection adapter, app config
-  gui/                    # PySide6 desktop UI (main window, dialogs, preview)
-  cli/                    # Command-line interface
-  web/                    # Flask web server (API + static web interface)
-  symbols/                # ezdxf electrical symbol definitions
-config/                  # JSON libraries (circuits, modules, rules, valves,
-                          # IO types, compressors, app config)
-templates/               # DXF templates (controller, io, ladder,
-                          # ladder_components, valves, templates)
-web_interface/
-  current/                # Active web frontend (circuit + compressor config)
-  legacy/                 # Older frontend, kept for reference
-docs/                    # Setup, CLI, and build guides
-scripts/                 # Startup scripts and PyInstaller build script
-test_data/               # Sample .aepj project files
-```
-
-## Getting started
-
-### Prerequisites
-- Python 3.9+ (add to PATH during install)
-
-### Windows quick start
-Double-click `scripts/START_APP.bat` (or run `scripts/START_APP.ps1`). It
-creates a virtual environment, installs dependencies, and launches the GUI.
-See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) for details and troubleshooting.
-
-### Manual setup
 ```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-python app.py
+scripts\START_WEB.ps1            # API on :8000 + web UI on http://127.0.0.1:3000
 ```
 
-## Usage
+Or run the two halves separately:
 
-### GUI mode (default)
-```bash
-python app.py
+```powershell
+scripts\START_API.ps1            # http://127.0.0.1:8000  (API docs at /docs)
+cd node_app; npm install; npm start
 ```
 
-### CLI mode
-```bash
-# From a .aepj project file
-python app.py --project my_project.aepj --output ./output [--format dxf|dwg|both]
+The browser calls the API cross-origin, so the API only accepts the origins in
+`QUANTUMB_CORS_ORIGINS` (default `http://127.0.0.1:3000,http://localhost:3000`).
+Point the front end elsewhere with `API_BASE`, and change its port with `PORT`.
 
-# From an XNNOV Selection Tool JSON payload
-python app.py --generate-from-selection selection.json --output ./output
-```
-Full reference: [docs/CLI_GUIDE.md](docs/CLI_GUIDE.md).
+Config, templates and the workbook are read from `legacy_code_interface/`
+(`config/`, `templates/`, `data_excel/`) — shared with the legacy app.
 
-### Web interface
-```bash
-python src/web/web_server.py --host 127.0.0.1 --port 5000
-```
-Then open `http://127.0.0.1:5000/` to configure circuits/compressors and
-generate drawings directly from the browser (downloads a ZIP of the
-generated files). See [docs/WEB_CIRCUIT_COMPRESSOR_PLAN.md](docs/WEB_CIRCUIT_COMPRESSOR_PLAN.md)
-for the design behind this feature.
+## I/O ordering workbook
 
-### Building a standalone executable
-```bash
-python scripts/build_executable.py
-```
-See [docs/BUILD_EXECUTABLE.md](docs/BUILD_EXECUTABLE.md) for details.
+`order_file/IO_Order.xlsx` decides the order of the I/O list and which I/O is
+always present. One sheet per machine type (`Regular`, `AHU`, …) — adding a
+type means adding a sheet. Columns:
 
-## Configuration
+| Column | Meaning |
+|---|---|
+| `Section` | `front` (machine I/O before the circuits), `circuit` (block repeated per circuit), `back` (machine I/O after them) |
+| `Direction` | `Input` or `Output` |
+| `Order` | position within its section + direction |
+| `Label` | tag; in `circuit` rows `#` is replaced by the circuit number |
+| `IOType` | name from `config/io_types_library.json` |
+| `Description` | optional; blank becomes `Reserved` |
 
-Shared JSON libraries live under `config/`: circuit library, controller
-modules, rules, valve types, IO types, and compressor library. These are
-edited through the GUI (or the web interface, for compressors) and are
-consumed by both the GUI and CLI/web generation paths.
+Entries the circuit templates do not produce are injected as `Reserved`
+placeholders, so each machine type has its own I/O count. Selecting
+“No ordering” in the UI skips the workbook entirely.
 
-## Documentation
+`scripts/build_order_file.py` regenerates the workbook from the legacy
+`Order_IO.xlsx` (refuses to overwrite without `--force`).
 
-- [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) — installation & troubleshooting
-- [docs/CLI_GUIDE.md](docs/CLI_GUIDE.md) — CLI reference and examples
-- [docs/CLI_IMPLEMENTATION_SUMMARY.md](docs/CLI_IMPLEMENTATION_SUMMARY.md) — CLI internals
-- [docs/BUILD_EXECUTABLE.md](docs/BUILD_EXECUTABLE.md) — packaging with PyInstaller
-- [docs/WEB_CIRCUIT_COMPRESSOR_PLAN.md](docs/WEB_CIRCUIT_COMPRESSOR_PLAN.md) — web configurator design/plan
+## Deprecated
+
+The Flask server (`legacy_code_interface/src/web/web_server.py`), its frontend
+(`legacy_code_interface/web_interface/`) and
+`legacy_code_interface/scripts/START_WEB_SERVER.*` are superseded by the
+FastAPI app. They still work and are kept for reference; the desktop GUI
+(`legacy_code_interface/app.py`) and the CLI are unaffected.
+
+`scripts/parity_check.py` starts both servers and verifies that every shared
+endpoint and the generated ZIP still match.

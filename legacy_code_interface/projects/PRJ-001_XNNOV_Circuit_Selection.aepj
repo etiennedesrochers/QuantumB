@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "name": "XNNOV Circuit Selection",
+  "updated_at": "2026-09-04T10:36:27.473383",
+  "settings": {
+    "title": "XNNOV Circuit Selection",
+    "project_name": "XNNOV Circuit Selection",
+    "project": "PRJ-001",
+    "project_number": "PRJ-001",
+    "drawing_number": "",
+    "revision": "A",
+    "drawn_by": "",
+    "paper_size": "A3",
+    "voltage": "208",
+    "manufacturer": "Copeland",
+    "capacity": "13",
+    "tension": "208",
+    "format": "both"
+  },
+  "circuits": [
+    {
+      "name": "CU001",
+      "description": "Copeland 13 tons Circuit 1",
+      "compressors": [
+        {
+          "model_number": "YAW0661E-5X9-ECH",
+          "description": "CSV4C13",
+          "skid_model_number": "CSV4C13",
+          "manufacturer": "Copeland",
+          "quantity": 1,
+          "templates": [
+            {
+              "id": "tpl-1788532527955-0",
+              "name": "1_Condenser_Fan",
+              "scope": "per_unit",
+              "type": "regular"
+            },
+            {
+              "id": "tpl-1788532547767-1",
+              "name": "VFD-L",
+              "scope": "per_unit",
+              "type": "regular"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "project_circuits": [
+    "CU001"
+  ],
+  "io_items": [],
+  "rungs": []
+}

@@ -1,0 +1,19 @@
+{
+  "name": "quantumb-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Express + EJS front end for the QuantumB FastAPI backend.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

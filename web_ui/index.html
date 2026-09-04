@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuantumB</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar-inner">
+      <a class="brand" href="#/generator">QuantumB</a>
+      <nav id="nav" class="nav-links">
+        <a href="#/generator" data-route="generator">Generator</a>
+        <a href="#/projects" data-route="projects">Projects</a>
+        <a href="#/compressors" data-route="compressors">Compressors</a>
+        <a href="#/libraries" data-route="libraries">Libraries</a>
+      </nav>
+      <div class="navbar-actions">
+        <a class="link-muted" href="/docs" target="_blank" rel="noopener">API docs</a>
+        <button id="themeToggle" class="btn btn-ghost" type="button" title="Toggle theme">&#9788;</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="view" class="view" aria-live="polite"></main>
+  <div id="toasts" class="toasts" aria-live="assertive"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
