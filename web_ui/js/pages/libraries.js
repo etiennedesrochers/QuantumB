@@ -3,20 +3,28 @@
 import { api } from "../api.js";
 import { el, withBusy } from "../dom.js";
 import { dataTable } from "../components/table.js";
-import { toast } from "../components/toast.js";
+import { confirmAction, toast } from "../components/toast.js";
 
 const CATEGORIES = [
   {
     key: "templates",
     label: "Templates",
     icon: "📁",
-    description: "Drawing template files, ladder component templates, and I/O / valve type mappings.",
+    description: "Drawing template files, ladder types, and valve type mappings.",
     sources: [
       { key: "templates", label: "Drawing Templates", load: api.templates },
       { key: "ladder-types", label: "Ladder Types", load: api.ladderTypes, save: api.saveLadderTypes },
-      { key: "io-types", label: "I/O Types", load: api.ioTypes, save: api.saveIoTypes },
       { key: "valve-types", label: "Valve Types", load: api.valveTypes, save: api.saveValveTypes },
       { key: "valve-ios", label: "Valve I/O", load: api.valveIos, save: api.saveValveIos },
+    ],
+  },
+  {
+    key: "io-types",
+    label: "I/O Types",
+    icon: "🔌",
+    description: "Named I/O types: the controller-page and ladder-page templates each signal maps to.",
+    sources: [
+      { key: "io-types", label: "I/O Types", load: api.ioTypes, save: api.saveIoTypes },
     ],
   },
   {
@@ -119,6 +127,14 @@ function renderSubTabs(root) {
   const container = root.querySelector("#subTabs");
   if (!container) return;
 
+  // A single-source category needs no sub-tab bar.
+  if (activeCategory.sources.length < 2) {
+    container.replaceChildren();
+    container.hidden = true;
+    return;
+  }
+  container.hidden = false;
+
   container.replaceChildren(
     ...activeCategory.sources.map((source) =>
       el("button", {
@@ -172,6 +188,12 @@ function renderData(root, data, source) {
   // ── Circuits Management View ──────────────────────────────────────────────
   if (source.isCircuits && Array.isArray(data)) {
     return renderCircuitsView(root, data);
+  }
+
+  // ── I/O Types Configuration View ──────────────────────────────────────────
+  if (sourceKey === "io-types" && Array.isArray(data)) {
+    cachedIoTypes = data;
+    return renderIoTypesView(root, data, source);
   }
 
   // ── Array of primitive strings (e.g. module-io-values, valve-types) ─────
@@ -1152,6 +1174,340 @@ async function openCircuitModal(root, existingCircuit = null) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Other Configuration Editors (List of primitive strings, List of objects, Dict)
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// I/O Types Configuration (master list + per-type config panel)
+// ─────────────────────────────────────────────────────────────────────────────
+
+let selectedIoTypeName = null;
+let ioTypeSearchQuery = "";
+let ioTypeDirectionFilter = "all";
+
+const IO_TYPE_DIRECTION_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "Input", label: "Inputs" },
+  { key: "Output", label: "Outputs" },
+];
+
+/** Templates are only needed by this view, so fetch them on demand. */
+async function ensureTemplates() {
+  if (!cachedTemplates) {
+    try {
+      cachedTemplates = await api.templates();
+    } catch {
+      cachedTemplates = {};
+    }
+  }
+  return cachedTemplates;
+}
+
+function templateSelect(category, value, onChange, placeholder = "-- none --") {
+  const names = (cachedTemplates && cachedTemplates[category]) || [];
+  const options = [
+    el("option", { value: "", selected: !value }, [placeholder]),
+    ...names.map((name) =>
+      el("option", { value: name, selected: name === value }, [name])
+    ),
+  ];
+  // Keep a value that points at a file that is no longer on disk visible.
+  if (value && !names.includes(value)) {
+    options.push(el("option", { value, selected: true }, [`${value} (missing)`]));
+  }
+  return el("select", { class: "table-input", onChange: (e) => onChange(e.target.value) }, options);
+}
+
+function renderIoTypesView(root, ioTypes, source) {
+  const working = JSON.parse(JSON.stringify(ioTypes));
+
+  const tableContainer = el("div", { id: "ioTypesTableContainer" });
+  const detailContainer = el("div", { class: "stack" });
+
+  const searchInput = el("input", {
+    type: "search",
+    placeholder: "Search name, description or template\u2026",
+    value: ioTypeSearchQuery,
+    style: "max-width: 280px;",
+    onInput: (e) => {
+      ioTypeSearchQuery = e.target.value.toLowerCase().trim();
+      update();
+    },
+  });
+
+  function filtered() {
+    return working.filter((item) => {
+      const matchesDir =
+        ioTypeDirectionFilter === "all" || item.direction === ioTypeDirectionFilter;
+      const haystack = [item.name, item.description, item.io_template, item.ladder_type]
+        .join(" ")
+        .toLowerCase();
+      return matchesDir && (!ioTypeSearchQuery || haystack.includes(ioTypeSearchQuery));
+    });
+  }
+
+  async function persist(button, message) {
+    await withBusy(button, "Saving\u2026", async () => {
+      try {
+        await source.save(working);
+        cachedIoTypes = JSON.parse(JSON.stringify(working));
+        toast.success(message);
+      } catch (err) {
+        toast.error(`Save failed: ${err.message}`);
+      }
+    });
+  }
+
+  function selected() {
+    return working.find((item) => item.name === selectedIoTypeName) || null;
+  }
+
+  function update() {
+    const rows = filtered();
+    if (rows.length && !rows.some((item) => item.name === selectedIoTypeName)) {
+      selectedIoTypeName = rows[0].name;
+    }
+
+    tableContainer.replaceChildren(
+      dataTable({
+        columns: [
+          {
+            label: "Name",
+            render: (row) => el("span", { style: "font-weight: 600;", text: row.name || "" }),
+          },
+          { label: "Direction", render: (row) => el("span", { class: "chip", text: row.direction || "-" }) },
+          { label: "Signal", render: (row) => row.signal_category || "-" },
+          { label: "I/O Template", render: (row) => row.io_template || "-" },
+          { label: "Shared", render: (row) => (row.shared ? row.shared_template || "yes" : "-") },
+          { label: "Ladder", render: (row) => row.ladder_type || "-" },
+          { label: "Ladder Component", render: (row) => row.ladder_component_template || "-" },
+        ],
+        rows,
+        onRowClick: (row) => {
+          selectedIoTypeName = row.name;
+          update();
+        },
+        isActive: (row) => row.name === selectedIoTypeName,
+        empty: "No I/O types match the filter.",
+      })
+    );
+
+    const current = selected();
+    if (current) renderIoTypeDetail(detailContainer, current, working, update, persist);
+    else detailContainer.replaceChildren(el("p", { class: "muted", text: "Select an I/O type to configure it." }));
+  }
+
+  const container = el("div", { class: "stack" }, [
+    el("div", { class: "row-between wrap" }, [
+      el("div", { class: "sub-tabs" }, IO_TYPE_DIRECTION_FILTERS.map((f) =>
+        el("button", {
+          type: "button",
+          class: `tab ${ioTypeDirectionFilter === f.key ? "is-active" : ""}`,
+          dataset: { key: f.key },
+          onClick: (e) => {
+            ioTypeDirectionFilter = f.key;
+            for (const tab of container.querySelectorAll(".sub-tabs .tab")) {
+              tab.classList.toggle("is-active", tab.dataset.key === f.key);
+            }
+            update();
+          },
+        }, [f.label])
+      )),
+      el("div", { class: "toolbar", style: "align-items: center;" }, [
+        searchInput,
+        el("button", {
+          type: "button",
+          class: "btn btn-primary btn-sm",
+          onClick: () => {
+            let name = "new_io_type";
+            let suffix = 1;
+            while (working.some((item) => item.name === name)) name = `new_io_type_${++suffix}`;
+            working.push({
+              name,
+              description: "",
+              signal_category: "Digital",
+              direction: ioTypeDirectionFilter === "Output" ? "Output" : "Input",
+              io_template: "",
+              shared: false,
+              shared_template: "",
+              ladder_type: "",
+              ladder_component_template: "",
+            });
+            selectedIoTypeName = name;
+            update();
+          },
+        }, ["\u2795 Add I/O Type"]),
+        el("button", {
+          type: "button",
+          class: "btn btn-primary btn-sm",
+          onClick: (e) => persist(e.target, "I/O types library saved."),
+        }, ["\uD83D\uDCBE Save Library"]),
+      ]),
+    ]),
+    tableContainer,
+    el("hr"),
+    detailContainer,
+  ]);
+
+  ensureTemplates().then(update);
+  update();
+  return container;
+}
+
+function renderIoTypeDetail(container, item, working, update, persist) {
+  const field = (label, control, hint) =>
+    el("div", { class: "field" }, [
+      el("label", { class: "field-label", text: label }),
+      control,
+      hint ? el("p", { class: "muted", text: hint }) : null,
+    ]);
+
+  const nameInput = el("input", {
+    class: "table-input",
+    value: item.name || "",
+    onChange: (e) => {
+      const next = e.target.value.trim();
+      if (!next) {
+        toast.error("Name is required.");
+        e.target.value = item.name;
+        return;
+      }
+      if (working.some((other) => other !== item && other.name === next)) {
+        toast.error(`An I/O type named '${next}' already exists.`);
+        e.target.value = item.name;
+        return;
+      }
+      item.name = next;
+      selectedIoTypeName = next;
+      update();
+    },
+  });
+
+  const sharedToggle = el("input", {
+    type: "checkbox",
+    checked: !!item.shared,
+    onChange: (e) => {
+      item.shared = e.target.checked;
+      if (!item.shared) item.shared_template = "";
+      update();
+    },
+  });
+
+  container.replaceChildren(
+    el("div", { class: "card stack" }, [
+      el("div", { class: "row-between wrap" }, [
+        el("h3", { text: `I/O Type: ${item.name}`, style: "margin: 0;" }),
+        el("div", { class: "toolbar" }, [
+          el("button", {
+            type: "button",
+            class: "btn btn-danger btn-sm",
+            onClick: async (e) => {
+              const removed = item.name;
+              const ok = await confirmAction(`Delete I/O type '${removed}'?`, {
+                confirmLabel: "Delete",
+              });
+              if (!ok) return;
+              working.splice(working.indexOf(item), 1);
+              await persist(e.target, `I/O type '${removed}' deleted.`);
+              selectedIoTypeName = null;
+              update();
+            },
+          }, ["\uD83D\uDDD1\uFE0F Delete"]),
+        ]),
+      ]),
+      el("hr"),
+      el("div", { class: "grid grid-2" }, [
+        el("div", { class: "card stack" }, [
+          el("h3", { text: "Identity" }),
+          field("Name", nameInput),
+          field(
+            "Description",
+            el("input", {
+              class: "table-input",
+              value: item.description || "",
+              onChange: (e) => (item.description = e.target.value),
+            })
+          ),
+          field(
+            "Direction",
+            el("select", {
+              class: "table-input",
+              onChange: (e) => {
+                item.direction = e.target.value;
+                update();
+              },
+            }, ["Input", "Output"].map((value) =>
+              el("option", { value, selected: item.direction === value }, [value])
+            ))
+          ),
+          field(
+            "Signal Category",
+            el("select", {
+              class: "table-input",
+              onChange: (e) => {
+                item.signal_category = e.target.value;
+                update();
+              },
+            }, ["Digital", "Analog"].map((value) =>
+              el("option", { value, selected: item.signal_category === value }, [value])
+            ))
+          ),
+        ]),
+        el("div", { class: "card stack" }, [
+          el("h3", { text: "Controller Page" }),
+          field(
+            "I/O Template",
+            templateSelect("io", item.io_template || "", (value) => {
+              item.io_template = value;
+              update();
+            }),
+            "Drawn at the module slot on the controller (C) page."
+          ),
+          el("div", { class: "field" }, [
+            el("label", { class: "field-label" }, [
+              sharedToggle,
+              el("span", { text: " Shares a common terminal" }),
+            ]),
+          ]),
+          field(
+            "Shared Template",
+            templateSelect("io", item.shared_template || "", (value) => {
+              item.shared_template = value;
+              update();
+            }),
+            item.shared
+              ? "Used for every slot after the first shared input."
+              : "Only applies when 'shares a common terminal' is on."
+          ),
+        ]),
+        el("div", { class: "card stack" }, [
+          el("h3", { text: "Ladder Page" }),
+          field(
+            "Ladder Type",
+            templateSelect("ladder", item.ladder_type || "", (value) => {
+              item.ladder_type = value;
+              update();
+            }, "-- no ladder page --"),
+            "The ladder (L) page this type's components are drawn on. Leave empty to exclude it from ladder generation."
+          ),
+          field(
+            "Ladder Component Template",
+            templateSelect("ladder_component", item.ladder_component_template || "", (value) => {
+              item.ladder_component_template = value;
+              update();
+            }),
+            "The rung artwork placed on that ladder page."
+          ),
+        ]),
+      ]),
+      el("div", { class: "row-end" }, [
+        el("button", {
+          type: "button",
+          class: "btn btn-primary btn-sm",
+          onClick: (e) => persist(e.target, `I/O type '${item.name}' saved.`),
+        }, ["\uD83D\uDCBE Save Library"]),
+      ]),
+    ])
+  );
+}
 
 function renderStringListView(root, list, source) {
   return el("div", { class: "stack" }, [

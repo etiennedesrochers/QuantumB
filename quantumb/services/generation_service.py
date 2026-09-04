@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Iterator
 
 from ..legacy_bridge import ensure_legacy_importable
-from . import order_service
+from . import ladder_service, order_service
 from .errors import GenerationError, NotFoundError, ValidationError
 from .template_resolver import CircuitTemplateManager
 
@@ -25,6 +25,7 @@ ensure_legacy_importable()
 import src.core.project_manager as pm  # noqa: E402
 import src.core.selection_adapter as sa  # noqa: E402
 from src.cli.cli import CLIGenerator  # noqa: E402
+from src.core.template_manager import convert_folder_dxf_to_dwg  # noqa: E402
 
 VALID_FORMATS = {"dxf", "dwg", "both"}
 ARCHIVE_NAME = "generated_drawings.zip"
@@ -85,6 +86,25 @@ def _apply_ordering(generator: CLIGenerator, machine_type: str | None) -> None:
     generator._build_generation_io_items = ordered
 
 
+def _capture_io_items(generator: CLIGenerator) -> list:
+    """Expose the engine's I/O list to the caller.
+
+    `_assign_io_addresses` mutates the very list `_build_generation_io_items`
+    returns, so holding onto it yields fully addressed items once
+    `generate()` has run.
+    """
+    captured: list = []
+    build = generator._build_generation_io_items
+
+    def capturing(project_circuits, manual_io_items=None):
+        items = build(project_circuits, manual_io_items)
+        captured[:] = [items]
+        return items
+
+    generator._build_generation_io_items = capturing
+    return captured
+
+
 def build_generator(
     payload: dict,
     work_dir: Path,
@@ -137,11 +157,22 @@ def build_generator(
     return generator, project_dict
 
 
+def _generate_ladders(generator: CLIGenerator, settings: dict, io_items: list) -> list[str]:
+    """Emit the L pages the CLI engine never produced (GUI-only feature)."""
+    prefix = machine_prefix(settings)
+    ladder_gen = ladder_service.LadderGenerator(generator.io_types, prefix)
+    _, errors = ladder_gen.generate(
+        generator.output_dir, generator._build_config(settings), io_items
+    )
+    return errors
+
+
 def generate_from_selection(
     payload: dict,
     fmt: str = "both",
     controller: str | None = None,
     machine_type: str | None = None,
+    ladders: bool = True,
 ) -> GenerationResult:
     """Generate drawings for *payload* and zip them.
 
@@ -155,12 +186,29 @@ def generate_from_selection(
     output_dir.mkdir()
 
     try:
-        generator, _ = build_generator(
-            payload, work_dir, output_dir, fmt, controller, machine_type
+        # Ladder pages are drawn after the engine runs, so DWG conversion is
+        # deferred to this service instead of happening inside `generate()`.
+        generator, project_dict = build_generator(
+            payload, work_dir, output_dir, "dxf", controller, machine_type
         )
+        captured = _capture_io_items(generator) if ladders else []
         success, message = generator.generate()
         if not success:
             raise GenerationError(message)
+
+        if ladders and captured and captured[0]:
+            ladder_errors = _generate_ladders(
+                generator, project_dict["settings"], captured[0]
+            )
+            if ladder_errors:
+                message += "\n\n[WARNING] Ladder pages:" + "".join(
+                    f"\n  - {error}" for error in ladder_errors
+                )
+
+        if fmt in ("dwg", "both"):
+            _, _, conversion_error = convert_folder_dxf_to_dwg(str(output_dir))
+            if conversion_error:
+                message += f"\n\n[WARNING] DWG conversion: {conversion_error}"
 
         zip_path = work_dir / ARCHIVE_NAME
         shutil.make_archive(str(zip_path.with_suffix("")), "zip", str(output_dir))
@@ -184,9 +232,10 @@ def generated_archive(
     fmt: str = "both",
     controller: str | None = None,
     machine_type: str | None = None,
+    ladders: bool = True,
 ) -> Iterator[GenerationResult]:
     """Context manager that cleans up the work dir on exit."""
-    result = generate_from_selection(payload, fmt, controller, machine_type)
+    result = generate_from_selection(payload, fmt, controller, machine_type, ladders)
     try:
         yield result
     finally:

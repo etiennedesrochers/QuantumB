@@ -49,10 +49,11 @@ def generate(
     format: str = Query("both"),
     controller: str | None = None,
     machine_type: str | None = None,
+    ladders: bool = Query(True),
 ) -> FileResponse:
     """Generate drawings in-process and return them as a ZIP download."""
     result = generation_service.generate_from_selection(
-        payload.model_dump(), format, controller, machine_type
+        payload.model_dump(), format, controller, machine_type, ladders
     )
     return FileResponse(
         result.zip_path,

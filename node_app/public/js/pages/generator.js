@@ -341,7 +341,14 @@ function circuitLabel(row) {
 }
 
 function renderIoPreview(summary, list, preview) {
-  const { total, inputs, outputs, reserved, controller_pages: pages } = preview.summary;
+  const {
+    total,
+    inputs,
+    outputs,
+    reserved,
+    controller_pages: pages,
+    ladder_pages: ladders,
+  } = preview.summary;
   summary.replaceChildren(
     ...[
       el("span", { class: "chip", text: `${total} I/O` }),
@@ -349,6 +356,9 @@ function renderIoPreview(summary, list, preview) {
       el("span", { class: "chip", text: `${outputs} out` }),
       reserved ? el("span", { class: "chip", text: `${reserved} reserved` }) : null,
       el("span", { class: "chip chip-shared", text: `${pages} controller page(s)` }),
+      ladders
+        ? el("span", { class: "chip chip-shared", text: `${ladders} ladder page(s)` })
+        : null,
     ].filter(Boolean)
   );
 

@@ -146,8 +146,9 @@ input:focus, select:focus {
 
 /* Tables ------------------------------------------------------------------ */
 
-.table { width: 100%; border-collapse: collapse; font-size: 14px; overflow: auto; max-height: 660px; }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .table-scroll { overflow: auto; max-height: 460px; }
+.libraries-template-list-scroll { height: 460px; max-height: none; overflow-y: auto; }
 .table th, .table td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); }
 .table th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); }
 .table td { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

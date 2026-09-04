@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from ..legacy_bridge import ensure_legacy_importable
-from . import generation_service
+from . import generation_service, ladder_service
 from .errors import ValidationError
 
 ensure_legacy_importable()
@@ -86,6 +86,9 @@ def preview_ios(
         prefix = generation_service.machine_prefix(project_dict["settings"])
         generator._assign_io_addresses(items, prefix)
 
+        ladder_pages = ladder_service.LadderGenerator(
+            generator.io_types, prefix
+        ).count_pages(items)
         active = generator.modules[0] if generator.modules else None
     finally:
         shutil.rmtree(work_dir, ignore_errors=True)
@@ -106,6 +109,7 @@ def preview_ios(
             "outputs": outputs,
             "reserved": sum(1 for item in items if item.description == "Reserved"),
             "controller_pages": _controller_pages(active_summary, inputs, outputs),
+            "ladder_pages": ladder_pages,
         },
         "items": [{field: getattr(item, field, "") for field in _IO_FIELDS} for item in items],
     }

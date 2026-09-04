@@ -2,21 +2,37 @@
 
 import { api } from "../api.js";
 import { el, withBusy } from "../dom.js";
-import { dataTable } from "../components/table.js";
-import { toast } from "../components/toast.js";
+import { confirmAction, toast } from "../components/toast.js";
 
 const CATEGORIES = [
   {
     key: "templates",
     label: "Templates",
     icon: "📁",
-    description: "Drawing template files, ladder component templates, and I/O / valve type mappings.",
+    description: "Drawing template files, ladder types, and valve type mappings.",
     sources: [
       { key: "templates", label: "Drawing Templates", load: api.templates },
       { key: "ladder-types", label: "Ladder Types", load: api.ladderTypes, save: api.saveLadderTypes },
-      { key: "io-types", label: "I/O Types", load: api.ioTypes, save: api.saveIoTypes },
       { key: "valve-types", label: "Valve Types", load: api.valveTypes, save: api.saveValveTypes },
       { key: "valve-ios", label: "Valve I/O", load: api.valveIos, save: api.saveValveIos },
+    ],
+  },
+  {
+    key: "io-types",
+    label: "I/O Types",
+    icon: "🔌",
+    description: "Named I/O types: the controller-page and ladder-page templates each signal maps to.",
+    sources: [
+      { key: "io-types", label: "I/O Types", load: api.ioTypes, save: api.saveIoTypes },
+    ],
+  },
+  {
+    key: "controllers",
+    label: "Controllers",
+    icon: "🧭",
+    description: "Controller modules, drawing templates, and I/O placement definitions.",
+    sources: [
+      { key: "controllers", label: "Controllers", load: api.modules, save: api.saveModules },
     ],
   },
   {
@@ -70,30 +86,43 @@ export function sortIoItems(ios) {
   });
 }
 
-export async function mount(root) {
-  root.replaceChildren(
-    el("section", { class: "card stack" }, [
-      el("div", { class: "row-between wrap" }, [
-        el("div", {}, [
-          el("h2", { text: "Libraries" }),
-          el("p", { class: "muted", id: "categoryDescription", text: activeCategory.description }),
-        ]),
-      ]),
-      el("div", { class: "category-tabs", id: "categoryTabs" }, CATEGORIES.map((cat) =>
-        el("button", {
-          type: "button",
-          class: `category-tab ${cat.key === activeCategory.key ? "is-active" : ""}`,
-          dataset: { key: cat.key },
-          onClick: () => switchCategory(root, cat),
-        }, [
-          el("span", { text: cat.icon }),
-          el("span", { text: cat.label }),
-        ])
-      )),
-      el("div", { class: "sub-tabs", id: "subTabs" }),
-      el("div", { id: "libraryBody" }),
-    ])
+function tableFromPartial(templateId, rows, empty = "Nothing to show.", headers = []) {
+  if (!rows.length) return el("p", { class: "muted", text: empty });
+
+  const template = document.getElementById(templateId);
+  if (!template) throw new Error(`Missing table partial '${templateId}'.`);
+
+  const table = template.content.firstElementChild.cloneNode(true);
+  if (headers.length) {
+    table.querySelector("thead tr").replaceChildren(
+      ...headers.map((header) => el("th", { text: header }))
+    );
+  }
+  table.querySelector("tbody").replaceChildren(...rows);
+  return table;
+}
+
+function buildTableRows(columns, rows, { onRowClick, isActive } = {}) {
+  return rows.map((row, index) =>
+    el("tr", {
+      class: [
+        onRowClick ? "clickable" : "",
+        isActive?.(row) ? "is-active" : "",
+      ].filter(Boolean).join(" "),
+      onClick: onRowClick ? () => onRowClick(row) : undefined,
+    }, columns.map((column) => {
+      const value = column.render ? column.render(row, index) : row[column.key];
+      return el("td", { class: column.class }, [value instanceof Node ? value : String(value ?? "")]);
+    }))
   );
+}
+
+export async function mount(root) {
+  const categoryTabs = root.querySelectorAll(".category-tab");
+  for (const tab of categoryTabs) {
+    const category = CATEGORIES.find((item) => item.key === tab.dataset.key);
+    if (category) tab.addEventListener("click", () => switchCategory(root, category));
+  }
 
   renderSubTabs(root);
   await loadSource(root, activeSource);
@@ -118,6 +147,14 @@ function switchCategory(root, category) {
 function renderSubTabs(root) {
   const container = root.querySelector("#subTabs");
   if (!container) return;
+
+  // A single-source category needs no sub-tab bar.
+  if (activeCategory.sources.length < 2) {
+    container.replaceChildren();
+    container.hidden = true;
+    return;
+  }
+  container.hidden = false;
 
   container.replaceChildren(
     ...activeCategory.sources.map((source) =>
@@ -172,6 +209,16 @@ function renderData(root, data, source) {
   // ── Circuits Management View ──────────────────────────────────────────────
   if (source.isCircuits && Array.isArray(data)) {
     return renderCircuitsView(root, data);
+  }
+
+  // ── I/O Types Configuration View ──────────────────────────────────────────
+  if (sourceKey === "io-types" && Array.isArray(data)) {
+    cachedIoTypes = data;
+    return renderIoTypesView(root, data, source);
+  }
+
+  if (sourceKey === "controllers" && Array.isArray(data)) {
+    return renderControllersView(root, data, source);
   }
 
   // ── Array of primitive strings (e.g. module-io-values, valve-types) ─────
@@ -321,10 +368,9 @@ function renderTemplatesView(root, templatesDict) {
       },
     ];
 
-    tableContainer.replaceChildren(
-      dataTable({
-        columns,
-        rows: filtered,
+    tableContainer.replaceChildren(tableFromPartial(
+      "librariesTemplateListTable",
+      buildTableRows(columns, filtered, {
         onRowClick: (row) => {
           selectedTemplateItem = row;
           updateTableAndDetails();
@@ -333,9 +379,9 @@ function renderTemplatesView(root, templatesDict) {
           selectedTemplateItem &&
           row.name === selectedTemplateItem.name &&
           row.category === selectedTemplateItem.category,
-        empty: "No templates match filter criteria.",
-      })
-    );
+      }),
+      "No templates match filter criteria."
+    ));
 
     if (selectedTemplateItem) {
       loadTemplateDetails(detailContainer, selectedTemplateItem, root);
@@ -579,19 +625,7 @@ function renderTemplateDetailCard(container, info, templateItem, root) {
 
     iosTableContainer.replaceChildren(
       filterTabsHeader,
-      el("table", { class: "table" }, [
-        el("thead", {}, [
-          el("tr", {}, [
-            el("th", { text: "Signal Name" }),
-            el("th", { text: "Description" }),
-            el("th", { text: "Direction" }),
-            el("th", { text: "Signal Type" }),
-            el("th", { text: "I/O Type" }),
-            el("th", { text: "Action" }),
-          ]),
-        ]),
-        el("tbody", {}, rows),
-      ])
+      tableFromPartial("librariesTemplateIoTable", rows)
     );
   }
 
@@ -667,22 +701,13 @@ function renderTemplateDetailCard(container, info, templateItem, root) {
           el("p", { class: "muted", text: `${blocksCount} embedded block INSERT instances found in drawing.` }),
           blocksCount > 0
             ? el("div", { style: "max-height: 180px; overflow-y: auto;" }, [
-                el("table", { class: "table" }, [
-                  el("thead", {}, [
-                    el("tr", {}, [
-                      el("th", { text: "Block Name" }),
-                      el("th", { text: "Insert Point" }),
-                      el("th", { text: "Attributes" }),
-                    ]),
-                  ]),
-                  el("tbody", {}, info.blocks.map((blk) =>
-                    el("tr", {}, [
-                      el("td", { text: blk.name }),
-                      el("td", { text: blk.insert_pt ? `${blk.insert_pt[0]}, ${blk.insert_pt[1]}` : "0, 0" }),
-                      el("td", { text: blk.attributes ? blk.attributes.map((a) => a.tag).join(", ") : "-" }),
-                    ])
-                  )),
-                ]),
+                tableFromPartial("librariesBlockInspectionTable", info.blocks.map((blk) =>
+                  el("tr", {}, [
+                    el("td", { text: blk.name }),
+                    el("td", { text: blk.insert_pt ? `${blk.insert_pt[0]}, ${blk.insert_pt[1]}` : "0, 0" }),
+                    el("td", { text: blk.attributes ? blk.attributes.map((a) => a.tag).join(", ") : "-" }),
+                  ])
+                )),
               ])
             : null,
         ]),
@@ -816,7 +841,7 @@ function renderCircuitsView(root, circuits) {
         onClick: () => openCircuitModal(root),
       }, ["➕ Add Circuit"]),
     ]),
-    dataTable({ columns, rows: circuits, empty: "No circuits defined." }),
+    tableFromPartial("librariesCircuitListTable", buildTableRows(columns, circuits), "No circuits defined."),
   ]);
 }
 
@@ -997,19 +1022,7 @@ async function openCircuitModal(root, existingCircuit = null) {
     });
 
     iosContainer.replaceChildren(
-      el("table", { class: "table" }, [
-        el("thead", {}, [
-          el("tr", {}, [
-            el("th", { text: "Name" }),
-            el("th", { text: "Description" }),
-            el("th", { text: "Direction" }),
-            el("th", { text: "Signal" }),
-            el("th", { text: "IO Type" }),
-            el("th", { text: "Action" }),
-          ]),
-        ]),
-        el("tbody", {}, rows),
-      ])
+      tableFromPartial("librariesCircuitIoTable", rows)
     );
   }
 
@@ -1153,6 +1166,572 @@ async function openCircuitModal(root, existingCircuit = null) {
 // Other Configuration Editors (List of primitive strings, List of objects, Dict)
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// I/O Types Configuration (master list + per-type config panel)
+// ─────────────────────────────────────────────────────────────────────────────
+
+let selectedIoTypeName = null;
+let ioTypeSearchQuery = "";
+let ioTypeDirectionFilter = "all";
+
+const IO_TYPE_DIRECTION_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "Input", label: "Inputs" },
+  { key: "Output", label: "Outputs" },
+];
+
+/** Templates are only needed by this view, so fetch them on demand. */
+async function ensureTemplates() {
+  if (!cachedTemplates) {
+    try {
+      cachedTemplates = await api.templates();
+    } catch {
+      cachedTemplates = {};
+    }
+  }
+  return cachedTemplates;
+}
+
+function templateSelect(category, value, onChange, placeholder = "-- none --") {
+  const names = (cachedTemplates && cachedTemplates[category]) || [];
+  const options = [
+    el("option", { value: "", selected: !value }, [placeholder]),
+    ...names.map((name) =>
+      el("option", { value: name, selected: name === value }, [name])
+    ),
+  ];
+  // Keep a value that points at a file that is no longer on disk visible.
+  if (value && !names.includes(value)) {
+    options.push(el("option", { value, selected: true }, [`${value} (missing)`]));
+  }
+  return el("select", { class: "table-input", onChange: (e) => onChange(e.target.value) }, options);
+}
+
+function renderIoTypesView(root, ioTypes, source) {
+  const working = JSON.parse(JSON.stringify(ioTypes));
+
+  const tableContainer = el("div", { id: "ioTypesTableContainer" });
+  const detailContainer = el("div", { class: "stack" });
+
+  const searchInput = el("input", {
+    type: "search",
+    placeholder: "Search name, description or template\u2026",
+    value: ioTypeSearchQuery,
+    style: "max-width: 280px;",
+    onInput: (e) => {
+      ioTypeSearchQuery = e.target.value.toLowerCase().trim();
+      update();
+    },
+  });
+
+  function filtered() {
+    return working.filter((item) => {
+      const matchesDir =
+        ioTypeDirectionFilter === "all" || item.direction === ioTypeDirectionFilter;
+      const haystack = [item.name, item.description, item.io_template, item.ladder_type]
+        .join(" ")
+        .toLowerCase();
+      return matchesDir && (!ioTypeSearchQuery || haystack.includes(ioTypeSearchQuery));
+    });
+  }
+
+  async function persist(button, message) {
+    await withBusy(button, "Saving\u2026", async () => {
+      try {
+        await source.save(working);
+        cachedIoTypes = JSON.parse(JSON.stringify(working));
+        toast.success(message);
+      } catch (err) {
+        toast.error(`Save failed: ${err.message}`);
+      }
+    });
+  }
+
+  function selected() {
+    return working.find((item) => item.name === selectedIoTypeName) || null;
+  }
+
+  function update() {
+    const rows = filtered();
+    if (rows.length && !rows.some((item) => item.name === selectedIoTypeName)) {
+      selectedIoTypeName = rows[0].name;
+    }
+
+    const columns = [
+          {
+            label: "Name",
+            render: (row) => el("span", { style: "font-weight: 600;", text: row.name || "" }),
+          },
+          { label: "Direction", render: (row) => el("span", { class: "chip", text: row.direction || "-" }) },
+          { label: "Signal", render: (row) => row.signal_category || "-" },
+          { label: "I/O Template", render: (row) => row.io_template || "-" },
+          { label: "Shared", render: (row) => (row.shared ? row.shared_template || "yes" : "-") },
+          { label: "Ladder", render: (row) => row.ladder_type || "-" },
+          { label: "Ladder Component", render: (row) => row.ladder_component_template || "-" },
+        ];
+    tableContainer.replaceChildren(tableFromPartial(
+      "librariesIoTypesTable",
+      buildTableRows(columns, rows, {
+        onRowClick: (row) => {
+          selectedIoTypeName = row.name;
+          update();
+        },
+        isActive: (row) => row.name === selectedIoTypeName,
+      }),
+      "No I/O types match the filter."
+    ));
+
+    const current = selected();
+    if (current) renderIoTypeDetail(detailContainer, current, working, update, persist);
+    else detailContainer.replaceChildren(el("p", { class: "muted", text: "Select an I/O type to configure it." }));
+  }
+
+  const container = el("div", { class: "stack" }, [
+    el("div", { class: "row-between wrap" }, [
+      el("div", { class: "sub-tabs" }, IO_TYPE_DIRECTION_FILTERS.map((f) =>
+        el("button", {
+          type: "button",
+          class: `tab ${ioTypeDirectionFilter === f.key ? "is-active" : ""}`,
+          dataset: { key: f.key },
+          onClick: (e) => {
+            ioTypeDirectionFilter = f.key;
+            for (const tab of container.querySelectorAll(".sub-tabs .tab")) {
+              tab.classList.toggle("is-active", tab.dataset.key === f.key);
+            }
+            update();
+          },
+        }, [f.label])
+      )),
+      el("div", { class: "toolbar", style: "align-items: center;" }, [
+        searchInput,
+        el("button", {
+          type: "button",
+          class: "btn btn-primary btn-sm",
+          onClick: () => {
+            let name = "new_io_type";
+            let suffix = 1;
+            while (working.some((item) => item.name === name)) name = `new_io_type_${++suffix}`;
+            working.push({
+              name,
+              description: "",
+              signal_category: "Digital",
+              direction: ioTypeDirectionFilter === "Output" ? "Output" : "Input",
+              io_template: "",
+              shared: false,
+              shared_template: "",
+              ladder_type: "",
+              ladder_component_template: "",
+            });
+            selectedIoTypeName = name;
+            update();
+          },
+        }, ["\u2795 Add I/O Type"]),
+        el("button", {
+          type: "button",
+          class: "btn btn-primary btn-sm",
+          onClick: (e) => persist(e.target, "I/O types library saved."),
+        }, ["\uD83D\uDCBE Save Library"]),
+      ]),
+    ]),
+    tableContainer,
+    el("hr"),
+    detailContainer,
+  ]);
+
+  ensureTemplates().then(update);
+  update();
+  return container;
+}
+
+function renderIoTypeDetail(container, item, working, update, persist) {
+  const field = (label, control, hint) =>
+    el("div", { class: "field" }, [
+      el("label", { class: "field-label", text: label }),
+      control,
+      hint ? el("p", { class: "muted", text: hint }) : null,
+    ]);
+
+  const nameInput = el("input", {
+    class: "table-input",
+    value: item.name || "",
+    onChange: (e) => {
+      const next = e.target.value.trim();
+      if (!next) {
+        toast.error("Name is required.");
+        e.target.value = item.name;
+        return;
+      }
+      if (working.some((other) => other !== item && other.name === next)) {
+        toast.error(`An I/O type named '${next}' already exists.`);
+        e.target.value = item.name;
+        return;
+      }
+      item.name = next;
+      selectedIoTypeName = next;
+      update();
+    },
+  });
+
+  const sharedToggle = el("input", {
+    type: "checkbox",
+    checked: !!item.shared,
+    onChange: (e) => {
+      item.shared = e.target.checked;
+      if (!item.shared) item.shared_template = "";
+      update();
+    },
+  });
+
+  container.replaceChildren(
+    el("div", { class: "card stack" }, [
+      el("div", { class: "row-between wrap" }, [
+        el("h3", { text: `I/O Type: ${item.name}`, style: "margin: 0;" }),
+        el("div", { class: "toolbar" }, [
+          el("button", {
+            type: "button",
+            class: "btn btn-danger btn-sm",
+            onClick: async (e) => {
+              const removed = item.name;
+              const ok = await confirmAction(`Delete I/O type '${removed}'?`, {
+                confirmLabel: "Delete",
+              });
+              if (!ok) return;
+              working.splice(working.indexOf(item), 1);
+              await persist(e.target, `I/O type '${removed}' deleted.`);
+              selectedIoTypeName = null;
+              update();
+            },
+          }, ["\uD83D\uDDD1\uFE0F Delete"]),
+        ]),
+      ]),
+      el("hr"),
+      el("div", { class: "grid grid-2" }, [
+        el("div", { class: "card stack" }, [
+          el("h3", { text: "Identity" }),
+          field("Name", nameInput),
+          field(
+            "Description",
+            el("input", {
+              class: "table-input",
+              value: item.description || "",
+              onChange: (e) => (item.description = e.target.value),
+            })
+          ),
+          field(
+            "Direction",
+            el("select", {
+              class: "table-input",
+              onChange: (e) => {
+                item.direction = e.target.value;
+                update();
+              },
+            }, ["Input", "Output"].map((value) =>
+              el("option", { value, selected: item.direction === value }, [value])
+            ))
+          ),
+          field(
+            "Signal Category",
+            el("select", {
+              class: "table-input",
+              onChange: (e) => {
+                item.signal_category = e.target.value;
+                update();
+              },
+            }, ["Digital", "Analog"].map((value) =>
+              el("option", { value, selected: item.signal_category === value }, [value])
+            ))
+          ),
+        ]),
+        el("div", { class: "card stack" }, [
+          el("h3", { text: "Controller Page" }),
+          field(
+            "I/O Template",
+            templateSelect("io", item.io_template || "", (value) => {
+              item.io_template = value;
+              update();
+            }),
+            "Drawn at the module slot on the controller (C) page."
+          ),
+          el("div", { class: "field" }, [
+            el("label", { class: "field-label" }, [
+              sharedToggle,
+              el("span", { text: " Shares a common terminal" }),
+            ]),
+          ]),
+          field(
+            "Shared Template",
+            templateSelect("io", item.shared_template || "", (value) => {
+              item.shared_template = value;
+              update();
+            }),
+            item.shared
+              ? "Used for every slot after the first shared input."
+              : "Only applies when 'shares a common terminal' is on."
+          ),
+        ]),
+        el("div", { class: "card stack" }, [
+          el("h3", { text: "Ladder Page" }),
+          field(
+            "Ladder Type",
+            templateSelect("ladder", item.ladder_type || "", (value) => {
+              item.ladder_type = value;
+              update();
+            }, "-- no ladder page --"),
+            "The ladder (L) page this type's components are drawn on. Leave empty to exclude it from ladder generation."
+          ),
+          field(
+            "Ladder Component Template",
+            templateSelect("ladder_component", item.ladder_component_template || "", (value) => {
+              item.ladder_component_template = value;
+              update();
+            }),
+            "The rung artwork placed on that ladder page."
+          ),
+        ]),
+      ]),
+      el("div", { class: "row-end" }, [
+        el("button", {
+          type: "button",
+          class: "btn btn-primary btn-sm",
+          onClick: (e) => persist(e.target, `I/O type '${item.name}' saved.`),
+        }, ["\uD83D\uDCBE Save Library"]),
+      ]),
+    ])
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Controller Configuration (master list + module I/O placement editor)
+// ─────────────────────────────────────────────────────────────────────────────
+
+let selectedControllerName = null;
+let controllerSearchQuery = "";
+
+function renderControllersView(root, controllers, source) {
+  const working = JSON.parse(JSON.stringify(controllers));
+  const tableContainer = el("div", { id: "controllersTableContainer" });
+  const detailContainer = el("div", { class: "stack" });
+
+  const searchInput = el("input", {
+    type: "search",
+    placeholder: "Search name, company or template...",
+    value: controllerSearchQuery,
+    style: "max-width: 280px;",
+    onInput: (e) => {
+      controllerSearchQuery = e.target.value.toLowerCase().trim();
+      update();
+    },
+  });
+
+  async function persist(button, message) {
+    await withBusy(button, "Saving...", async () => {
+      try {
+        await source.save(working);
+        toast.success(message);
+      } catch (err) {
+        toast.error(`Save failed: ${err.message}`);
+      }
+    });
+  }
+
+  function filtered() {
+    return working.filter((controller) =>
+      !controllerSearchQuery || [controller.name, controller.company, controller.description, controller.template]
+        .join(" ")
+        .toLowerCase()
+        .includes(controllerSearchQuery)
+    );
+  }
+
+  function selected() {
+    return working.find((controller) => controller.name === selectedControllerName) || null;
+  }
+
+  function update() {
+    const rows = filtered();
+    if (rows.length && !rows.some((controller) => controller.name === selectedControllerName)) {
+      selectedControllerName = rows[0].name;
+    }
+
+    const columns = [
+      { label: "Name", render: (row) => el("span", { style: "font-weight: 600;", text: row.name || "" }) },
+      { label: "Company", render: (row) => row.company || "-" },
+      { label: "Template", render: (row) => row.template || "-" },
+      { label: "Inputs", render: (row) => String((row.inputs || []).length) },
+      { label: "Outputs", render: (row) => String((row.outputs || []).length) },
+    ];
+
+    tableContainer.replaceChildren(tableFromPartial(
+      "librariesControllerListTable",
+      buildTableRows(columns, rows, {
+        onRowClick: (row) => {
+          selectedControllerName = row.name;
+          update();
+        },
+        isActive: (row) => row.name === selectedControllerName,
+      }),
+      "No controllers match the filter."
+    ));
+
+    const current = selected();
+    if (current) renderControllerDetail(detailContainer, current, working, update, persist);
+    else detailContainer.replaceChildren(el("p", { class: "muted", text: "Select a controller to configure it." }));
+  }
+
+  const container = el("div", { class: "stack" }, [
+    el("div", { class: "row-between wrap" }, [
+      el("p", { class: "muted", text: `${working.length} controllers` }),
+      el("div", { class: "toolbar", style: "align-items: center;" }, [
+        searchInput,
+        el("button", {
+          type: "button",
+          class: "btn btn-primary btn-sm",
+          onClick: () => {
+            let name = "new_controller";
+            let suffix = 1;
+            while (working.some((controller) => controller.name === name)) name = `new_controller_${++suffix}`;
+            working.push({
+              name,
+              company: "",
+              description: "",
+              template: "",
+              inputs: [],
+              outputs: [],
+            });
+            selectedControllerName = name;
+            update();
+          },
+        }, ["+ Add Controller"]),
+        el("button", {
+          type: "button",
+          class: "btn btn-primary btn-sm",
+          onClick: (e) => persist(e.target, "Controllers library saved."),
+        }, ["Save Library"]),
+      ]),
+    ]),
+    tableContainer,
+    el("hr"),
+    detailContainer,
+  ]);
+
+  ensureTemplates().then(update);
+  update();
+  return container;
+}
+
+function renderControllerDetail(container, controller, working, update, persist) {
+  const field = (label, control, hint) =>
+    el("div", { class: "field" }, [
+      el("label", { class: "field-label", text: label }),
+      control,
+      hint ? el("p", { class: "muted", text: hint }) : null,
+    ]);
+
+  const nameInput = el("input", {
+    class: "table-input",
+    value: controller.name || "",
+    onChange: (e) => {
+      const next = e.target.value.trim();
+      if (!next) {
+        toast.error("Name is required.");
+        e.target.value = controller.name;
+        return;
+      }
+      if (working.some((other) => other !== controller && other.name === next)) {
+        toast.error(`A controller named '${next}' already exists.`);
+        e.target.value = controller.name;
+        return;
+      }
+      controller.name = next;
+      selectedControllerName = next;
+      update();
+    },
+  });
+
+  const positionTable = (direction) => {
+    const items = Array.isArray(controller[direction]) ? controller[direction] : (controller[direction] = []);
+    const label = direction === "inputs" ? "Input" : "Output";
+    const rows = items.map((item, index) => el("tr", {}, [
+      el("td", {}, [el("input", { class: "table-input", value: item.name || "", onChange: (e) => (item.name = e.target.value) })]),
+      el("td", {}, [el("input", { class: "table-input", type: "number", step: "any", value: item.x ?? 0, onChange: (e) => (item.x = Number(e.target.value) || 0) })]),
+      el("td", {}, [el("input", { class: "table-input", type: "number", step: "any", value: item.y ?? 0, onChange: (e) => (item.y = Number(e.target.value) || 0) })]),
+      el("td", {}, [el("button", {
+        type: "button",
+        class: "btn btn-danger btn-sm",
+        title: `Delete ${label.toLowerCase()}`,
+        onClick: () => {
+          items.splice(index, 1);
+          update();
+        },
+      }, ["Delete"])]),
+    ]));
+
+    return el("div", { class: "stack" }, [
+      el("div", { class: "row-between" }, [
+        el("h3", { text: `${label}s (${items.length})`, style: "margin: 0;" }),
+        el("button", {
+          type: "button",
+          class: "btn btn-secondary btn-sm",
+          onClick: () => {
+            items.push({ name: `${label} ${items.length + 1}`, x: 0, y: 0 });
+            update();
+          },
+        }, [`+ Add ${label}`]),
+      ]),
+      tableFromPartial("librariesControllerPlacementTable", rows, `No ${direction} configured.`),
+    ]);
+  };
+
+  container.replaceChildren(
+    el("div", { class: "card stack" }, [
+      el("div", { class: "row-between wrap" }, [
+        el("h3", { text: `Controller: ${controller.name}`, style: "margin: 0;" }),
+        el("button", {
+          type: "button",
+          class: "btn btn-danger btn-sm",
+          onClick: async (e) => {
+            const removed = controller.name;
+            const ok = await confirmAction(`Delete controller '${removed}'?`, { confirmLabel: "Delete" });
+            if (!ok) return;
+            working.splice(working.indexOf(controller), 1);
+            selectedControllerName = null;
+            await persist(e.target, `Controller '${removed}' deleted.`);
+            update();
+          },
+        }, ["Delete"]),
+      ]),
+      el("hr"),
+      el("div", { class: "grid grid-2" }, [
+        el("div", { class: "card stack" }, [
+          el("h3", { text: "Identity" }),
+          field("Name", nameInput),
+          field("Company", el("input", { class: "table-input", value: controller.company || "", onChange: (e) => (controller.company = e.target.value) })),
+          field("Description", el("input", { class: "table-input", value: controller.description || "", onChange: (e) => (controller.description = e.target.value) })),
+        ]),
+        el("div", { class: "card stack" }, [
+          el("h3", { text: "Controller Page" }),
+          field("Drawing Template", templateSelect("controller", controller.template || "", (value) => {
+            controller.template = value;
+            update();
+          })),
+          el("p", { class: "muted", text: "This template is used for the controller page drawing." }),
+        ]),
+      ]),
+      el("div", { class: "grid grid-2" }, [
+        el("div", { class: "card stack" }, [positionTable("inputs")]),
+        el("div", { class: "card stack" }, [positionTable("outputs")]),
+      ]),
+      el("div", { class: "row-end" }, [
+        el("button", {
+          type: "button",
+          class: "btn btn-primary btn-sm",
+          onClick: (e) => persist(e.target, `Controller '${controller.name}' saved.`),
+        }, ["Save Controller"]),
+      ]),
+    ])
+  );
+}
+
 function renderStringListView(root, list, source) {
   return el("div", { class: "stack" }, [
     el("div", { class: "row-between" }, [
@@ -1230,7 +1809,12 @@ function renderObjectListView(root, rows, source) {
           }, ["✏️ Edit Configuration"])
         : null,
     ]),
-    dataTable({ columns, rows }),
+    tableFromPartial(
+      "librariesConfigurationTable",
+      buildTableRows(columns, rows),
+      "Nothing to show.",
+      columns.map((column) => column.label)
+    ),
   ]);
 }
 
@@ -1247,13 +1831,15 @@ function renderDictView(root, dict, source) {
           }, ["✏️ Edit Configuration"])
         : null,
     ]),
-    dataTable({
-      columns: [
+    tableFromPartial(
+      "librariesConfigurationTable",
+      buildTableRows([
         { label: "Key", render: (r) => r[0] },
         { label: "Value", render: (r) => formatCell(r[1]) },
-      ],
-      rows: entries,
-    }),
+      ], entries),
+      "Nothing to show.",
+      ["Key", "Value"]
+    ),
   ]);
 }
 
