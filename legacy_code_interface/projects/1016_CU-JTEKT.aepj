@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "name": "CU-JTEKT",
+  "updated_at": "2026-09-05T11:06:09.125176",
+  "settings": {
+    "title": "CU-JTEKT",
+    "project_name": "CU-JTEKT",
+    "project": "1016",
+    "project_number": "1016",
+    "drawing_number": "",
+    "revision": "A",
+    "drawn_by": "",
+    "paper_size": "A3",
+    "voltage": "480",
+    "manufacturer": "Mitsubishi",
+    "capacity": "150",
+    "tension": "480",
+    "format": "both",
+    "use_valves": false,
+    "valve_quantities": {}
+  },
+  "circuits": [
+    {
+      "name": "CU001",
+      "description": "Mitsubishi 150 tons Circuit 1",
+      "compressors": [
+        {
+          "model_number": "ARK87FAEMT",
+          "description": "CSV4M50",
+          "skid_model_number": "CSV4M50",
+          "manufacturer": "Mitsubishi",
+          "quantity": 3,
+          "templates": [
+            {
+              "id": "c02707af-70b8-447b-8bc5-dbc2c005849f",
+              "name": "1 EXD-SH2",
+              "scope": "per_unit",
+              "type": "regular"
+            },
+            {
+              "id": "aa67fde1-d647-4f84-8fa7-78676869fe55",
+              "name": "1 EXD-SH2-1-TRANS",
+              "scope": "per_unit",
+              "type": "regular"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CU002",
+      "description": "Mitsubishi 150 tons Circuit 2",
+      "compressors": [
+        {
+          "model_number": "ARK87FAEMT",
+          "description": "CSV4M50",
+          "skid_model_number": "CSV4M50",
+          "manufacturer": "Mitsubishi",
+          "quantity": 3,
+          "templates": [
+            {
+              "id": "c02707af-70b8-447b-8bc5-dbc2c005849f",
+              "name": "1 EXD-SH2",
+              "scope": "per_unit",
+              "type": "regular"
+            },
+            {
+              "id": "aa67fde1-d647-4f84-8fa7-78676869fe55",
+              "name": "1 EXD-SH2-1-TRANS",
+              "scope": "per_unit",
+              "type": "regular"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CU003",
+      "description": "Mitsubishi 150 tons Circuit 3",
+      "compressors": [
+        {
+          "model_number": "ARK87FAEMT",
+          "description": "CSV4M50",
+          "skid_model_number": "CSV4M50",
+          "manufacturer": "Mitsubishi",
+          "quantity": 3,
+          "templates": [
+            {
+              "id": "c02707af-70b8-447b-8bc5-dbc2c005849f",
+              "name": "1 EXD-SH2",
+              "scope": "per_unit",
+              "type": "regular"
+            },
+            {
+              "id": "aa67fde1-d647-4f84-8fa7-78676869fe55",
+              "name": "1 EXD-SH2-1-TRANS",
+              "scope": "per_unit",
+              "type": "regular"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "project_circuits": [
+    "CU001",
+    "CU002",
+    "CU003"
+  ],
+  "io_items": [],
+  "rungs": []
+}
