@@ -71,6 +71,7 @@ let activeSource = activeCategory.sources[0];
 let cachedTemplates = null;
 let cachedValveTypes = null;
 let cachedIoTypes = null;
+let cachedLadderTypes = null;
 
 export function sortIoItems(ios) {
   if (!Array.isArray(ios)) return [];
@@ -180,6 +181,8 @@ async function loadSource(root, source) {
   body.replaceChildren(el("p", { class: "muted", text: "Loading\u2026" }));
 
   try {
+    if (source.key === "ladder-types") await ensureTemplates();
+    if (source.key === "io-types") await ensureLadderTypes();
     const data = await source.load();
     body.replaceChildren(renderData(root, data, source));
   } catch (error) {
@@ -215,6 +218,10 @@ function renderData(root, data, source) {
   if (sourceKey === "io-types" && Array.isArray(data)) {
     cachedIoTypes = data;
     return renderIoTypesView(root, data, source);
+  }
+
+  if (sourceKey === "ladder-types" && Array.isArray(data)) {
+    return renderLadderTypesView(root, data, source);
   }
 
   // ── Array of primitive strings (e.g. module-io-values, valve-types) ─────
@@ -1237,6 +1244,30 @@ function templateSelect(category, value, onChange, placeholder = "-- none --") {
   return el("select", { class: "table-input", onChange: (e) => onChange(e.target.value) }, options);
 }
 
+async function ensureLadderTypes() {
+  if (!cachedLadderTypes) {
+    try {
+      const data = await api.ladderTypes();
+      cachedLadderTypes = data.map((item) => typeof item === "string" ? item : item.name).filter(Boolean);
+    } catch {
+      cachedLadderTypes = [];
+    }
+  }
+  return cachedLadderTypes;
+}
+
+function ladderTypeSelect(value, onChange, placeholder = "-- no ladder page --") {
+  const names = cachedLadderTypes || [];
+  const options = [
+    el("option", { value: "", selected: !value }, [placeholder]),
+    ...names.map((name) => el("option", { value: name, selected: name === value }, [name])),
+  ];
+  if (value && !names.includes(value)) {
+    options.push(el("option", { value, selected: true }, [`${value} (missing)`]));
+  }
+  return el("select", { class: "table-input", onChange: (e) => onChange(e.target.value) }, options);
+}
+
 function renderIoTypesView(root, ioTypes, source) {
   const working = JSON.parse(JSON.stringify(ioTypes));
 
@@ -1503,7 +1534,7 @@ function renderIoTypeDetail(container, item, working, update, persist) {
           el("h3", { text: "Ladder Page" }),
           field(
             "Ladder Type",
-            templateSelect("ladder", item.ladder_type || "", (value) => {
+            ladderTypeSelect(item.ladder_type || "", (value) => {
               item.ladder_type = value;
               update();
             }, "-- no ladder page --"),
@@ -1608,6 +1639,70 @@ function renderObjectListView(root, rows, source) {
         : null,
     ]),
     dataTable({ columns, rows }),
+  ]);
+}
+
+function renderLadderTypesView(root, rows, source) {
+  const working = rows.map((row) => typeof row === "string"
+    ? { name: row, template: row, secondary_template: "" }
+    : { ...row });
+
+  const save = async (button) => {
+    const entries = working
+      .map((row) => ({
+        name: String(row.name || "").trim(),
+        template: String(row.template || "").trim(),
+        secondary_template: String(row.secondary_template || "").trim(),
+      }))
+      .filter((row) => row.name);
+    await withBusy(button, "Saving\u2026", async () => {
+      try {
+        await source.save(entries);
+        toast.success("Ladder types updated.");
+        await loadSource(root, activeSource);
+      } catch (error) {
+        toast.error(`Save failed: ${error.message}`);
+      }
+    });
+  };
+
+  const update = () => renderLadderTypesView(root, working, source);
+  return el("div", { class: "stack" }, [
+    el("div", { class: "row-between wrap" }, [
+      el("p", { class: "muted", text: "The first ladder page uses the primary template. Later pages use the secondary template." }),
+      el("div", { class: "toolbar" }, [
+        el("button", {
+          type: "button",
+          class: "btn btn-secondary btn-sm",
+          onClick: () => { working.push({ name: "", template: "", secondary_template: "" }); update(); },
+        }, ["+ Add Ladder Type"]),
+        el("button", {
+          type: "button",
+          class: "btn btn-primary btn-sm",
+          onClick: (event) => save(event.target),
+        }, ["\uD83D\DCBE Save Ladder Types"]),
+      ]),
+    ]),
+    el("div", { class: "table-wrap" }, [
+      el("table", { class: "data-table" }, [
+        el("thead", {}, [el("tr", {}, [
+          el("th", { text: "Ladder Type" }),
+          el("th", { text: "Primary Template" }),
+          el("th", { text: "Secondary Template" }),
+          el("th", { text: "" }),
+        ])]),
+        el("tbody", {}, working.map((row, index) => el("tr", {}, [
+          el("td", {}, [el("input", { class: "table-input", value: row.name || "", onInput: (event) => (row.name = event.target.value) })]),
+          el("td", {}, [templateSelect("ladder", row.template || "", (value) => (row.template = value), "-- select primary template --")]),
+          el("td", {}, [templateSelect("ladder", row.secondary_template || "", (value) => (row.secondary_template = value), "-- no secondary template --")]),
+          el("td", {}, [el("button", {
+            type: "button",
+            class: "btn btn-danger btn-sm",
+            onClick: () => { working.splice(index, 1); update(); },
+          }, ["Delete"])]),
+        ]))),
+      ]),
+    ]),
   ]);
 }
 
