@@ -5,6 +5,7 @@ Produces ladder diagrams with rungs of electrical components.
 from __future__ import annotations
 
 import io
+import re
 import ezdxf
 from ezdxf import colors
 from ezdxf.document import Drawing
@@ -62,7 +63,7 @@ class LadderConfig:
 class DrawingGenerator:
     # Class-level variables shared across all instances
     _biggest_fuse_number: int = 0
-    _count_link_page: int =0
+    _link_page_counts: dict[str, int] = {}
     _biggest_cr_number: int = 0
     
     def __init__(self, config: LadderConfig | None = None):
@@ -73,6 +74,11 @@ class DrawingGenerator:
 
     def reset_static(self):
         self.fuse_counter = 0
+
+    @classmethod
+    def reset_generation_counters(cls) -> None:
+        """Reset counters that must start fresh for each complete generation."""
+        cls._link_page_counts = {}
     # ── Public API ──────────────────────────────────────────────────────────
 
     def generate(
@@ -124,6 +130,7 @@ class DrawingGenerator:
             else :
                 #Control replace
                 self.control_replace(doc, controller_number, controller_prefix)
+            self.replace_link_pages(doc)
 
             
             # Only draw our own border/title block when no template is used;
@@ -164,7 +171,7 @@ class DrawingGenerator:
         # Ensure we have the latest persisted value from the class variable
         self.biggest_fuse_number = DrawingGenerator._biggest_fuse_number
         doc_base = None  # Will be set on first FU! encountered
-        as_replace_link_page= False
+        link_page_seen: set[str] = set()
 
         ##TODOO: MACHINE PREFIX
         
@@ -179,7 +186,7 @@ class DrawingGenerator:
                             self.replace_name(attrib, item)
                             doc_base = self.replace_fuse(attrib, doc_base)
                             self.replace_tagstrip(item,entity,attrib)
-                            as_replace_link_page = self.replace_link_page( attrib,as_replace_link_page)
+                            self.replace_link_page(attrib, link_page_seen)
                             
                             #If the attribute contains the # then we need to replace it with the circuit number
                             if item.circuit_no!='N' and (attrib.dxf.get("text", "").find("#") != -1):
@@ -195,7 +202,16 @@ class DrawingGenerator:
         DrawingGenerator._biggest_fuse_number = self.biggest_fuse_number
         return self.biggest_fuse_number
 
-    def replace_link_page(self,attrib,replace):
+    def replace_link_pages(self, doc: Drawing) -> None:
+        """Replace all dollar placeholders in a completed drawing once per key."""
+        seen: set[str] = set()
+        for entity in doc.modelspace():
+            if entity.dxftype() != "INSERT":
+                continue
+            for attrib in entity.attribs:
+                self.replace_link_page(attrib, seen)
+
+    def replace_link_page(self, attrib, seen: set[str]):
         #Check the attribute to see if it contains LX-$ 
         #X is a value that is the field and we wont change it 
         #$ is a value that we will change
@@ -206,37 +222,19 @@ class DrawingGenerator:
 
         #We also have the format GND-$+x
 
-        if attrib.dxf.get("text", "").startswith("L") and attrib.dxf.get("text", "").find("-$") != -1:
-            if not replace:
-                replace = True
-                #Increment the count
-                DrawingGenerator._count_link_page += 1
-            #Replace the $ with the count
-            text = attrib.dxf.get("text", "")
-            additional_offset = 0
-            if text.find("+") != -1:
-                additional_offset = int(text.split("+")[1])
-            text = text.replace("$", str(DrawingGenerator._count_link_page+additional_offset))
-            if text.find("+") != -1:
-                text = text.split("+")[0]
-            attrib.dxf.text = text
+        text = attrib.dxf.get("text", "")
+        marker = text.find("$")
+        if marker < 0:
+            return
 
-        elif attrib.dxf.get("text", "").startswith("GND") and attrib.dxf.get("text", "").find("-$") != -1:
-            if not replace:
-                replace = True
-                #Increment the count
-                DrawingGenerator._count_link_page += 1
-            #Replace the $ with the count
-            text = attrib.dxf.get("text", "")
-            additional_offset = 0
-            if text.find("+") != -1:
-                additional_offset = int(text.split("+")[1])
-            text = text.replace("$", str(DrawingGenerator._count_link_page+additional_offset))
-            #Add a split we dont want the +x to be in the text
-            if text.find("+") != -1:
-                text = text.split("+")[0]
-            attrib.dxf.text = text
-        return replace
+        key = text[:marker].rstrip("-")
+        if key not in seen:
+            DrawingGenerator._link_page_counts[key] = DrawingGenerator._link_page_counts.get(key, 0) + 1
+            seen.add(key)
+
+        offset_match = re.search(r"\$\+(\d+)", text)
+        offset = int(offset_match.group(1)) if offset_match else 0
+        attrib.dxf.text = re.sub(r"\$(?:\+\d+)?", str(DrawingGenerator._link_page_counts[key] + offset), text)
 
         
         

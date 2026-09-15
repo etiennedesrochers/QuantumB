@@ -428,6 +428,7 @@ def generate_from_selection(
     archive has been consumed (or use `generated_archive`).
     """
     _validate(payload, fmt)
+    DrawingGenerator.reset_generation_counters()
 
     work_dir = Path(tempfile.mkdtemp(prefix="quantumb_gen_"))
     output_dir = work_dir / "output"

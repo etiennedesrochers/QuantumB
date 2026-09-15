@@ -15,6 +15,7 @@ from typing import Any, Iterable
 import ezdxf
 
 from ..legacy_bridge import ensure_legacy_importable
+from . import library_service
 
 ensure_legacy_importable()
 
@@ -38,6 +39,27 @@ _BOTTOM_MARGIN = 0.5
 def ladder_type_map(io_types: Iterable[dict[str, Any]]) -> dict[str, str]:
     """I/O type name -> ladder template name."""
     return {t["name"]: t.get("ladder_type", "") for t in io_types if t.get("ladder_type")}
+
+
+def ladder_template_map() -> dict[str, dict[str, str]]:
+    """Return configured primary and continuation templates by ladder type.
+
+    String entries remain valid and mean that the ladder type is also the
+    template name. Object entries may provide ``template`` and
+    ``secondary_template`` for paged ladder output.
+    """
+    configured = library_service.list_ladder_types()
+    result: dict[str, dict[str, str]] = {}
+    for entry in configured:
+        if isinstance(entry, str):
+            result[entry] = {"template": entry, "secondary_template": ""}
+        elif isinstance(entry, dict) and entry.get("name"):
+            name = str(entry["name"])
+            result[name] = {
+                "template": str(entry.get("template") or name),
+                "secondary_template": str(entry.get("secondary_template") or ""),
+            }
+    return result
 
 
 def component_template_map(io_types: Iterable[dict[str, Any]]) -> dict[str, str]:
@@ -66,6 +88,7 @@ class LadderGenerator:
     def __init__(self, io_types: list[dict[str, Any]], machine_prefix: str = "CU") -> None:
         self.machine_prefix = machine_prefix
         self._type_map = ladder_type_map(io_types)
+        self._template_map = ladder_template_map()
         self._component_map = component_template_map(io_types)
         self._ladder_mgr = TemplateManager(LADDER_TEMPLATES_DIR)
         self._component_mgr = TemplateManager(LADDER_COMPONENT_TEMPLATES_DIR)
@@ -76,9 +99,17 @@ class LadderGenerator:
 
     # ── planning ────────────────────────────────────────────────────────────
 
-    def _components_per_page(self, ladder_type: str, start_y: float) -> int:
+    def _template_name(self, ladder_type: str, page_index: int) -> str:
+        configured = self._template_map.get(ladder_type)
+        if not configured:
+            return ladder_type
+        if page_index > 1 and configured["secondary_template"]:
+            return configured["secondary_template"]
+        return configured["template"]
+
+    def _components_per_page(self, template_name: str, start_y: float) -> int:
         """Usable vertical space of the template divided by the rung pitch."""
-        probe = self._ladder_mgr.load_template(ladder_type)
+        probe = self._ladder_mgr.load_template(template_name)
         base_ys = [
             entity.dxf.insert.y
             for entity in probe.modelspace()
@@ -98,11 +129,17 @@ class LadderGenerator:
         available = set(self._ladder_mgr.list_templates())
         total = 0
         for ladder_type, components in group_by_ladder_type(io_items, self._type_map).items():
-            if ladder_type not in available:
+            first_template = self._template_name(ladder_type, 1)
+            if first_template not in available:
                 continue
-            _, start_y = self._start_point(ladder_type)
-            per_page = self._components_per_page(ladder_type, start_y)
-            total += -(-len(components) // per_page)
+            remaining = len(components)
+            page_index = 1
+            while remaining:
+                template_name = self._template_name(ladder_type, page_index)
+                _, start_y = self._start_point(template_name)
+                remaining -= self._components_per_page(template_name, start_y)
+                total += 1
+                page_index += 1
         return total
 
     # ── drawing ─────────────────────────────────────────────────────────────
@@ -123,20 +160,24 @@ class LadderGenerator:
         page = first_page
 
         for ladder_type, components in grouped.items():
-            if ladder_type not in available:
-                errors.append(f"Ladder template '{ladder_type}' not found; skipping.")
+            first_template = self._template_name(ladder_type, 1)
+            if first_template not in available:
+                errors.append(f"Ladder template '{first_template}' not found; skipping.")
                 continue
 
-            start_x, start_y = self._start_point(ladder_type)
-            per_page = self._components_per_page(ladder_type, start_y)
             cotag_counter = 100  # CR100, CR101, … unique per ladder type
+            chunk_start = 0
+            page_index = 1
 
-            for chunk_start in range(0, len(components), per_page):
+            while chunk_start < len(components):
+                template_name = self._template_name(ladder_type, page_index)
+                start_x, start_y = self._start_point(template_name)
+                per_page = self._components_per_page(template_name, start_y)
                 chunk = components[chunk_start : chunk_start + per_page]
                 page_str = f"L{page:03d}"
                 dxf_path = output_dir / f"{page_str}.dxf"
 
-                template_doc = self._ladder_mgr.load_template(ladder_type)
+                template_doc = self._ladder_mgr.load_template(template_name)
                 placements: list[tuple[Any, float, float, IOItem]] = []
                 for comp_idx, io_item in enumerate(chunk):
                     comp_name = self._component_map.get(io_item.io_type_name, "")
@@ -174,6 +215,8 @@ class LadderGenerator:
                 else:
                     errors.append(f"{page_str}: {message}")
                 page += 1
+                page_index += 1
+                chunk_start += per_page
 
         return generated, errors
 

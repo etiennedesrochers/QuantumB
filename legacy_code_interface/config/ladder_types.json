@@ -1,7 +1,14 @@
 {
   "ladder_types": [
-    "24VDC",
-    "24VAC",
-    "None"
+    {
+      "name": "BASE_LADDER+24VDC",
+      "template": "BASE_LADDER+24VDC",
+      "secondary_template": "BASE_LADDER+24VDC 2"
+    },
+    {
+      "name": "BASE_LADDER_24VAC",
+      "template": "BASE_LADDER_24VAC",
+      "secondary_template": ""
+    }
   ]
 }
